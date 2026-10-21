@@ -1,0 +1,1 @@
+PASS: modified non-relocatable opcode refused; no game started.

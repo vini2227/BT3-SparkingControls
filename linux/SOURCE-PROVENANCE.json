@@ -1,0 +1,13 @@
+{
+  "version": "1.0 Beta",
+  "date": "2026-10-21",
+  "windows_exe_sha256": "a3e366dc2e9d0bc10c3c2dd74a815ac997565a65816716db25f305ce30677ceb",
+  "windows_filter_sha256": "67d0c05da43ceb7e875d3ff52b2b64163e53ee1b2844ba0057f153cb199b7eac",
+  "linux_filter_sha256": "bfdd06343056597702a141f1a8c341bf2657ecc30b0a7f6b7bc718467ab4098a",
+  "only_filter_source_difference": "export annotation",
+  "shared_files_identical": [
+    "UiLanguage.cs",
+    "Transformations.cs"
+  ],
+  "launcher": "Current 16-language launcher, sphere icon, 3 placements, persisted HUD controls and configurable shortcuts; Linux backend uses X11 and /proc memory reader."
+}

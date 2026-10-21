@@ -1,0 +1,13 @@
+{
+  "hooks": [
+    {
+      "name": "Port_PadRead",
+      "address": 539740544,
+      "expected": "f30f1efa4157",
+      "trampoline": "f30f1efa4157e97be92a18"
+    }
+  ],
+  "allocation": 134217728,
+  "abi": "System V x86-64",
+  "game_sha256": "b3408acf1d5392d56cee54fa709358c241e130c947bd1781467d82d6834adfaf"
+}

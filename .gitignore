@@ -1,0 +1,18 @@
+# Local builds and caches
+__pycache__/
+*.pyc
+*.log
+build_tools/
+.git-credentials
+.env
+.env.*
+# Keep user preferences outside the repository
+game-path.txt
+panel-layout.txt
+language.txt
+keyboard-shortcuts.json
+shortcut-lock.txt
+attack-panel.txt
+attack-frame.txt
+# Generated Windows root binary
+/BT3-SparkingControls.exe

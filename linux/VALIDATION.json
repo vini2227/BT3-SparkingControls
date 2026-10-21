@@ -1,0 +1,27 @@
+{
+  "version": "1.0 Beta",
+  "build_date": "2026-10-21",
+  "status": "beta; CPU and managed tests passed; native Linux runtime unverified",
+  "native_sha256": "d050053dc6d569eda87a275cd71555aa20d3d623e1f68ec24582a9ca8ec3a211",
+  "frontend_sha256": "6f251d121e69413f22f074b64b32b32770235f662cfb20402cadb64c73de198e",
+  "games": [
+    "v0.1.37 Linux x64",
+    "v0.1.38.1 Linux x64"
+  ],
+  "packet_checks_per_game": 160061,
+  "loader_checks_per_game": 9,
+  "launcher_checks": 2250,
+  "shortcut_checks": 93,
+  "responsive_checks": 693,
+  "preview_states": 12,
+  "negative_checks": [
+    "Windows executable refused",
+    "Changed non-relocatable ELF opcode refused"
+  ],
+  "not_verified": [
+    "Native Mono/X11 rendering and fullscreen",
+    "Real LD_PRELOAD execution on Linux",
+    "Physical controller timing",
+    "Live offline/online gameplay and rollback"
+  ]
+}

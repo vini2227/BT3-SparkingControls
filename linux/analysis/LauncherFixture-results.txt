@@ -1,0 +1,1 @@
+PASS: 2250 launcher checks: all three persisted modes, default, 4:3 invariance, 16:9/ultrawide placement, 16 translated layouts, complete catalog strings, RTL, no clipped controls, rounded buttons, dark theme and language-switch preservation.

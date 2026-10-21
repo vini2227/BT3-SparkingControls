@@ -1,0 +1,92 @@
+{
+  "BtlParam_GetUnkB4": {
+    "rva": 482400
+  },
+  "BtlParam_GetCostAE": {
+    "rva": 482544
+  },
+  "BtlAct_CanFuse": {
+    "rva": 189072
+  },
+  "BtlAct_CanSwitch": {
+    "rva": 189856
+  },
+  "BtlMember_NextSwitchTarget": {
+    "rva": 365872
+  },
+  "BtlMember_GetGauge": {
+    "rva": 365296
+  },
+  "Port_PadRead": {
+    "rva": 2265440
+  },
+  "Port_NetActive": {
+    "rva": 2479120
+  },
+  "Port_NetMe": {
+    "rva": 2471376
+  },
+  "BtlPause_GetMenuPad": {
+    "rva": 1263296
+  },
+  "BtlChar_FindBySide": {
+    "rva": 351552
+  },
+  "BtlChar_GetObj": {
+    "rva": 351616
+  },
+  "BtlParam_GetSlotId": {
+    "rva": 481984
+  },
+  "BtlParam_GetSlotCost": {
+    "rva": 482032
+  },
+  "BtlAct_CanTransform": {
+    "rva": 188288
+  },
+  "BtlChar_TestFlag": {
+    "rva": 319104
+  },
+  "BtlSuper_GetPromptRow": {
+    "rva": 497152
+  },
+  "gBattleWork": {
+    "rva": 45290216
+  },
+  "gBtlChars": {
+    "rva": 4382692
+  },
+  "gBtlObjTbl": {
+    "rva": 45202272
+  },
+  "gHud": {
+    "rva": 6271328
+  },
+  "gBtlSeq": {
+    "rva": 4382728
+  },
+  "gHudPrompt": {
+    "rva": 6271352
+  },
+  "sAspectMilli": {
+    "rva": 4408176
+  },
+  "sHudLayout": {
+    "rva": 13330216
+  },
+  "BtlInput_RemapButtons": {
+    "rva": 413632
+  },
+  "BtlInput_BuildCommands": {
+    "rva": 414736
+  },
+  "BtlInput_TestSwitch": {
+    "rva": 414448
+  },
+  "BtlInput_TestAction": {
+    "rva": 421552
+  },
+  "BtlInput_MergeStick": {
+    "rva": 414608
+  }
+}

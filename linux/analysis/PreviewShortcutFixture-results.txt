@@ -1,0 +1,1 @@
+PASS: F8 rising edge, no held repeat, focus gating, wraparound and saved choice; 12 preview states respond to layout and both checkboxes.

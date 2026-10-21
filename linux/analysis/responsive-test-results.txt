@@ -1,0 +1,10 @@
+Name advance: 544 -> 503,8 px; original glyph sizing retained.
+{Width=1920, Height=1080} aspect=1333 picture={X=240,1801,Y=0,Width=1439,64,Height=1080} safe={X=240,1801,Y=0,Width=1439,64,Height=1080} moves={X=276,1711,Y=772,2,Width=709,02,Height=237,6}
+{Width=1440, Height=1080} aspect=1333 picture={X=0,1800537,Y=0,Width=1439,64,Height=1080} safe={X=0,1800537,Y=0,Width=1439,64,Height=1080} moves={X=36,17105,Y=772,2,Width=709,02,Height=237,6}
+{Width=1920, Height=1080} aspect=1778 picture={X=0,Y=0,06750488,Width=1920,Height=1079,865} safe={X=150,1013,Y=0,06750488,Width=1619,797,Height=1079,865} moves={X=190,5962,Y=772,171,Width=708,9314,Height=237,5703}
+{Width=1920, Height=1200} aspect=1600 picture={X=0,Y=0,Width=1920,Height=1200} safe={X=60,Y=0,Width=1800,Height=1200} moves={X=105,Y=858,Width=787,8,Height=264}
+{Width=3440, Height=1440} aspect=2389 picture={X=0,Y=0,03344727,Width=3440,Height=1439,933} safe={X=640,0502,Y=0,03344727,Width=2159,9,Height=1439,933} moves={X=694,0477,Y=1029,586,Width=945,3162,Height=316,7853}
+{Width=5120, Height=1440} aspect=3556 picture={X=0,Y=0,08996582,Width=5120,Height=1439,82} safe={X=1480,135,Y=0,08996582,Width=2159,73,Height=1439,82} moves={X=1534,128,Y=1029,561,Width=945,2418,Height=316,7604}
+{Width=640, Height=480} aspect=1333 picture={X=0,08001709,Y=0,Width=639,84,Height=480} safe={X=0,08001709,Y=0,Width=639,84,Height=480} moves={X=16,07602,Y=320,1,Width=384,0525,Height=128,7}
+{Width=1280, Height=720} aspect=2333 picture={X=0,Y=85,67508,Width=1280,Height=548,6498} safe={X=228,5126,Y=85,67508,Width=822,9747,Height=548,6498} moves={X=249,087,Y=469,9627,Width=384,0525,Height=128,7}
+PASS: 693 responsive layout/typography checks; real rendering at eight viewport/aspect combinations; transformations/fusion/switch and split panels fit.

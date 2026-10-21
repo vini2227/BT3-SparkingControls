@@ -1,0 +1,1 @@
+PASS: 11 holding-prompt checks; local side independent of last HUD draw; native Triangle covered by selected Square/Circle; existing Square and super-2 Triangle preserved; online P2 left, offline P2 side retained.

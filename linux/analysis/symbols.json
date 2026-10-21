@@ -1,0 +1,157 @@
+{
+  "BtlAct_CanTransform": {
+    "rva": 829744,
+    "address": 537700656,
+    "size": 220
+  },
+  "gBattleWork": {
+    "rva": 45043704,
+    "address": 581914616,
+    "size": 0
+  },
+  "BtlInput_BuildCommands": {
+    "rva": 1052448,
+    "address": 537923360,
+    "size": 568
+  },
+  "gBtlChars": {
+    "rva": 6529748,
+    "address": 543400660,
+    "size": 0
+  },
+  "BtlChar_GetObj": {
+    "rva": 989840,
+    "address": 537860752,
+    "size": 8
+  },
+  "BtlParam_GetUnkB4": {
+    "rva": 1118080,
+    "address": 537988992,
+    "size": 26
+  },
+  "BtlInput_TestSwitch": {
+    "rva": 1052176,
+    "address": 537923088,
+    "size": 153
+  },
+  "BtlPause_GetMenuPad": {
+    "rva": 1891024,
+    "address": 538761936,
+    "size": 41
+  },
+  "BtlInput_MergeStick": {
+    "rva": 1052336,
+    "address": 537923248,
+    "size": 110
+  },
+  "BtlInput_RemapButtons": {
+    "rva": 1051392,
+    "address": 537922304,
+    "size": 96
+  },
+  "BtlMember_GetGauge": {
+    "rva": 1003568,
+    "address": 537874480,
+    "size": 20
+  },
+  "Port_NetMe": {
+    "rva": 3062512,
+    "address": 539933424,
+    "size": 11
+  },
+  "gBtlObjTbl": {
+    "rva": 44955760,
+    "address": 581826672,
+    "size": 0
+  },
+  "BtlChar_FindBySide": {
+    "rva": 989776,
+    "address": 537860688,
+    "size": 56
+  },
+  "gHudPrompt": {
+    "rva": 6554904,
+    "address": 543425816,
+    "size": 4
+  },
+  "BtlChar_TestFlag": {
+    "rva": 958016,
+    "address": 537828928,
+    "size": 35
+  },
+  "BtlSuper_GetPromptRow": {
+    "rva": 1131904,
+    "address": 538002816,
+    "size": 56
+  },
+  "BtlParam_GetSlotCost": {
+    "rva": 1117792,
+    "address": 537988704,
+    "size": 32
+  },
+  "BtlMember_NextSwitchTarget": {
+    "rva": 1004128,
+    "address": 537875040,
+    "size": 78
+  },
+  "gBtlSeq": {
+    "rva": 6529784,
+    "address": 543400696,
+    "size": 0
+  },
+  "BtlParam_GetCostAE": {
+    "rva": 1118192,
+    "address": 537989104,
+    "size": 32
+  },
+  "Port_NetActive": {
+    "rva": 3069408,
+    "address": 539940320,
+    "size": 291
+  },
+  "BtlAct_CanSwitch": {
+    "rva": 831360,
+    "address": 537702272,
+    "size": 87
+  },
+  "BtlParam_GetSlotId": {
+    "rva": 1117760,
+    "address": 537988672,
+    "size": 26
+  },
+  "Port_PadRead": {
+    "rva": 2869632,
+    "address": 539740544,
+    "size": 4425
+  },
+  "BtlInput_TestAction": {
+    "rva": 1059344,
+    "address": 537930256,
+    "size": 2988
+  },
+  "gHud": {
+    "rva": 6554880,
+    "address": 543425792,
+    "size": 4
+  },
+  "BtlAct_CanFuse": {
+    "rva": 830528,
+    "address": 537701440,
+    "size": 307
+  },
+  "sHudLayout": {
+    "rva": 13542696,
+    "address": 550413608,
+    "size": 4
+  },
+  "sMode": {
+    "rva": 6323952,
+    "address": 543194864,
+    "size": 4
+  },
+  "sAspectMilli": {
+    "rva": 6554456,
+    "address": 543425368,
+    "size": 4
+  }
+}

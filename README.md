@@ -118,7 +118,11 @@ All three menus use consistent card positions. Switching cards show reserve heal
 
 Hold R2: Display the active character's attack list, commands and costs. Available HD game button artwork is preferred; original assets are the fallback. No game artwork or HD texture pack is bundled.
 
-Panel placement options: - Centered: A balance between the center and edges. - Expanded: More space between the panels. - Classic (4:3): Original positioning within a 4:3 region.
+Panel placement options:
+
+- **Centered:** A balance between the center and edges.
+- **Expanded:** More space between the panels.
+- **Classic (4:3):** Original positioning within a 4:3 region.
 
 Native 4:3 positioning is preserved. Ultrawide layouts use safe regions rather than putting controls at the extreme screen edges.
 

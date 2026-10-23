@@ -30,7 +30,7 @@ for block in blocks[1:]:
  if len(lines)>1 and all(re.match(r'^(Square|Triangle|X:|R2|L1|L2|R1|L3|Select|F[678])',s) for s in lines):english.append('\n'.join('- '+s for s in lines));continue
  english.append(' '.join(lines))
 hero='<img src="desenvolvimento/assets/dragon-ball-three-stars.png" alt="BT3 Sparking Controls" width="86">'
-(R/'README.md').write_text(nav(False)+'\n\n---\n\n'+hero+'\n\n# BT3 Sparking Controls\n\n**1.0.3 Beta — Controls and Setup Guide**\n\n'+'## What changed in 1.0.3 Beta\n\n'+changes+'\n\n[Full changelog](CHANGELOG.md)\n\n'+downloads('Downloads and demonstration')+'\n'+ '\n\n'.join(english)+'\n',encoding='utf-8')
+(R/'README.md').write_text(nav(False)+'\n\n---\n\n'+hero+'\n\n# BT3 Sparking Controls\n\n**1.0.3 Beta — Controls and Setup Guide**\n\n'+'## 1.0.3 Beta — Changes\n\n'+changes+'\n\n[Full changelog](CHANGELOG.md)\n\n'+downloads('Downloads and demonstration')+'\n'+ '\n\n'.join(english)+'\n',encoding='utf-8')
 for code,entry in D.items():
  h=entry['head'];a,b,dh=headers[code];desc=entry['rows'].split('|');desc[6:6]=[entry['vertical_up'],entry['vertical_down']];assert len(desc)==len(buttons),(code,len(desc))
  table=f'| {a} | {b} |\n| --- | --- |\n'+'\n'.join('| `'+key+'` | '+value+' |' for key,value in zip(buttons,desc))

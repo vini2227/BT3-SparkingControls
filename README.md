@@ -14,7 +14,7 @@
 
 **1.0.3 Beta — Controls and Setup Guide**
 
-## What changed in 1.0.3 Beta
+## 1.0.3 Beta — Changes
 
 - Hold R2 + L1 for upward vertical Z Dash; R2 + L2 for downward vertical
   Z Dash. L1/L2 alone still ascend/descend normally. Their original double-tap

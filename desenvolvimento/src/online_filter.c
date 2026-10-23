@@ -10,7 +10,7 @@ unsigned long _tls_index;
 #define I32(p,o) (*(volatile int *)((u8 *)(p)+(o)))
 #define U8(p,o) (*(volatile u8 *)((u8 *)(p)+(o)))
 static __attribute__((always_inline)) inline void neutral_stick(u8 *p){p[4]=128;p[5]=128;}
-static __attribute__((always_inline)) inline void ui_hidden(void){U32((void *)MAIL,0x10c)=0;U32((void *)MAIL,0x18c)=0;for(int i=0;i<32;i++)U32((void *)MAIL,0x600+i*4)=0;for(int i=0;i<16;i++)U32((void *)MAIL,0x700+i*4)=0;for(int i=0;i<16;i++)U32((void *)MAIL,0x780+i*4)=0;for(int i=0;i<16;i++)U32((void *)MAIL,0x7c0+i*4)=0;for(int i=0;i<16;i++)U32((void *)MAIL,0x800+i*4)=0;}
+static __attribute__((always_inline)) inline void ui_hidden(void){U32((void *)MAIL,0x10c)=0;U32((void *)MAIL,0x18c)=0;for(int i=0;i<32;i++)U32((void *)MAIL,0x600+i*4)=0;for(int i=0;i<16;i++)U32((void *)MAIL,0x700+i*4)=0;for(int i=0;i<16;i++)U32((void *)MAIL,0x780+i*4)=0;for(int i=0;i<16;i++)U32((void *)MAIL,0x7c0+i*4)=0;for(int i=0;i<16;i++)U32((void *)MAIL,0x800+i*4)=0;for(int i=0;i<32;i++)U32((void *)MAIL,0x840+i*4)=0;for(int i=0;i<16;i++)U32((void *)MAIL,0x8c0+i*4)=0;}
 static __attribute__((always_inline)) inline unsigned directions(u16 raw,const u8 *data){
     unsigned v=raw&0xf0;
     if(data[4]<78)v|=0x80;else if(data[4]>178)v|=0x20;
@@ -181,6 +181,67 @@ __declspec(dllexport) int PadFilter(int socket,u8 *data){
             neutral_stick(data);
         }
 
+    }
+    /* Translate vertical Z Dash to the original two-tap ASCEND/DESCEND input.
+       Only private packet state is written; both peers run native double-tap tests. */
+    u8 *vertical=(u8 *)MAIL+0x840+side*64;
+    if(U32(vertical,4)!=U32(chr,12)){
+        for(int i=0;i<8;i++)U32(vertical,i*4)=0;
+        U32(vertical,4)=U32(chr,12);
+    }
+    int plain=!active&&!skill&&!open&&!switching&&!U32(tab,8)&&!U32(sw,0)&&!U32(formPulse,0);
+    unsigned verticalWant=0;
+    if(plain&&charge&&!(raw&0xf8fcu)){
+        if((raw&0x500u)==0x400u)verticalWant=0x800u;
+        else if((raw&0x500u)==0x100u)verticalWant=0x200u;
+    }
+    if(verticalWant){
+        if(U32(vertical,8)!=verticalWant)U32(vertical,12)=(U32(chr,0x940)&(verticalWant==0x800u?0x800u:0x1000u))?8:6;
+        unsigned phase=U32(vertical,12);
+        mapped=(mapped&9u)|((phase>=7||phase==4||phase==3)?0:verticalWant);
+        neutral_stick(data);data[2]=data[3]=128;
+        if(phase)U32(vertical,12)--;
+    }else {
+        U32(vertical,12)=0;
+        if(U32(vertical,8))U32(vertical,20)=2;
+        /* The old physical double-tap route is disabled. If a second normal
+           ascent/descent would become TAP2, wait for the native seven-frame
+           window to expire. Release cancels it; continuous movement is unchanged. */
+        if(plain&&!charge){
+            unsigned nativeHeld=U32(chr,0x940),seen=U32(vertical,16);
+            if((raw&0x400u)&&(mapped&0x800u)){
+                if((seen&0x800u)&&!(nativeHeld&0x800u)&&U8(chr,0x687)<7)mapped&=(u16)~0x800u;
+                U32(vertical,16)|=0x800u;
+            }
+            if((raw&0x100u)&&(mapped&0x200u)){
+                if((seen&0x200u)&&!(nativeHeld&0x1000u)&&U8(chr,0x688)<7)mapped&=(u16)~0x200u;
+                U32(vertical,16)|=0x200u;
+            }
+        }
+    }
+    if(!verticalWant&&U32(vertical,20)){mapped&=(u16)~0xa00u;U32(vertical,20)--;}
+    U32(vertical,8)=verticalWant;
+    /* Counter actions 0x67..0x69 only inspect guard release when their
+       animation advances. A fixed two-sample release can end before that window.
+       Keep releasing until native input is clear AND the counter action has left,
+       then the existing physical R1 mapping resumes guard. Read-only acknowledgment. */
+    u8 *guardReturn=(u8 *)MAIL+0x8c0+side*32;
+    unsigned wasCircle=U32(guardReturn,0);U32(guardReturn,0)=raw&0x2000u;
+    if(U32(guardReturn,8)!=U32(chr,12)){wasCircle=0;U32(guardReturn,4)=0;U32(guardReturn,12)=0;U32(guardReturn,8)=U32(chr,12);}
+    int counterPose=action>=0x67&&action<=0x69;
+    int releasePose=counterPose||action==0x3b||action==0x3d;
+    int guardEligible=plain&&!charge&&!(raw&0xd000u);
+    if(!guardEligible||!(raw&0x800u)||(raw&0x2000u)){U32(guardReturn,4)=0;U32(guardReturn,12)=0;}
+    else {
+        /* Also recover a counter already in progress after reattachment/pause:
+           R1 alone must not silently keep a Circle-only pose alive. */
+        if(!U32(guardReturn,4)&&(wasCircle||counterPose)){U32(guardReturn,4)=1;U32(guardReturn,12)=2;}
+        if(U32(guardReturn,4)){
+            if(U32(guardReturn,12)||releasePose||(U32(chr,0x73c)&1u)||(U32(chr,0x74c)&0x10u)){
+                mapped&=(u16)~0x3000u;
+                if(U32(guardReturn,12))U32(guardReturn,12)--;
+            }else U32(guardReturn,4)=0;
+        }
     }
     /* Complete a short native transformation pulse even after a quick face tap.
        Each phase lasts two packet samples, never long enough to become a fusion. */

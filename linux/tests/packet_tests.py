@@ -9,6 +9,7 @@ from elf_image import Elf
 game=Elf(options.game);s={name:{'rva':game.syms[name][0]-0x20000000} for name in s};library=Elf(R/'libbt3sparking.so');base=0x20000000;libbase=0x60000000
 assert hashlib.sha256(game.d).hexdigest()==p['game_sha256']
 layout=json.loads((R/'native-layout.json').read_text());assert len(layout['hooks'])==1 and layout['hooks'][0]['name']=='Port_PadRead'
+for _testHelper in ['BtlInput_AddDoubleTaps', 'BtlAct_Action67to69', 'BtlMember_SpendKi', 'BtlParam_GetKiDrain67', 'BtlAnim_Advance', 'BtlMember_IsKiEmpty', 'BtlAct_Request', 'BtlMove_Step', 'BtlMove_ApplyGravity', 'BtlChar_SetFlag', 'BtlChar_SetVibration', 'BtlAct_GetCurrent']:s[_testHelper]={'rva':game.syms[_testHelper][0]-base}
 checks=0
 def run_suite(allocated):
  global checks
@@ -16,7 +17,7 @@ def run_suite(allocated):
  if p.get('runtime_addresses'):u.mem_write(libbase+library.syms['bt3_symbols'][0],b''.join(struct.pack('<Q',value) for value in p['runtime_addresses']))
  u.mem_map(allocated,0x10000);chr=0x4000000;obj=chr+0x4000;row=chr+0x5000;mask=chr+0x6000;buf=0x50002000;stack=0x70000000;stop=0x50000000
  for a,n in [(chr,0x10000),(0x50000000,0x10000),(stack,0x10000)]:u.mem_map(a,n)
- current={'net':1,'side':0,'active':1,'flags':0,'action':0,'stage':0,'owner':0,'ids':[4,5,6,255],'result':18,'rowdir':0,'roster':[(0,10000,1)],'member':0,'candidate':1,'switchable':1,'fusions':[255,255,255],'fuseable':1,'inputHeld':0,'emergency':0,'fusionAge':0,'switchUp':30};calls=[];packet=b'';trace=[]
+ current={'net':1,'side':0,'active':1,'flags':0,'action':0,'stage':0,'owner':0,'ids':[4,5,6,255],'result':18,'rowdir':0,'roster':[(0,10000,1)],'member':0,'candidate':1,'switchable':1,'fusions':[255,255,255],'fuseable':1,'inputHeld':0,'emergency':0,'fusionAge':0,'switchUp':30,'recordHeld':0,'ascendAge':100,'descendAge':100,'nativeCommand':0};calls=[];packet=b'';trace=[]
  def adr(name):return base+s[name]['rva']
  def regargs():return [u.reg_read(v) for v in [UC_X86_REG_RDI,UC_X86_REG_RSI,UC_X86_REG_RDX,UC_X86_REG_RCX]]
  handlers={
@@ -50,7 +51,8 @@ def run_suite(allocated):
   global checks
   current.update(opts);packet=packet_for(raw,lx,ly);calls.clear();u.mem_write(chr,b'\0'*0x2000);set32(chr, current['side']);set32(chr+0x948,current['action']);set32(chr+0x1594,current['stage']);u.mem_write(row+2,bytes([current['rowdir']]))
   u.mem_write(chr+0x923,bytes([64 if current['emergency'] else 0]))
-  set32(chr+0x73c,current['inputHeld'])
+  set32(chr+0x73c,current['inputHeld']);set32(chr+0x74c,current['nativeCommand'])
+  set32(chr+0x940,current['recordHeld']);u.mem_write(chr+0x687,bytes([current['ascendAge'],current['descendAge']]))
   u.mem_write(chr+0x7af,bytes([current['switchUp']]))
   u.mem_write(chr+0x7cd,bytes([current['fusionAge']]))
   set32(chr+0x998,len(current['roster']));set32(chr+0x994,current['member']);set32(chr+0x9a0,current['candidate'])
@@ -640,6 +642,110 @@ def run_suite(allocated):
   assert held(invoke(0x8200,socket=port))==0x1100;checks+=1
   invoke(0,socket=port)
  invoke(0,net=1,side=0,socket=0,action=0,flags=0,stage=0)
+ # Regression: run the real native double-tap detector and action predicates.
+ # Its counters are fixture-owned; the packet translator must never write them.
+ def simulate_vertical(physical,net,side,port,stride=1,phase=0):
+  invoke(0,net=net,side=side,socket=port,active=0,action=0,flags=0,stage=0)
+  prev=0;age=[100,100];prevAge=[100,100];recognizedIds=[];emitted=[]
+  for i,raw in enumerate(physical):
+   out=invoke(raw,socket=port,active=1,recordHeld=prev,ascendAge=prevAge[0],descendAge=prevAge[1]);emitted.append(held(out))
+   if i%stride!=phase:continue
+   bits=native('BtlInput_RemapButtons',[held(out),mask])
+   tapped=native('BtlInput_AddDoubleTaps',[chr,bits,prev,0]);set32(chr+0x73c,tapped);set32(chr+0x744,tapped&~prev)
+   allow_native[0]=True
+   try:
+    recognizedIds.append((bool(native('BtlInput_TestAction',[chr,15,1])),bool(native('BtlInput_TestAction',[chr,17,1]))))
+   finally:allow_native[0]=False
+   for j,bit in enumerate([0x800,0x1000]):prevAge[j]=age[j];age[j]=0 if bits&bit and not prev&bit else min(100,age[j]+1)
+   prev=tapped
+  return recognizedIds,emitted
+ for net,side,port in [(1,0,0),(1,1,0),(0,0,0),(0,1,1)]:
+  for ascend,button,chord,nativeBit in [(True,0x400,0x600,0x800),(False,0x100,0x300,0x200)]:
+   for stride in [1,2]:
+    for phase in range(stride):
+     for lead in [0,2,18]:
+      states,stream=simulate_vertical([0]*8+[button]*lead+[chord]*24+[0]*6,net,side,port,stride,phase)
+      assert any(v[0 if ascend else 1] for v in states),(net,side,ascend,stride,phase,lead,stream);checks+=1
+      assert not any(v[1 if ascend else 0] for v in states);checks+=1
+     states,stream=simulate_vertical([0]*8+[button]*2+[0]*2+[button]*26+[0]*6,net,side,port,stride,phase)
+     assert not any(any(v) for v in states),(ascend,stride,phase,stream);checks+=1
+     assert nativeBit in stream[-12:-6];checks+=1 # second held press eventually resumes ordinary movement
+     states,stream=simulate_vertical([0]*8+[chord]*20+[button]*25+[0]*6,net,side,port,stride,phase)
+     end=stream[28:];assert 0 in end[:3] and nativeBit in end[-12:-6];checks+=1
+  # Guard -> counter -> release Circle while retaining R1: real native guard
+  # predicate must go false, then true, for BOTH one-/two-blank sample phases.
+  for stride in [1,2]:
+   for phase in range(stride):
+    invoke(0,net=net,side=side,socket=port,active=0,recordHeld=0,ascendAge=100,descendAge=100)
+    physical=[0]*8+[0x800]*6+[0x2800]*6+[0x800]*8+[0]*4;output=[]
+    for raw in physical:output.append(held(invoke(raw,socket=port,active=1,action=0x38)))
+    assert output[20:24]==[0,0,0x2000,0x2000],output;checks+=1
+    sampled=output[phase::stride];guardStates=[]
+    for j,raw in enumerate(sampled):
+     set32(chr+0x74c,commands(raw,sampled[j-1] if j else 0));allow_native[0]=True
+     try:guardStates.append(bool(native('BtlInput_TestAction',[chr,34,1])))
+     finally:allow_native[0]=False
+    a=next(i for i in range(20,len(output)) if i%stride==phase)//stride
+    assert guardStates[a] is False and guardStates[a+1 if stride==2 else a+2] is True;checks+=1
+  invoke(0,socket=port,action=0,recordHeld=0,ascendAge=100,descendAge=100)
+ invoke(0,net=1,side=0,socket=0,action=0,flags=0,stage=0)
+ # Execute the ACTUAL counter handler, with its animation completion stubbed.
+ # Unlike a guard-bit-only assertion, this reproduces the native wait until
+ # BtlAnim_Advance succeeds before testing the release predicate.
+ counterWindow=[False];requested=[]
+ custom={
+  'BtlMember_SpendKi':lambda a:1,'BtlParam_GetKiDrain67':lambda a:0,
+  'BtlAnim_Advance':lambda a:int(counterWindow[0]),'BtlMember_IsKiEmpty':lambda a:0,
+  'BtlAct_Request':lambda a:requested.append(a[1]) or 0,
+  'BtlMove_Step':lambda a:0,'BtlMove_ApplyGravity':lambda a:0,
+  'BtlChar_SetFlag':lambda a:0,'BtlChar_SetVibration':lambda a:0,
+  'BtlAct_GetCurrent':lambda a:current['action']}
+ savedHandlers={adr(name):handlers.get(adr(name)) for name in custom}
+ for name,fn in custom.items():handlers[adr(name)]=fn
+ def counter_tick(raw,previous,window):
+  counterWindow[0]=window;requested[:]=[];set32(chr+0x74c,commands(raw,previous))
+  allow_native[0]=True
+  try:native('BtlAct_Action67to69',[chr,1])
+  finally:allow_native[0]=False
+  return 0xb in requested
+ # Control: the former two-sample release finishes BEFORE animation completion.
+ invoke(0,action=0x67,recordHeld=0,inputHeld=0,nativeCommand=0)
+ assert not any(counter_tick(v,0,i==8) for i,v in enumerate([0,0]+[0x2000]*8));checks+=1
+ for net,side,port in [(1,0,0),(1,1,0),(0,0,0),(0,1,1)]:
+  for pose in [0x67,0x68,0x69]:
+   for holdIndex,holdLength in enumerate([1,2,17,180]):
+    stride=1 if holdIndex%2==0 else 2;phase=holdIndex%stride
+    delay=[0,4,12][(pose+holdIndex)%3];windowDelay=[0,3,11,35][holdIndex]
+    invoke(0,net=net,side=side,socket=port,active=0,recordHeld=0,inputHeld=0,nativeCommand=0)
+    for _ in range(4):invoke(0x800,socket=port,active=1,action=0x38)
+    for _ in range(holdLength):assert held(invoke(0x2800,socket=port,action=pose))==0x3000;checks+=1
+    action=pose;nativeHeld=5;nativeCmd=commands(0x3000);previous=0x3000;stream=[];exitAt=None;guardAt=None
+    for i in range(windowDelay+delay+24):
+     out=held(invoke(0x800,socket=port,action=action,inputHeld=nativeHeld,nativeCommand=nativeCmd));stream.append(out)
+     if action==pose:assert not out&0x3000,('early guard resume',pose,holdLength,i);checks+=1
+     elif out&0x2000 and guardAt is None:guardAt=i
+     if i%stride!=phase:continue
+     delivered=stream[i-delay] if i>=delay else 0x3000
+     nativeHeld=native('BtlInput_RemapButtons',[delivered,mask]);nativeCmd=commands(delivered,previous)
+     if action==pose and counter_tick(delivered,previous,i>=windowDelay):action=0xb;exitAt=i
+     previous=delivered
+    assert exitAt is not None and guardAt is not None and guardAt>exitAt,(pose,holdLength,delay,stride,phase,exitAt,guardAt,stream);checks+=1
+    assert all(v==0x2000 for v in stream[-4:]),stream;checks+=1
+  # Re-press Circle cancels the guard-return wait immediately. Other explicit
+  # attacks and charge must never be swallowed by a pending return.
+  invoke(0x2800,socket=port,action=0x67,inputHeld=5,nativeCommand=0x10)
+  assert held(invoke(0x800,socket=port))==0;checks+=1
+  assert held(invoke(0x2800,socket=port))==0x3000;checks+=1
+  assert held(invoke(0,socket=port))==0;checks+=1
+  invoke(0x2800,socket=port,action=0x67);invoke(0x800,socket=port)
+  assert held(invoke(0x8200,socket=port))==0x1100;checks+=1
+  # Recovery also works after reattachment/pause discarded the Circle edge.
+  invoke(0,socket=port,active=0);assert held(invoke(0x800,socket=port,active=1,action=0x67))==0;checks+=1
+  invoke(0,socket=port,action=0,inputHeld=0,nativeCommand=0)
+ for address,old in savedHandlers.items():
+  if old is None:del handlers[address]
+  else:handlers[address]=old
+ invoke(0,net=1,side=0,socket=0,action=0,inputHeld=0,nativeCommand=0,recordHeld=0,ascendAge=100,descendAge=100)
  # Exact native fusion predicates 104/105/106, including cooldown and frame 12.
  for inputId,raw in [(104,0x84),(105,0x14),(106,0x24)]:
   bits=native('BtlInput_RemapButtons',[raw,mask]);set32(chr+0x73c,bits)
@@ -661,5 +767,5 @@ def run_suite(allocated):
  return 'PASS Linux System V allocation '+hex(allocated)
 
 lines=[run_suite(a) for a in [0x08000000]]
-lines+=['PASS: '+str(checks)+' packet/ABI/native-command checks; new controls offline on both ports; menus preserved; online local side only, relocation, held techniques/skills, transform packets, switch panel and native teammate navigation/acknowledgment, cancellation and timeout, native swap acknowledgment/release and bounded retries online and on both offline ports, fusion tabs and native long-hold packets on host/guest and both offline ports, native R1+Square priority without attack/guard/counter leaks, R3 emergency shortcut in native eligibility window and no original R3 leakage, native boost chord, no writes to fighter or game globals.','NOT TESTED: a live online match, actual ping/rollback behavior, physical-controller timing or opponent compatibility end-to-end.']
+lines+=['PASS: '+str(checks)+' packet/ABI/native-command checks; new controls offline on both ports; menus preserved; online local side only, relocation, held techniques/skills, transform packets, switch panel and native teammate navigation/acknowledgment, cancellation and timeout, native swap acknowledgment/release and bounded retries online and on both offline ports, fusion tabs and native long-hold packets on host/guest and both offline ports, native R1+Square priority without attack/guard/counter leaks, R3 emergency shortcut in native eligibility window and no original R3 leakage, native boost chord, vertical Z Dash and disabled legacy double taps, guard return after Circle release with actual native counter animation/exit tests and varied hold durations/delayed input acknowledgment, no writes to fighter or game globals.','NOT TESTED: a live online match, actual ping/rollback behavior, physical-controller timing or opponent compatibility end-to-end.']
 print('\n'.join(lines));(R/'analysis/packet-test-results.txt').write_text('\n'.join(lines)+'\n',encoding='utf-8')

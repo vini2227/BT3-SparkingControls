@@ -3,6 +3,6 @@
   "game_sha256": "7c8886cfcebf4763fffd55a0e8e17913e9ea0105f55920cb0ebb6906fdd4fc22",
   "entry_offset": 4096,
   "trampoline_length": 6,
-  "relocations": 249,
+  "relocations": 361,
   "imports": 0
 }

@@ -1,14 +1,14 @@
 {
-  "version": "1.0 Beta",
-  "build_date": "2026-10-21",
+  "version": "1.0.3 Beta",
+  "build_date": "2026-10-22",
   "status": "beta; CPU and managed tests passed; native Linux runtime unverified",
-  "native_sha256": "d050053dc6d569eda87a275cd71555aa20d3d623e1f68ec24582a9ca8ec3a211",
-  "frontend_sha256": "6f251d121e69413f22f074b64b32b32770235f662cfb20402cadb64c73de198e",
+  "native_sha256": "311455da989ed41848deeebdfe209e96b573d5d5b848c0b6aafb2162a757fda5",
+  "frontend_sha256": "a4c457735638b73be9b9ed1b5a4a6ef6d21bcaf9bde75c3932ca8426bae7f756",
   "games": [
     "v0.1.37 Linux x64",
     "v0.1.38.1 Linux x64"
   ],
-  "packet_checks_per_game": 160061,
+  "packet_checks_per_game": 445763,
   "loader_checks_per_game": 9,
   "launcher_checks": 2250,
   "shortcut_checks": 93,
@@ -23,5 +23,9 @@
     "Real LD_PRELOAD execution on Linux",
     "Physical controller timing",
     "Live offline/online gameplay and rollback"
-  ]
+  ],
+  "ui_checks_unchanged_from": "1.0 Beta",
+  "menu_fade_checks": 180,
+  "menu_fade_runtime": "Managed offscreen tests under Windows .NET, not actual Mono/X11",
+  "counter_release_checks": "Real compiled counter handler, animation gate, varied hold duration, delayed input acknowledgment, host/guest and both offline ports"
 }

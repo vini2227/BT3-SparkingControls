@@ -1,5 +1,21 @@
 BT3 SPARKING CONTROLS - CONTROLS AND SETUP GUIDE
-Version 1.0 Beta
+Version 1.0.3 Beta
+
+WHAT CHANGED IN 1.0.3 BETA
+
+- Hold R2 + L1 for upward vertical Z Dash; R2 + L2 for downward vertical
+  Z Dash. L1/L2 alone still ascend/descend normally. Their original double-tap
+  fast-movement route is disabled. A rapid second ordinary press may wait for
+  BT3's seven-frame double-tap window to expire before normal movement resumes.
+- Release Circle while continuing to hold R1 to request exit from the counter
+  stance and resume guard without another R1 press. Short and long holds work;
+  the helper waits for the game's actual exit rather than a fixed release pulse.
+  It still respects BT3's native animation exit window, without forced cancels.
+- Attack, transformation, fusion and switching menus now fade in over 100 ms
+  and out over 80 ms. Quick reopening reverses the fade smoothly. This is a
+  visual effect only; it adds no input wait. Loss of focus clears immediately.
+- Linux HUD presentation updates changed/animated frames immediately.
+- Current tests and all 16 language guides were updated. Settings are preserved.
 
 ABOUT
 
@@ -10,7 +26,7 @@ The game and its assets are not included.
 
 WINDOWS INSTALLATION
 
-1. Extract BT3-SparkingControls-1.0-Beta-Windows.zip.
+1. Extract BT3-SparkingControls-1.0.3-Beta-Windows.zip.
 2. Run BT3-SparkingControls.exe.
 3. Click Browse and select Tenkaichi3Decomp.exe in your game installation.
 4. Choose your language, panel placement and HUD preferences.
@@ -28,7 +44,7 @@ select its new executable location in the launcher.
 
 LINUX INSTALLATION (NATIVE LINUX GAME)
 
-1. Extract BT3-SparkingControls-1.0-Beta-Linux-x64.zip.
+1. Extract BT3-SparkingControls-1.0.3-Beta-Linux-x64.zip.
 2. Keep the entire extracted folder together, including the managed EXE,
    libbt3sparking.so, profiles, compatibility files and assets.
 3. Install Mono with Windows Forms and System.Web.Extensions support,
@@ -64,6 +80,8 @@ X: Native movement and dash actions. Original double-tap X grabs remain.
 R2: Charge Ki.
 L1: Ascend.
 L2: Descend.
+R2 + L1: Vertical Z Dash upward (hold).
+R2 + L2: Vertical Z Dash downward (hold).
 R1: Guard outside your own supported attack combos.
 L3: BT3's original search/lock-on action.
 Select / View: Change camera.
@@ -94,6 +112,9 @@ COUNTERS, VANISHES AND GRABS
 Circle: Requests BT3's native counter stance, inspired by ZERO's Perception.
 During supported Rush/Ki combos, it takes priority over held attack buttons.
 It does not add ZERO's full Perception or Super Perception systems.
+Release Circle while retaining R1 to request the end of the counter stance
+and return to guard, without another R1 press. This waits for BT3's actual
+stance exit and respects the native animation window, for short or long holds.
 
 R1 during your own supported combos: Requests BT3's native forward vanish.
 It may move forward slightly. It is not a stationary teleport and does not
@@ -156,6 +177,10 @@ Panel placement options:
 Native 4:3 positioning is preserved. Ultrawide layouts use safe regions
 rather than putting controls at the extreme screen edges.
 
+All four battle menus fade in over 100 ms and out over 80 ms. Closing retains
+only the last visual snapshot until it becomes transparent. Reopening reverses
+smoothly. No command waits for the fade. Losing game focus clears immediately.
+
 Show attack panel: Enable or hide the attack list.
 Attack panel outer frame: Optional; off by default for fresh settings.
 Existing saved choices are preserved during updates.
@@ -196,10 +221,13 @@ phases; the second press is about 33 ms later at 60 Hz. Range, native timing
 windows and rollback still affect whether the game accepts a command.
 Panel selections also follow native timing and acknowledgment.
 
-Automated validation passed: 480,183 Windows packet/ABI/native-command checks;
-160,061 Linux packet checks and 9 emulated loader checks for EACH of two game
+Automated validation passed: 1,337,289 Windows packet/ABI/native-command checks;
+445,763 Linux packet checks and 9 emulated loader checks for EACH of two game
 versions; 2,250 launcher, 93 shortcut and 693 responsive checks per frontend,
-plus preview-state checks. Linux managed UI tests ran under Windows .NET.
+plus 180 fade checks per frontend and 12 preview states. Counter regressions
+execute the actual compiled counter handler with varied Circle hold durations,
+animation timing and delayed acknowledgment. Linux managed UI tests ran under
+Windows .NET. Linux presentation now updates changed/animated frames immediately.
 
 These tests do not establish real-world online behavior. Live online matches,
 actual ping/rollback, physical-controller timing and native Linux gameplay

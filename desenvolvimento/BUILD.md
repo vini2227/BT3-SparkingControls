@@ -1,4 +1,4 @@
-# Build BT3 Sparking Controls 1.0 Beta — Windows
+# Build BT3 Sparking Controls 1.0.3 Beta — Windows
 
 Python 3 and .NET Framework 4 C# compiler are required. Install Pillow to rebuild the icon. From the source root run `python desenvolvimento/tools/build-single-exe-windows.py`. The reviewed payload, profiles and compatibility metadata are included, so rebuilding the launcher does not require the game or Zig. An optional output EXE path can be passed as the first argument.
 

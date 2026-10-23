@@ -8,17 +8,25 @@
 
 ---
 
-# BT3 Sparking Controls — 1.0 Beta
+# BT3 Sparking Controls — 1.0.3 Beta
 
 ## Управление и установка
 
 Раскладка управления и боевой HUD в духе Sparking! ZERO для Tenkaichi3Decomp. Анимации, урон, затраты Ki, дальность, способности и окна действий остаются такими, как в BT3. Игра и её ресурсы не включены.
 
+## Новое в версии 1.0.3 Beta
+
+- Удерживайте R2 + L1 для быстрого подъёма или R2 + L2 для спуска. Отдельные L1/L2 сохраняют обычное движение; прежнее двойное нажатие отключено. Второе быстрое нажатие может ждать окончания штатного окна в семь кадров.
+- Отпускание ○ при удержании R1 запрашивает выход из контрстойки и возвращает блок с учётом штатного окна выхода из анимации BT3. Поддерживается разная длительность удержания, без повторного нажатия R1.
+- Четыре меню плавно появляются за 100 мс и исчезают за 80 мс без дополнительного ожидания ввода. В Linux изменённые или анимированные кадры выводятся сразу.
+
+[CHANGELOG](../../CHANGELOG.md)
+
 ## Загрузка и демонстрация
 
-[**Windows x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-1.0-Beta-Windows.zip) · [**Linux x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-1.0-Beta-Linux-x64.zip) · [**1.0 Beta**](https://github.com/vini2227/BT3-SparkingControls/releases/tag/v1.0-beta)
+[**Windows x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.3-beta/BT3-SparkingControls-1.0.3-Beta-Windows.zip) · [**Linux x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.3-beta/BT3-SparkingControls-1.0.3-Beta-Linux-x64.zip) · [**1.0.3 Beta**](https://github.com/vini2227/BT3-SparkingControls/releases/tag/v1.0.3-beta)
 
-[▶ Gameplay demo — MP4, 167 MiB](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-1.0-Beta-Gameplay-Demo.mp4) · [TXT](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-Controls-and-Setup-Guide.txt) · [SHA256](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/SHA256SUMS.txt)
+[▶ Gameplay demo (recorded for 1.0 Beta) — MP4, 167 MiB](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-1.0-Beta-Gameplay-Demo.mp4) · [TXT](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.3-beta/BT3-SparkingControls-Controls-and-Setup-Guide.txt) · [SHA256](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.3-beta/SHA256SUMS.txt)
 
 ## Установка
 
@@ -52,6 +60,8 @@ bash start.sh --check /path/to/Tenkaichi3Decomp
 | `R2` | Зарядка Ki |
 | `L1` | Подняться |
 | `L2` | Опуститься |
+| `R2 + L1` | Вертикальный Z Dash вверх |
+| `R2 + L2` | Вертикальный Z Dash вниз |
 | `R1` | Защита вне своих поддерживаемых комбо |
 | `R2 + □` | Суператака 1 |
 | `R2 + △` | Суператака 2 |
@@ -85,7 +95,7 @@ bash start.sh --check /path/to/Tenkaichi3Decomp
 
 ## Совместимость, онлайн и проверки
 
-Помощник переводит локальный пакет контроллера 18 байт до сетевой выборки; другой игрок получает родные команды BT3. Удалённый ввод и функции боевых решений не меняются. Символы, 61 полная функция и ссылки проверяют совместимые изменения адресов; структурные изменения или отсутствие символов могут потребовать обновления. Проверены Linux v0.1.37 и v0.1.38.1, без гарантии всех версий. Простые переназначения не добавляют sleep. Захват/R3 используют фазы по два отсчёта: второе нажатие примерно через 33 мс при 60 Гц. Карты следуют родному времени и подтверждениям; дальность, окна и rollback по-прежнему влияют. Пройдено: 480 183 проверки пакетов/ABI Windows; 160 061 пакетов и 9 эмуляции загрузчика для КАЖДОЙ версии Linux; 2250 лаунчера, 93 клавиш, 693 макета на интерфейс и 12 предпросмотров. UI Linux проверялся в .NET на Windows, не Mono/X11. Нативный Linux, физические контроллеры и настоящие онлайн-матчи/rollback ещё не проверены. Всеобщая гарантия отсутствия десинхронизации не даётся.
+Помощник переводит локальный пакет контроллера 18 байт до сетевой выборки; другой игрок получает родные команды BT3. Удалённый ввод и функции боевых решений не меняются. Символы, 61 полная функция и ссылки проверяют совместимые изменения адресов; структурные изменения или отсутствие символов могут потребовать обновления. Проверены Linux v0.1.37 и v0.1.38.1, без гарантии всех версий. Простые переназначения не добавляют sleep. Захват/R3 используют фазы по два отсчёта: второе нажатие примерно через 33 мс при 60 Гц. Карты следуют родному времени и подтверждениям; дальность, окна и rollback по-прежнему влияют. Пройдено: 1 337 289 проверки пакетов/ABI Windows; 445 763 пакетов и 9 эмуляции загрузчика для КАЖДОЙ версии Linux; 2250 лаунчера, 93 клавиш, 693 макета на интерфейс и 12 предпросмотров. UI Linux проверялся в .NET на Windows, не Mono/X11. Нативный Linux, физические контроллеры и настоящие онлайн-матчи/rollback ещё не проверены. Всеобщая гарантия отсутствия десинхронизации не даётся.
 
 ## Исходники и лицензия
 

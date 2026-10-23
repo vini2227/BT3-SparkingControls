@@ -1,3 +1,3 @@
-BT3 Sparking Controls 1.0 Beta - Linux x64
+BT3 Sparking Controls 1.0.3 Beta - Linux x64
 Run: bash start.sh
 Keep the complete extracted folder. Read README.md and FEATURES-EN.md.

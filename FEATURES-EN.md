@@ -1,4 +1,4 @@
-# BT3 Sparking Controls 1.0 Beta — Features and Differences
+# BT3 Sparking Controls 1.0.3 Beta — Features and Differences
 
 ## What this add-on is
 - A standalone, Sparking! ZERO-inspired control layout and battle HUD for Tenkaichi3Decomp.
@@ -8,6 +8,7 @@
 
 ## Core controls
 - R2: charge Ki; L1: ascend; L2: descend; R1: guard outside your own attack combos.
+- Hold R2 + L1 / R2 + L2 for upward / downward vertical Z Dash. The old L1/L2 double-tap fast-movement route is disabled. A rapid second ordinary press may wait for the native seven-frame double-tap window to expire.
 - Square: Rush attacks; Triangle: Ki attacks; X: native movement/dash actions.
 - R2 + Square: Super 1; R2 + Triangle: Super 2; R2 + Circle: Ultimate.
 - R2 + D-pad Up/Down: Skill 1; R2 + D-pad Left/Right: Skill 2. These are this add-on's skill shortcuts, not a claim of an exact ZERO layout.
@@ -19,6 +20,7 @@
 
 ## Counter stance, vanishes and grabs
 - Circle requests BT3's native counter stance, inspired by ZERO's Perception button. It does not add ZERO's complete Perception/Super Perception mechanics.
+- Release Circle while holding R1 to request stance exit and resume guard without another R1 press. The helper waits for the actual native stance exit; varied hold durations are supported. Native animation exit windows still apply.
 - During your own supported Rush/Ki combo actions, Circle takes priority over held attack buttons and requests the native combo counter stance.
 - R1 alone during those combos requests the native forward vanish. It can move forward slightly; it is not a stationary teleport or a guaranteed teleport behind the opponent.
 - R1 + left-stick direction during those combos requests the corresponding native directional vanish. Native Ki requirements and cancel windows still apply.
@@ -40,6 +42,8 @@
 - Online local panels are placed on the left HUD side even when the local player is logically Player 2.
 
 ## Battle HUD and launcher
+- All four battle menus fade in over 100 ms and out over 80 ms; rapid reopening reverses smoothly, without input waits. Losing game focus clears immediately.
+- Linux presents changed/animated HUD frames immediately.
 - Hold R2 to show the active character's five skills/specials with their names, assigned buttons and native costs.
 - Costs are displayed as Skill Count values or Ki-bar values, without redundant unit labels; the Ultimate includes a Sparking/MAX marker.
 - Compact single-line rows, aligned cost numbers, original-game font metrics, game-style translucent rows/frame and no redundant title/player label.
@@ -65,5 +69,5 @@
 - Compatible game address changes can be resolved automatically from symbols and reviewed signatures. Windows PE/COFF and Linux ELF resolvers verify 61 complete functions and their symbolic/data references; incompatible structural changes still require an update.
 - Linux compatibility was checked against official v0.1.37 and v0.1.38.1 x64 binaries. This does not claim support for every older or future build.
 - Grab and emergency sequences hold each press/release phase for two input samples to improve capture. The second press is about 33 ms later at 60 Hz; rollback, range and native action windows still apply. Transform, fusion and switching retain their native timing/acknowledgment.
-- Package validation includes 480,183 Windows packet checks; 160,061 Linux packet checks and 9 emulated loader checks on each of two game versions; 2,250 launcher, 93 shortcut and 693 responsive checks per frontend, plus preview-state checks.
+- Package validation includes 1,337,289 Windows packet checks; 445,763 Linux packet checks and 9 emulated loader checks on each of two game versions; 2,250 launcher, 93 shortcut and 693 responsive checks per frontend, plus 180 fade checks per frontend and 12 preview states. Counter tests execute the real native handler with varied hold durations, animation windows and delayed input acknowledgment.
 - Linux managed UI checks ran under Windows .NET. Native Mono/X11, real Linux LD_PRELOAD and live online/rollback behavior remain unverified.

@@ -8,17 +8,25 @@
 
 ---
 
-# BT3 Sparking Controls — 1.0 Beta
+# BT3 Sparking Controls — 1.0.3 Beta
 
 ## Steuerung und Einrichtung
 
 Eine von Sparking! ZERO inspirierte Steuerung mit Kampf-HUD für Tenkaichi3Decomp. Animationen, Schaden, Ki-Kosten, Reichweite, Fähigkeiten und Aktionsfenster stammen weiterhin aus BT3. Spiel und Spielressourcen sind nicht enthalten.
 
+## Neu in Version 1.0.3 Beta
+
+- R2 + L1 halten, um schnell aufzusteigen; R2 + L2 zum Absteigen. L1/L2 allein bewegen weiterhin normal. Ihr alter Doppeltipp ist deaktiviert. Ein schneller zweiter Druck kann das native Zeitfenster von sieben Frames abwarten.
+- Wird ○ bei gehaltenem R1 losgelassen, fordert die Hilfe das Ende der Konterhaltung an und kehrt zur Deckung zurück. Das native Animationsfenster von BT3 gilt weiterhin. Unterschiedliche Haltedauern funktionieren ohne erneuten R1-Druck.
+- Alle vier Menüs blenden in 100 ms ein und in 80 ms aus, ohne zusätzliche Eingabewartezeit. Unter Linux werden geänderte oder animierte Frames sofort dargestellt.
+
+[CHANGELOG](../../CHANGELOG.md)
+
 ## Downloads und Demonstration
 
-[**Windows x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-1.0-Beta-Windows.zip) · [**Linux x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-1.0-Beta-Linux-x64.zip) · [**1.0 Beta**](https://github.com/vini2227/BT3-SparkingControls/releases/tag/v1.0-beta)
+[**Windows x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.3-beta/BT3-SparkingControls-1.0.3-Beta-Windows.zip) · [**Linux x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.3-beta/BT3-SparkingControls-1.0.3-Beta-Linux-x64.zip) · [**1.0.3 Beta**](https://github.com/vini2227/BT3-SparkingControls/releases/tag/v1.0.3-beta)
 
-[▶ Gameplay demo — MP4, 167 MiB](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-1.0-Beta-Gameplay-Demo.mp4) · [TXT](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-Controls-and-Setup-Guide.txt) · [SHA256](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/SHA256SUMS.txt)
+[▶ Gameplay demo (recorded for 1.0 Beta) — MP4, 167 MiB](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-1.0-Beta-Gameplay-Demo.mp4) · [TXT](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.3-beta/BT3-SparkingControls-Controls-and-Setup-Guide.txt) · [SHA256](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.3-beta/SHA256SUMS.txt)
 
 ## Installation
 
@@ -52,6 +60,8 @@ bash start.sh --check /path/to/Tenkaichi3Decomp
 | `R2` | Ki aufladen |
 | `L1` | Aufsteigen |
 | `L2` | Absteigen |
+| `R2 + L1` | Vertikaler Z Dash nach oben |
+| `R2 + L2` | Vertikaler Z Dash nach unten |
 | `R1` | Blocken außerhalb eigener unterstützter Kombos |
 | `R2 + □` | Superangriff 1 |
 | `R2 + △` | Superangriff 2 |
@@ -85,7 +95,7 @@ R2 halten: Angriffe, Eingaben und Kosten. **Centered** liegt zwischen Mitte und 
 
 ## Kompatibilität, Online und Tests
 
-Übersetzt das lokale 18-Byte-Eingabepaket vor der Netzwerkabtastung in native BT3-Eingaben; fremde Eingaben und Kampfentscheidungsfunktionen werden nicht geändert. Symbole, 61 vollständige Funktionen und Referenzen prüfen kompatible Adressänderungen. Strukturänderungen oder fehlende Symbole können Updates erfordern. Linux v0.1.37 und v0.1.38.1 geprüft; keine Garantie für jede Version. Einfache Belegungen fügen keine Sleeps hinzu. Griff/R3 verwenden Zwei-Sample-Phasen; zweite Betätigung etwa 33 ms später bei 60 Hz. Karten folgen nativer Zeitsteuerung/Bestätigung; Reichweite, Fenster und Rollback gelten weiter. Bestanden: 480.183 Windows-Paket/ABI-Prüfungen; je Linux-Version 160.061 Paket- und 9 emulierte Loader-Prüfungen; je Frontend 2.250 Launcher-, 93 Kürzel-, 693 Layout-Prüfungen und 12 Vorschauzustände. Linux-Oberfläche unter Windows .NET geprüft, nicht Mono/X11. Echte Linux-Ausführung, Controller und Online-Partien/Rollback noch ungeprüft. Keine allgemeine Desync-Garantie.
+Übersetzt das lokale 18-Byte-Eingabepaket vor der Netzwerkabtastung in native BT3-Eingaben; fremde Eingaben und Kampfentscheidungsfunktionen werden nicht geändert. Symbole, 61 vollständige Funktionen und Referenzen prüfen kompatible Adressänderungen. Strukturänderungen oder fehlende Symbole können Updates erfordern. Linux v0.1.37 und v0.1.38.1 geprüft; keine Garantie für jede Version. Einfache Belegungen fügen keine Sleeps hinzu. Griff/R3 verwenden Zwei-Sample-Phasen; zweite Betätigung etwa 33 ms später bei 60 Hz. Karten folgen nativer Zeitsteuerung/Bestätigung; Reichweite, Fenster und Rollback gelten weiter. Bestanden: 1.337.289 Windows-Paket/ABI-Prüfungen; je Linux-Version 445.763 Paket- und 9 emulierte Loader-Prüfungen; je Frontend 2.250 Launcher-, 93 Kürzel-, 693 Layout-Prüfungen und 12 Vorschauzustände. Linux-Oberfläche unter Windows .NET geprüft, nicht Mono/X11. Echte Linux-Ausführung, Controller und Online-Partien/Rollback noch ungeprüft. Keine allgemeine Desync-Garantie.
 
 ## Quellcode und Lizenz
 

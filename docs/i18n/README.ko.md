@@ -8,17 +8,25 @@
 
 ---
 
-# BT3 Sparking Controls — 1.0 Beta
+# BT3 Sparking Controls — 1.0.3 Beta
 
 ## 조작 및 설치 안내
 
 Tenkaichi3Decomp용 Sparking! ZERO 스타일 조작 배치와 전투 HUD입니다. 애니메이션, 피해량, 기 소모, 사거리, 캐릭터 능력과 동작 허용 시간은 BT3 규칙을 따릅니다. 게임과 게임 리소스는 포함되지 않습니다.
 
+## 1.0.3 Beta 변경 사항
+
+- R2 + L1을 길게 누르면 빠르게 상승하고 R2 + L2는 하강합니다. L1/L2 단독은 일반 이동을 유지하며 이전 두 번 누르기 단축 조작은 비활성화됩니다. 빠른 두 번째 입력은 게임의 기본 7프레임 입력 구간이 끝날 때까지 기다릴 수 있습니다.
+- R1을 누른 상태에서 ○를 놓으면 반격 자세 종료를 요청하고 방어로 돌아갑니다. BT3의 기본 애니메이션 종료 시점을 따릅니다. 누른 시간이 달라도 R1을 다시 누를 필요가 없습니다.
+- 네 종류의 메뉴에 100ms 페이드인과 80ms 페이드아웃을 적용하며 입력 대기 시간은 추가하지 않습니다. Linux에서는 변경되거나 애니메이션 중인 프레임을 즉시 표시합니다.
+
+[CHANGELOG](../../CHANGELOG.md)
+
 ## 다운로드 및 시연
 
-[**Windows x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-1.0-Beta-Windows.zip) · [**Linux x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-1.0-Beta-Linux-x64.zip) · [**1.0 Beta**](https://github.com/vini2227/BT3-SparkingControls/releases/tag/v1.0-beta)
+[**Windows x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.3-beta/BT3-SparkingControls-1.0.3-Beta-Windows.zip) · [**Linux x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.3-beta/BT3-SparkingControls-1.0.3-Beta-Linux-x64.zip) · [**1.0.3 Beta**](https://github.com/vini2227/BT3-SparkingControls/releases/tag/v1.0.3-beta)
 
-[▶ Gameplay demo — MP4, 167 MiB](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-1.0-Beta-Gameplay-Demo.mp4) · [TXT](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-Controls-and-Setup-Guide.txt) · [SHA256](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/SHA256SUMS.txt)
+[▶ Gameplay demo (recorded for 1.0 Beta) — MP4, 167 MiB](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-1.0-Beta-Gameplay-Demo.mp4) · [TXT](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.3-beta/BT3-SparkingControls-Controls-and-Setup-Guide.txt) · [SHA256](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.3-beta/SHA256SUMS.txt)
 
 ## 설치
 
@@ -52,6 +60,8 @@ bash start.sh --check /path/to/Tenkaichi3Decomp
 | `R2` | 기 모으기 |
 | `L1` | 상승 |
 | `L2` | 하강 |
+| `R2 + L1` | 위쪽 수직 Z Dash |
+| `R2 + L2` | 아래쪽 수직 Z Dash |
 | `R1` | 지원되는 자신의 콤보 이외의 가드 |
 | `R2 + □` | 슈퍼 공격 1 |
 | `R2 + △` | 슈퍼 공격 2 |
@@ -85,7 +95,7 @@ R2를 눌러 기술, 조작과 비용을 확인합니다. **Centered**는 중앙
 
 ## 호환성, 온라인 및 검증
 
-네트워크 샘플링 전에 로컬 18바이트 패킷을 변환하여 상대에게 BT3 기본 입력을 보냅니다. 원격 입력이나 전투 판단 함수는 수정하지 않습니다. 심볼, 전체 함수 61개와 참조로 호환되는 주소 변경을 검증하며 구조 변경이나 심볼 누락은 업데이트가 필요할 수 있습니다. Linux v0.1.37과 v0.1.38.1 호환 검증을 통과했지만 모든 버전을 보장하지는 않습니다. 단순 매핑에 sleep은 추가하지 않습니다. 잡기/R3는 단계마다 2개 샘플이며 60Hz에서 두 번째 누름은 약 33ms 뒤입니다. 카드는 원래 타이밍/확인을 따르고 사거리, 허용 시간과 롤백도 영향을 줍니다. Windows 패킷/ABI 480,183개, 각 Linux 버전 패킷 160,061개 및 로더 에뮬레이션 9개, 각 프런트엔드 런처 2,250개, 단축키 93개, 배치 693개 및 미리보기 12개 상태를 통과했습니다. Linux UI는 Windows .NET에서 검사했으며 Mono/X11 검사는 아닙니다. 실제 Linux, 물리 컨트롤러와 실제 온라인/롤백은 미검증이며 디싱크 방지를 보장하지 않습니다.
+네트워크 샘플링 전에 로컬 18바이트 패킷을 변환하여 상대에게 BT3 기본 입력을 보냅니다. 원격 입력이나 전투 판단 함수는 수정하지 않습니다. 심볼, 전체 함수 61개와 참조로 호환되는 주소 변경을 검증하며 구조 변경이나 심볼 누락은 업데이트가 필요할 수 있습니다. Linux v0.1.37과 v0.1.38.1 호환 검증을 통과했지만 모든 버전을 보장하지는 않습니다. 단순 매핑에 sleep은 추가하지 않습니다. 잡기/R3는 단계마다 2개 샘플이며 60Hz에서 두 번째 누름은 약 33ms 뒤입니다. 카드는 원래 타이밍/확인을 따르고 사거리, 허용 시간과 롤백도 영향을 줍니다. Windows 패킷/ABI 1,337,289개, 각 Linux 버전 패킷 445,763개 및 로더 에뮬레이션 9개, 각 프런트엔드 런처 2,250개, 단축키 93개, 배치 693개 및 미리보기 12개 상태를 통과했습니다. Linux UI는 Windows .NET에서 검사했으며 Mono/X11 검사는 아닙니다. 실제 Linux, 물리 컨트롤러와 실제 온라인/롤백은 미검증이며 디싱크 방지를 보장하지 않습니다.
 
 ## 소스 및 라이선스
 

@@ -8,17 +8,25 @@
 
 ---
 
-# BT3 Sparking Controls — 1.0 Beta
+# BT3 Sparking Controls — 1.0.3 Beta
 
 ## 操作与安装指南
 
 为 Tenkaichi3Decomp 提供受 Sparking! ZERO 启发的操作布局和战斗 HUD。动画、伤害、气力消耗、距离、角色能力和动作窗口仍遵循 BT3。安装包不包含游戏或其资源。
 
+## 1.0.3 Beta 版本更新
+
+- 按住 R2 + L1 快速上升，或 R2 + L2 快速下降。单独按 L1/L2 仍为普通移动；旧的双击快捷操作已禁用。快速第二次按键可能需要等待游戏原有的七帧双击窗口结束。
+- 持续按住 R1 时松开 ○，辅助程序会请求退出反击架势并恢复防御，仍遵守 BT3 动画原有的退出时机。支持不同的按住时长，无需再次按 R1。
+- 四种菜单以 100 毫秒淡入、80 毫秒淡出，不增加输入等待。Linux 会立即显示发生变化或播放动画的画面。
+
+[CHANGELOG](../../CHANGELOG.md)
+
 ## 下载与演示
 
-[**Windows x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-1.0-Beta-Windows.zip) · [**Linux x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-1.0-Beta-Linux-x64.zip) · [**1.0 Beta**](https://github.com/vini2227/BT3-SparkingControls/releases/tag/v1.0-beta)
+[**Windows x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.3-beta/BT3-SparkingControls-1.0.3-Beta-Windows.zip) · [**Linux x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.3-beta/BT3-SparkingControls-1.0.3-Beta-Linux-x64.zip) · [**1.0.3 Beta**](https://github.com/vini2227/BT3-SparkingControls/releases/tag/v1.0.3-beta)
 
-[▶ Gameplay demo — MP4, 167 MiB](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-1.0-Beta-Gameplay-Demo.mp4) · [TXT](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-Controls-and-Setup-Guide.txt) · [SHA256](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/SHA256SUMS.txt)
+[▶ Gameplay demo (recorded for 1.0 Beta) — MP4, 167 MiB](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-1.0-Beta-Gameplay-Demo.mp4) · [TXT](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.3-beta/BT3-SparkingControls-Controls-and-Setup-Guide.txt) · [SHA256](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.3-beta/SHA256SUMS.txt)
 
 ## 安装
 
@@ -52,6 +60,8 @@ bash start.sh --check /path/to/Tenkaichi3Decomp
 | `R2` | 蓄气 |
 | `L1` | 上升 |
 | `L2` | 下降 |
+| `R2 + L1` | 向上垂直 Z Dash |
+| `R2 + L2` | 向下垂直 Z Dash |
 | `R1` | 自身受支持连段之外的防御 |
 | `R2 + □` | 超级攻击 1 |
 | `R2 + △` | 超级攻击 2 |
@@ -85,7 +95,7 @@ bash start.sh --check /path/to/Tenkaichi3Decomp
 
 ## 兼容性、联机与测试
 
-辅助程序在网络采样前转换本地 18 字节控制器数据包，对手收到的是 BT3 原生输入，不修改远程输入或战斗决策函数。通过符号、61 个完整函数和引用检查兼容地址变更；结构变化或缺失符号仍可能需要更新。Linux v0.1.37 与 v0.1.38.1 已通过兼容检查，不保证支持每个旧版或新版。简单映射不额外加入 sleep；抓投和 R3 使用每阶段两个采样，60 Hz 时第二次按下约晚 33 毫秒。卡片遵循原生时序／确认，距离、动作窗口和 rollback 仍影响结果。已通过：Windows 480,183 项数据包／ABI 检查；每个 Linux 版本 160,061 项数据包和 9 项模拟加载器检查；每个前端 2,250 项启动器、93 项快捷键、693 项布局检查和 12 个预览状态。Linux 界面在 Windows .NET 而非 Mono/X11 下测试。尚未验证实际 Linux 运行、实体手柄和真实联机／rollback，不保证完全没有失步。
+辅助程序在网络采样前转换本地 18 字节控制器数据包，对手收到的是 BT3 原生输入，不修改远程输入或战斗决策函数。通过符号、61 个完整函数和引用检查兼容地址变更；结构变化或缺失符号仍可能需要更新。Linux v0.1.37 与 v0.1.38.1 已通过兼容检查，不保证支持每个旧版或新版。简单映射不额外加入 sleep；抓投和 R3 使用每阶段两个采样，60 Hz 时第二次按下约晚 33 毫秒。卡片遵循原生时序／确认，距离、动作窗口和 rollback 仍影响结果。已通过：Windows 1,337,289 项数据包／ABI 检查；每个 Linux 版本 445,763 项数据包和 9 项模拟加载器检查；每个前端 2,250 项启动器、93 项快捷键、693 项布局检查和 12 个预览状态。Linux 界面在 Windows .NET 而非 Mono/X11 下测试。尚未验证实际 Linux 运行、实体手柄和真实联机／rollback，不保证完全没有失步。
 
 ## 源码与许可
 

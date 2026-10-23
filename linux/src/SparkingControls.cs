@@ -1,4 +1,4 @@
-﻿// Standalone add-on. Build with the Windows .NET Framework C# compiler (x64).
+// Standalone add-on. Build with the Windows .NET Framework C# compiler (x64).
 // The game is never edited on disk. Only our own suspended child is patched.
 using System;
 using System.IO;
@@ -404,12 +404,44 @@ static class HudLayout {
     }
 }
 
+// Purely visual, monotonic-time transition; no input reads, waits or game writes.
+sealed class HudMenuFade : IDisposable {
+    public const double InSeconds=.100,OutSeconds=.080;
+    public float Opacity {get;private set;}
+    public bool Target {get;private set;}
+    public Bitmap Image {get;private set;}
+    public Rectangle Bounds {get;private set;}
+    double last=-1;
+    public bool Update(bool visible,double now){
+        double dt=last<0?0:Math.Max(0,now-last);last=now;Target=visible;
+        float before=Opacity;
+        Opacity=(float)(visible?Math.Min(1,Opacity+dt/InSeconds):Math.Max(0,Opacity-dt/OutSeconds));
+        if(Opacity<.0001f)Opacity=0;else if(Opacity>.9999f)Opacity=1;
+        if(!visible&&Opacity==0)DiscardImage();
+        return before!=Opacity;
+    }
+    public void Cache(Bitmap image,Rectangle bounds){DiscardImage();Image=image;Bounds=bounds;}
+    void DiscardImage(){if(Image!=null){Image.Dispose();Image=null;}Bounds=Rectangle.Empty;}
+    public void Draw(Graphics g){
+        if(Image==null||Opacity<=0)return;
+        if(Opacity>=1){g.DrawImageUnscaled(Image,Bounds.Location);return;}
+        using(var attributes=new System.Drawing.Imaging.ImageAttributes()){
+            var matrix=new System.Drawing.Imaging.ColorMatrix();matrix.Matrix33=Opacity;attributes.SetColorMatrix(matrix);
+            g.DrawImage(Image,Bounds,0,0,Image.Width,Image.Height,GraphicsUnit.Pixel,attributes);
+        }
+    }
+    public void Reset(){Opacity=0;Target=false;last=-1;DiscardImage();}
+    public void Dispose(){Reset();}
+}
+
 sealed class Overlay : Form {
     Process game; Reader reader; readonly Timer timer;
     readonly PrivateFontCollection battleFonts=new PrivateFontCollection();
     readonly FontFamily battleFamily; readonly FontFamily menuFamily;
     readonly PrivateFontCollection menuFonts=new PrivateFontCollection();
     readonly GameMenuSkin menuSkin; readonly NativeMenuMetrics menuMetrics; Bitmap alphaCanvas;string lastVisualKey;
+    Bitmap menuScratch;bool updateMenuSnapshots;
+    readonly HudMenuFade[] attackFades={new HudMenuFade(),new HudMenuFade()},cardFades={new HudMenuFade(),new HudMenuFade()};
     DateTime nextPresentation=DateTime.MinValue,nextPreferenceRead=DateTime.MinValue,nextHudError=DateTime.MinValue,nextHudNotice=DateTime.MinValue;string lastHudNotice;
     readonly GameButtonIcons buttonIcons; readonly TransformationArt transformationArt;
     TransformationPanel[] transformations=new TransformationPanel[0];
@@ -479,10 +511,9 @@ sealed class Overlay : Form {
     }
     void PresentCachedHud(){
         // Reassert the no-activation overlay after full-screen/monitor transitions.
-        if(DateTime.UtcNow>=nextPresentation)
         AlphaHud.Present(this,alphaCanvas);nextPresentation=DateTime.UtcNow.AddSeconds(1);
     }
-    void Clear() { if(rows[0]!=null || rows[1]!=null || prompts.Length>0 || transformations.Length>0) { rows=new MoveRow[2][];prompts=new TechniquePrompt[0];transformations=new TransformationPanel[0];if(preview)Invalidate();else PresentAlphaHud(); } }
+    void Clear() { if(rows[0]!=null || rows[1]!=null || prompts.Length>0 || transformations.Length>0 || attackFades.Any(f=>f.Opacity>0)||cardFades.Any(f=>f.Opacity>0)) { rows=new MoveRow[2][];prompts=new TechniquePrompt[0];transformations=new TransformationPanel[0];ResetMenuFades();lastVisualKey=null;if(preview)Invalidate();else PresentAlphaHud(); } }
     protected override void OnPaint(PaintEventArgs e) {
         if(!preview)return;
         base.OnPaint(e); Graphics g=e.Graphics;g.SmoothingMode=SmoothingMode.AntiAlias;
@@ -497,9 +528,42 @@ sealed class Overlay : Form {
         g.SmoothingMode=SmoothingMode.AntiAlias;g.InterpolationMode=InterpolationMode.HighQualityBicubic;
         foreach(var prompt in prompts)prompt.Draw(g,ClientSize,buttonIcons);
         // The established move panel is drawn LAST and always stays above prompt covers.
-        if(HudPreferences.ShowAttacks)for(int side=0;side<2;side++) if(rows[side]!=null) DrawPanel(g,side,rows[side]);
-        foreach(var panel in transformations)DrawTransformations(g,panel);
+        if(preview){
+            if(HudPreferences.ShowAttacks)for(int side=0;side<2;side++)if(rows[side]!=null)DrawPanel(g,side,rows[side]);
+            foreach(var panel in transformations)DrawTransformations(g,panel);
+        }else DrawAnimatedMenus(g);
         if(!preview&&DateTime.UtcNow<layoutNoticeUntil)DrawLayoutNotice(g);
+    }
+    bool UpdateMenuFades(double now){
+        bool changed=false;
+        for(int side=0;side<2;side++){
+            changed|=attackFades[side].Update(HudPreferences.ShowAttacks&&rows[side]!=null,now);
+            changed|=cardFades[side].Update(transformations.Any(p=>p.DisplaySide==side),now);
+        }
+        return changed;
+    }
+    void ResetMenuFades(){foreach(var fade in attackFades)fade.Reset();foreach(var fade in cardFades)fade.Reset();}
+    void DrawAnimatedMenus(Graphics g){
+        for(int side=0;side<2;side++){
+            int index=side;
+            DrawFadedMenu(g,attackFades[side],rows[side]!=null?new Action<Graphics>(canvas=>DrawPanel(canvas,index,rows[index])):null,side);
+        }
+        for(int side=0;side<2;side++){
+            var panel=transformations.FirstOrDefault(p=>p.DisplaySide==side);
+            DrawFadedMenu(g,cardFades[side],panel!=null?new Action<Graphics>(canvas=>DrawTransformations(canvas,panel)):null,side);
+        }
+    }
+    void DrawFadedMenu(Graphics g,HudMenuFade fade,Action<Graphics> render,int side){
+        if(fade.Opacity<=0)return;
+        if(fade.Target&&render!=null&&(updateMenuSnapshots||fade.Image==null)){
+            if(menuScratch==null||menuScratch.Size!=ClientSize){if(menuScratch!=null)menuScratch.Dispose();menuScratch=new Bitmap(ClientSize.Width,ClientSize.Height,System.Drawing.Imaging.PixelFormat.Format32bppPArgb);}
+            using(var canvas=Graphics.FromImage(menuScratch)){
+                canvas.Clear(Color.Transparent);canvas.SmoothingMode=SmoothingMode.AntiAlias;canvas.InterpolationMode=InterpolationMode.HighQualityBicubic;render(canvas);
+            }
+            Rectangle box=Rectangle.Intersect(new Rectangle(Point.Empty,ClientSize),Rectangle.Inflate(Rectangle.Ceiling(panelBounds[side]),3,3));
+            if(box.Width>0&&box.Height>0)fade.Cache(menuScratch.Clone(box,System.Drawing.Imaging.PixelFormat.Format32bppPArgb),box);
+        }
+        fade.Draw(g);
     }
     void DrawLayoutNotice(Graphics g){
         string mode=UiLanguage.Text(PanelPlacement.Mode==PanelLayoutMode.Classic?"Clássica (4:3)":PanelPlacement.Mode==PanelLayoutMode.Expanded?"Expandida":"Centralizada");
@@ -511,7 +575,9 @@ sealed class Overlay : Form {
         foreach(var set in rows){key.Append('|');if(set!=null)foreach(var row in set)key.Append(row.Button).Append(row.Name).Append(row.Cost).Append(row.Available).Append(row.Selected);}
         foreach(var set in transformations){key.Append(set.Side).Append(set.OnlineLocal).Append(set.IsSwitch).Append(set.IsFusion).Append(set.HasFusion).Append(set.HasForms);foreach(var item in set.Options)key.Append(item.Character).Append(':').Append(item.Health).Append(':').Append(item.HealthMax).Append(':').Append(item.Cost).Append(':').Append(item.Available).Append(':').Append(transformationArt.Get(item.Character)!=null);}
         foreach(var prompt in prompts)key.Append(prompt.Button).Append(prompt.Project(ClientSize).ToString());
-        string state=key.ToString();if(state==lastVisualKey){if(alphaCanvas!=null&&DateTime.UtcNow>=nextPresentation)PresentCachedHud();return;}
+        string state=key.ToString();updateMenuSnapshots=state!=lastVisualKey;
+        bool fading=UpdateMenuFades((double)Stopwatch.GetTimestamp()/Stopwatch.Frequency);
+        if(!updateMenuSnapshots&&!fading){if(alphaCanvas!=null&&DateTime.UtcNow>=nextPresentation)PresentCachedHud();return;}
         if(alphaCanvas==null || alphaCanvas.Size!=ClientSize){if(alphaCanvas!=null)alphaCanvas.Dispose();alphaCanvas=new Bitmap(ClientSize.Width,ClientSize.Height,System.Drawing.Imaging.PixelFormat.Format32bppPArgb);}
         using(var g=Graphics.FromImage(alphaCanvas)){g.Clear(Color.Transparent);DrawScene(g);}
         PresentCachedHud();lastVisualKey=state;
@@ -668,7 +734,7 @@ sealed class Overlay : Form {
             if(crop.Width>0 && crop.Height>0)using(var detail=bitmap.Clone(crop,bitmap.PixelFormat))detail.Save(path);
         }
     }
-    protected override void Dispose(bool disposing) { if(disposing) { timer.Dispose();if(!preview)LinuxDesktop.Close();buttonIcons.Dispose();menuSkin.Dispose();transformationArt.Dispose();battleFonts.Dispose();menuFonts.Dispose();if(alphaCanvas!=null)alphaCanvas.Dispose(); }base.Dispose(disposing); }
+    protected override void Dispose(bool disposing) { if(disposing) { timer.Dispose();if(!preview)LinuxDesktop.Close();buttonIcons.Dispose();menuSkin.Dispose();transformationArt.Dispose();battleFonts.Dispose();menuFonts.Dispose();if(alphaCanvas!=null)alphaCanvas.Dispose();if(menuScratch!=null)menuScratch.Dispose();ResetMenuFades(); }base.Dispose(disposing); }
 }
 
 static class LauncherTheme {

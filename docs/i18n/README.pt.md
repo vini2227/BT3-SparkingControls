@@ -8,17 +8,25 @@
 
 ---
 
-# BT3 Sparking Controls — 1.0 Beta
+# BT3 Sparking Controls — 1.0.3 Beta
 
 ## Controles e guia de instalação
 
 Um layout de controles e HUD inspirado em Sparking! ZERO para Tenkaichi3Decomp. As animações, dano, custos de Ki, alcance, habilidades e janelas de ação continuam sendo os do BT3. O jogo e seus recursos não estão incluídos.
 
+## Novidades da versão 1.0.3 Beta
+
+- Segure R2 + L1 para subir rapidamente ou R2 + L2 para descer. L1/L2 sozinhos mantêm a movimentação normal; o atalho antigo de dois toques foi desativado. Uma segunda pressão rápida pode aguardar a janela nativa de sete quadros.
+- Ao soltar ○ mantendo R1, o auxiliar solicita a saída da postura de contra-ataque e retoma a defesa, respeitando a janela de saída da animação do BT3. Funciona com durações variadas, sem precisar apertar R1 novamente.
+- Os quatro menus têm fade de entrada de 100 ms e saída de 80 ms, sem espera adicional nos comandos. No Linux, quadros alterados ou animados são apresentados imediatamente.
+
+[CHANGELOG](../../CHANGELOG.md)
+
 ## Downloads e demonstração
 
-[**Windows x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-1.0-Beta-Windows.zip) · [**Linux x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-1.0-Beta-Linux-x64.zip) · [**1.0 Beta**](https://github.com/vini2227/BT3-SparkingControls/releases/tag/v1.0-beta)
+[**Windows x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.3-beta/BT3-SparkingControls-1.0.3-Beta-Windows.zip) · [**Linux x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.3-beta/BT3-SparkingControls-1.0.3-Beta-Linux-x64.zip) · [**1.0.3 Beta**](https://github.com/vini2227/BT3-SparkingControls/releases/tag/v1.0.3-beta)
 
-[▶ Gameplay demo — MP4, 167 MiB](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-1.0-Beta-Gameplay-Demo.mp4) · [TXT](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-Controls-and-Setup-Guide.txt) · [SHA256](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/SHA256SUMS.txt)
+[▶ Gameplay demo (recorded for 1.0 Beta) — MP4, 167 MiB](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-1.0-Beta-Gameplay-Demo.mp4) · [TXT](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.3-beta/BT3-SparkingControls-Controls-and-Setup-Guide.txt) · [SHA256](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.3-beta/SHA256SUMS.txt)
 
 ## Instalação
 
@@ -52,6 +60,8 @@ bash start.sh --check /path/to/Tenkaichi3Decomp
 | `R2` | Carregar Ki |
 | `L1` | Subir |
 | `L2` | Descer |
+| `R2 + L1` | Z Dash vertical para cima |
+| `R2 + L2` | Z Dash vertical para baixo |
 | `R1` | Defender fora dos próprios combos compatíveis |
 | `R2 + □` | Superataque 1 |
 | `R2 + △` | Superataque 2 |
@@ -85,7 +95,7 @@ Mantenha R2 para ver ataques, comandos e custos. **Centered / Centralizada** equ
 
 ## Compatibilidade, online e testes
 
-O auxiliar traduz o pacote local de controle de 18 bytes antes da amostragem de rede; o outro jogador recebe comandos nativos. Não altera os comandos remotos nem funções decisórias do combate. Alterações compatíveis de endereço são resolvidas com símbolos e 61 funções completas/referências revisadas; mudanças estruturais ou símbolos ausentes ainda podem exigir atualização. Linux v0.1.37 e v0.1.38.1 passaram na verificação de compatibilidade; não há garantia para toda versão antiga ou futura. Remapeamentos simples não adicionam sleeps; agarrão e R3 usam fases de dois samples, cerca de 33 ms até o segundo toque a 60 Hz. Seleções dos painéis seguem timing e confirmação nativos; alcance, janela e rollback continuam influenciando. Passaram 480.183 verificações de pacotes/ABI no Windows; 160.061 de pacotes e 9 de loader emulado para CADA uma das duas versões Linux; 2.250 de launcher, 93 de atalhos, 693 de layout por frontend e 12 estados da prévia. A interface Linux foi testada em .NET no Windows, não em Mono/X11. Linux nativo, controle físico, partidas e rollback online reais ainda não foram verificados nesta beta. Não há garantia universal contra desync.
+O auxiliar traduz o pacote local de controle de 18 bytes antes da amostragem de rede; o outro jogador recebe comandos nativos. Não altera os comandos remotos nem funções decisórias do combate. Alterações compatíveis de endereço são resolvidas com símbolos e 61 funções completas/referências revisadas; mudanças estruturais ou símbolos ausentes ainda podem exigir atualização. Linux v0.1.37 e v0.1.38.1 passaram na verificação de compatibilidade; não há garantia para toda versão antiga ou futura. Remapeamentos simples não adicionam sleeps; agarrão e R3 usam fases de dois samples, cerca de 33 ms até o segundo toque a 60 Hz. Seleções dos painéis seguem timing e confirmação nativos; alcance, janela e rollback continuam influenciando. Passaram 1.337.289 verificações de pacotes/ABI no Windows; 445.763 de pacotes e 9 de loader emulado para CADA uma das duas versões Linux; 2.250 de launcher, 93 de atalhos, 693 de layout por frontend e 12 estados da prévia. A interface Linux foi testada em .NET no Windows, não em Mono/X11. Linux nativo, controle físico, partidas e rollback online reais ainda não foram verificados nesta beta. Não há garantia universal contra desync.
 
 ## Código e licença
 

@@ -1,0 +1,9 @@
+{
+  "version": "1.0.3 Beta",
+  "windows_packet_checks": 1337289,
+  "linux_packet_checks_per_game": 445763,
+  "linux_loader_checks_per_game": 9,
+  "counter_handler_executed": true,
+  "hold_duration_and_delayed_acknowledgment_tested": true,
+  "live_gameplay_tested": false
+}

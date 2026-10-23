@@ -12,13 +12,31 @@
 
 # BT3 Sparking Controls
 
-**1.0 Beta — Controls and Setup Guide**
+**1.0.3 Beta — Controls and Setup Guide**
+
+## What changed in 1.0.3 Beta
+
+- Hold R2 + L1 for upward vertical Z Dash; R2 + L2 for downward vertical
+  Z Dash. L1/L2 alone still ascend/descend normally. Their original double-tap
+  fast-movement route is disabled. A rapid second ordinary press may wait for
+  BT3's seven-frame double-tap window to expire before normal movement resumes.
+- Release Circle while continuing to hold R1 to request exit from the counter
+  stance and resume guard without another R1 press. Short and long holds work;
+  the helper waits for the game's actual exit rather than a fixed release pulse.
+  It still respects BT3's native animation exit window, without forced cancels.
+- Attack, transformation, fusion and switching menus now fade in over 100 ms
+  and out over 80 ms. Quick reopening reverses the fade smoothly. This is a
+  visual effect only; it adds no input wait. Loss of focus clears immediately.
+- Linux HUD presentation updates changed/animated frames immediately.
+- Current tests and all 16 language guides were updated. Settings are preserved.
+
+[Full changelog](CHANGELOG.md)
 
 ## Downloads and demonstration
 
-[**Windows x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-1.0-Beta-Windows.zip) · [**Linux x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-1.0-Beta-Linux-x64.zip) · [**1.0 Beta**](https://github.com/vini2227/BT3-SparkingControls/releases/tag/v1.0-beta)
+[**Windows x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.3-beta/BT3-SparkingControls-1.0.3-Beta-Windows.zip) · [**Linux x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.3-beta/BT3-SparkingControls-1.0.3-Beta-Linux-x64.zip) · [**1.0.3 Beta**](https://github.com/vini2227/BT3-SparkingControls/releases/tag/v1.0.3-beta)
 
-[▶ Gameplay demo — MP4, 167 MiB](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-1.0-Beta-Gameplay-Demo.mp4) · [TXT](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-Controls-and-Setup-Guide.txt) · [SHA256](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/SHA256SUMS.txt)
+[▶ Gameplay demo (recorded for 1.0 Beta) — MP4, 167 MiB](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-1.0-Beta-Gameplay-Demo.mp4) · [TXT](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.3-beta/BT3-SparkingControls-Controls-and-Setup-Guide.txt) · [SHA256](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.3-beta/SHA256SUMS.txt)
 
 ## About
 
@@ -26,7 +44,7 @@ A Sparking! ZERO-inspired control layout and battle HUD for Tenkaichi3Decomp. BT
 
 ## Windows installation
 
-1. Extract BT3-SparkingControls-1.0-Beta-Windows.zip.
+1. Extract BT3-SparkingControls-1.0.3-Beta-Windows.zip.
 2. Run BT3-SparkingControls.exe.
 3. Click Browse and select Tenkaichi3Decomp.exe in your game installation.
 4. Choose your language, panel placement and HUD preferences.
@@ -38,7 +56,7 @@ Settings are saved in: %LOCALAPPDATA%\BT3-SparkingControls Updating the helper d
 
 ## Linux installation — native Linux game
 
-1. Extract BT3-SparkingControls-1.0-Beta-Linux-x64.zip.
+1. Extract BT3-SparkingControls-1.0.3-Beta-Linux-x64.zip.
 2. Keep the entire extracted folder together, including the managed EXE,
    libbt3sparking.so, profiles, compatibility files and assets.
 3. Install Mono with Windows Forms and System.Web.Extensions support,
@@ -66,6 +84,8 @@ Official Linux v0.1.37 and v0.1.38.1 executables passed compatibility checks. Re
 - R2: Charge Ki.
 - L1: Ascend.
 - L2: Descend.
+- R2 + L1: Vertical Z Dash upward (hold).
+- R2 + L2: Vertical Z Dash downward (hold).
 - R1: Guard outside your own supported attack combos.
 - L3: BT3's original search/lock-on action.
 - Select / View: Change camera.
@@ -88,7 +108,7 @@ When the game requests a boost input, use Square together with the requested dir
 
 ## Counters, vanishes and grabs
 
-Circle: Requests BT3's native counter stance, inspired by ZERO's Perception. During supported Rush/Ki combos, it takes priority over held attack buttons. It does not add ZERO's full Perception or Super Perception systems.
+Circle: Requests BT3's native counter stance, inspired by ZERO's Perception. During supported Rush/Ki combos, it takes priority over held attack buttons. It does not add ZERO's full Perception or Super Perception systems. Release Circle while retaining R1 to request the end of the counter stance and return to guard, without another R1 press. This waits for BT3's actual stance exit and respects the native animation window, for short or long holds.
 
 R1 during your own supported combos: Requests BT3's native forward vanish. It may move forward slightly. It is not a stationary teleport and does not guarantee appearing behind the opponent.
 
@@ -118,13 +138,11 @@ All three menus use consistent card positions. Switching cards show reserve heal
 
 Hold R2: Display the active character's attack list, commands and costs. Available HD game button artwork is preferred; original assets are the fallback. No game artwork or HD texture pack is bundled.
 
-Panel placement options:
-
-- **Centered:** A balance between the center and edges.
-- **Expanded:** More space between the panels.
-- **Classic (4:3):** Original positioning within a 4:3 region.
+Panel placement options: - Centered: A balance between the center and edges. - Expanded: More space between the panels. - Classic (4:3): Original positioning within a 4:3 region.
 
 Native 4:3 positioning is preserved. Ultrawide layouts use safe regions rather than putting controls at the extreme screen edges.
+
+All four battle menus fade in over 100 ms and out over 80 ms. Closing retains only the last visual snapshot until it becomes transparent. Reopening reverses smoothly. No command waits for the fade. Losing game focus clears immediately.
 
 Show attack panel: Enable or hide the attack list. Attack panel outer frame: Optional; off by default for fresh settings. Existing saved choices are preserved during updates.
 
@@ -148,7 +166,7 @@ Compatible game address changes can be resolved automatically from symbols and r
 
 Simple remaps do not add sleeps. Multi-step shortcuts require several native input samples. Grab and emergency sequences use two-sample press/release phases; the second press is about 33 ms later at 60 Hz. Range, native timing windows and rollback still affect whether the game accepts a command. Panel selections also follow native timing and acknowledgment.
 
-Automated validation passed: 480,183 Windows packet/ABI/native-command checks; 160,061 Linux packet checks and 9 emulated loader checks for EACH of two game versions; 2,250 launcher, 93 shortcut and 693 responsive checks per frontend, plus preview-state checks. Linux managed UI tests ran under Windows .NET.
+Automated validation passed: 1,337,289 Windows packet/ABI/native-command checks; 445,763 Linux packet checks and 9 emulated loader checks for EACH of two game versions; 2,250 launcher, 93 shortcut and 693 responsive checks per frontend, plus 180 fade checks per frontend and 12 preview states. Counter regressions execute the actual compiled counter handler with varied Circle hold durations, animation timing and delayed acknowledgment. Linux managed UI tests ran under Windows .NET. Linux presentation now updates changed/animated frames immediately.
 
 These tests do not establish real-world online behavior. Live online matches, actual ping/rollback, physical-controller timing and native Linux gameplay remain unverified for this beta. Desync-free operation is not guaranteed.
 

@@ -8,17 +8,25 @@
 
 ---
 
-# BT3 Sparking Controls — 1.0 Beta
+# BT3 Sparking Controls — 1.0.3 Beta
 
 ## Panduan kontrol dan pemasangan
 
 Tata letak kontrol dan HUD pertarungan terinspirasi Sparking! ZERO untuk Tenkaichi3Decomp. Animasi, kerusakan, biaya Ki, jangkauan, kemampuan dan jendela aksi BT3 tetap berlaku. Gim dan asetnya tidak disertakan.
 
+## Perubahan versi 1.0.3 Beta
+
+- Tahan R2 + L1 untuk naik cepat atau R2 + L2 untuk turun. L1/L2 saja tetap bergerak normal; pintasan ketuk ganda lama dinonaktifkan. Tekanan kedua yang cepat dapat menunggu jendela asli tujuh frame berakhir.
+- Melepas ○ sambil menahan R1 meminta keluar dari posisi serangan balik dan kembali bertahan sesuai jendela keluar animasi BT3. Durasi tahan bervariasi didukung tanpa menekan ulang R1.
+- Keempat menu memudar masuk selama 100 ms dan keluar selama 80 ms tanpa waktu tunggu input tambahan. Di Linux, frame yang berubah atau beranimasi langsung ditampilkan.
+
+[CHANGELOG](../../CHANGELOG.md)
+
 ## Unduhan dan demonstrasi
 
-[**Windows x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-1.0-Beta-Windows.zip) · [**Linux x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-1.0-Beta-Linux-x64.zip) · [**1.0 Beta**](https://github.com/vini2227/BT3-SparkingControls/releases/tag/v1.0-beta)
+[**Windows x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.3-beta/BT3-SparkingControls-1.0.3-Beta-Windows.zip) · [**Linux x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.3-beta/BT3-SparkingControls-1.0.3-Beta-Linux-x64.zip) · [**1.0.3 Beta**](https://github.com/vini2227/BT3-SparkingControls/releases/tag/v1.0.3-beta)
 
-[▶ Gameplay demo — MP4, 167 MiB](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-1.0-Beta-Gameplay-Demo.mp4) · [TXT](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-Controls-and-Setup-Guide.txt) · [SHA256](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/SHA256SUMS.txt)
+[▶ Gameplay demo (recorded for 1.0 Beta) — MP4, 167 MiB](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-1.0-Beta-Gameplay-Demo.mp4) · [TXT](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.3-beta/BT3-SparkingControls-Controls-and-Setup-Guide.txt) · [SHA256](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.3-beta/SHA256SUMS.txt)
 
 ## Pemasangan
 
@@ -52,6 +60,8 @@ bash start.sh --check /path/to/Tenkaichi3Decomp
 | `R2` | Mengisi Ki |
 | `L1` | Naik |
 | `L2` | Turun |
+| `R2 + L1` | Z Dash vertikal ke atas |
+| `R2 + L2` | Z Dash vertikal ke bawah |
 | `R1` | Bertahan di luar kombo sendiri yang didukung |
 | `R2 + □` | Serangan super 1 |
 | `R2 + △` | Serangan super 2 |
@@ -85,7 +95,7 @@ Tahan R2 untuk daftar serangan, perintah dan biaya. **Centered** menyeimbangkan 
 
 ## Kompatibilitas, daring dan pengujian
 
-Menerjemahkan paket kontrol lokal 18 byte sebelum pengambilan sampel jaringan; lawan menerima input native. Input jarak jauh dan fungsi keputusan tempur tidak diubah. Simbol, 61 fungsi lengkap dan referensinya memverifikasi perubahan alamat yang kompatibel; perubahan struktur atau simbol hilang mungkin memerlukan pembaruan. Linux v0.1.37 dan v0.1.38.1 lolos, tanpa jaminan semua versi. Remap sederhana tanpa sleep tambahan. Cengkeraman/R3 memakai fase dua sampel; tekan kedua sekitar 33 ms kemudian pada 60 Hz. Kartu mengikuti waktu/konfirmasi native; jangkauan, jendela dan rollback tetap berpengaruh. Lolos: 480.183 pemeriksaan paket/ABI Windows; 160.061 paket dan 9 loader emulasi untuk MASING-MASING versi Linux; 2.250 peluncur, 93 pintasan, 693 tata letak per frontend dan 12 keadaan pratinjau. UI Linux diuji dengan .NET pada Windows, bukan Mono/X11. Runtime Linux, kontrol fisik dan pertandingan/rollback daring nyata belum diverifikasi. Tidak ada jaminan universal bebas desync.
+Menerjemahkan paket kontrol lokal 18 byte sebelum pengambilan sampel jaringan; lawan menerima input native. Input jarak jauh dan fungsi keputusan tempur tidak diubah. Simbol, 61 fungsi lengkap dan referensinya memverifikasi perubahan alamat yang kompatibel; perubahan struktur atau simbol hilang mungkin memerlukan pembaruan. Linux v0.1.37 dan v0.1.38.1 lolos, tanpa jaminan semua versi. Remap sederhana tanpa sleep tambahan. Cengkeraman/R3 memakai fase dua sampel; tekan kedua sekitar 33 ms kemudian pada 60 Hz. Kartu mengikuti waktu/konfirmasi native; jangkauan, jendela dan rollback tetap berpengaruh. Lolos: 1.337.289 pemeriksaan paket/ABI Windows; 445.763 paket dan 9 loader emulasi untuk MASING-MASING versi Linux; 2.250 peluncur, 93 pintasan, 693 tata letak per frontend dan 12 keadaan pratinjau. UI Linux diuji dengan .NET pada Windows, bukan Mono/X11. Runtime Linux, kontrol fisik dan pertandingan/rollback daring nyata belum diverifikasi. Tidak ada jaminan universal bebas desync.
 
 ## Sumber dan lisensi
 

@@ -8,17 +8,25 @@
 
 ---
 
-# BT3 Sparking Controls — 1.0 Beta
+# BT3 Sparking Controls — 1.0.3 Beta
 
 ## คู่มือการควบคุมและการติดตั้ง
 
 รูปแบบการควบคุมและ HUD ต่อสู้ที่ได้แรงบันดาลใจจาก Sparking! ZERO สำหรับ Tenkaichi3Decomp แอนิเมชัน ความเสียหาย ค่า Ki ระยะ ความสามารถ และช่วงเวลาที่ทำท่าได้ยังเป็นกฎของ BT3 ไม่รวมตัวเกมหรือทรัพยากรของเกม
 
+## สิ่งที่เปลี่ยนแปลงในรุ่น 1.0.3 Beta
+
+- กด R2 + L1 ค้างเพื่อขึ้นอย่างรวดเร็ว หรือ R2 + L2 เพื่อลง การกด L1/L2 อย่างเดียวยังคงเคลื่อนที่ตามปกติ และปิดทางลัดแบบกดสองครั้งเดิมแล้ว การกดครั้งที่สองอย่างรวดเร็วอาจต้องรอให้ช่วงรับคำสั่งเดิมเจ็ดเฟรมสิ้นสุดก่อน
+- เมื่อปล่อย ○ ขณะกด R1 ค้าง ตัวช่วยจะขอออกจากท่าสวนกลับและกลับไปป้องกันตามจังหวะออกจากแอนิเมชันเดิมของ BT3 รองรับการกดค้างนานต่างกันโดยไม่ต้องกด R1 ใหม่
+- เมนูทั้งสี่ค่อย ๆ ปรากฏใน 100 มิลลิวินาทีและหายไปใน 80 มิลลิวินาที โดยไม่เพิ่มเวลารออินพุต บน Linux เฟรมที่เปลี่ยนแปลงหรือมีแอนิเมชันจะแสดงทันที
+
+[CHANGELOG](../../CHANGELOG.md)
+
 ## ดาวน์โหลดและวิดีโอสาธิต
 
-[**Windows x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-1.0-Beta-Windows.zip) · [**Linux x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-1.0-Beta-Linux-x64.zip) · [**1.0 Beta**](https://github.com/vini2227/BT3-SparkingControls/releases/tag/v1.0-beta)
+[**Windows x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.3-beta/BT3-SparkingControls-1.0.3-Beta-Windows.zip) · [**Linux x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.3-beta/BT3-SparkingControls-1.0.3-Beta-Linux-x64.zip) · [**1.0.3 Beta**](https://github.com/vini2227/BT3-SparkingControls/releases/tag/v1.0.3-beta)
 
-[▶ Gameplay demo — MP4, 167 MiB](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-1.0-Beta-Gameplay-Demo.mp4) · [TXT](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-Controls-and-Setup-Guide.txt) · [SHA256](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/SHA256SUMS.txt)
+[▶ Gameplay demo (recorded for 1.0 Beta) — MP4, 167 MiB](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-1.0-Beta-Gameplay-Demo.mp4) · [TXT](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.3-beta/BT3-SparkingControls-Controls-and-Setup-Guide.txt) · [SHA256](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.3-beta/SHA256SUMS.txt)
 
 ## การติดตั้ง
 
@@ -52,6 +60,8 @@ bash start.sh --check /path/to/Tenkaichi3Decomp
 | `R2` | ชาร์จ Ki |
 | `L1` | ลอยขึ้น |
 | `L2` | ลอยลง |
+| `R2 + L1` | Z Dash แนวตั้งขึ้น |
+| `R2 + L2` | Z Dash แนวตั้งลง |
 | `R1` | ป้องกันนอกคอมโบของตนที่รองรับ |
 | `R2 + □` | ท่าพิเศษ 1 |
 | `R2 + △` | ท่าพิเศษ 2 |
@@ -85,7 +95,7 @@ bash start.sh --check /path/to/Tenkaichi3Decomp
 
 ## ความเข้ากันได้ ออนไลน์ และการทดสอบ
 
-แปลงแพ็กเก็ตควบคุมท้องถิ่น 18 ไบต์ก่อนเก็บตัวอย่างเครือข่าย อีกฝ่ายได้รับอินพุต BT3 เดิม ไม่แก้ไขอินพุตระยะไกลหรือฟังก์ชันตัดสินการต่อสู้ ตรวจสัญลักษณ์ ฟังก์ชันเต็ม 61 รายการและการอ้างอิงเพื่อรับการเปลี่ยนที่อยู่ที่เข้ากันได้ การเปลี่ยนโครงสร้างหรือไม่มีสัญลักษณ์อาจต้องอัปเดต ตรวจผ่าน Linux v0.1.37 และ v0.1.38.1 แต่ไม่รับประกันทุกเวอร์ชัน การแมปธรรมดาไม่เพิ่ม sleep จับ/R3 ใช้สองตัวอย่างต่อช่วง การกดครั้งที่สองมาช้าประมาณ 33 ms ที่ 60 Hz การ์ดใช้จังหวะ/การยืนยันเดิม ระยะ ช่วงเวลาและ rollback ยังมีผล ผ่านการตรวจแพ็กเก็ต/ABI Windows 480,183 รายการ แพ็กเก็ต 160,061 และ loader จำลอง 9 รายการต่อเวอร์ชัน Linux รวมทั้ง launcher 2,250 คีย์ลัด 93 ผัง 693 ต่อ frontend และพรีวิว 12 สถานะ UI Linux ทดสอบบน Windows .NET ไม่ใช่ Mono/X11 ยังไม่ได้ยืนยัน Linux จริง จอยจริง หรือแมตช์/rollback ออนไลน์จริง จึงไม่รับประกันว่าจะไม่เกิด desync
+แปลงแพ็กเก็ตควบคุมท้องถิ่น 18 ไบต์ก่อนเก็บตัวอย่างเครือข่าย อีกฝ่ายได้รับอินพุต BT3 เดิม ไม่แก้ไขอินพุตระยะไกลหรือฟังก์ชันตัดสินการต่อสู้ ตรวจสัญลักษณ์ ฟังก์ชันเต็ม 61 รายการและการอ้างอิงเพื่อรับการเปลี่ยนที่อยู่ที่เข้ากันได้ การเปลี่ยนโครงสร้างหรือไม่มีสัญลักษณ์อาจต้องอัปเดต ตรวจผ่าน Linux v0.1.37 และ v0.1.38.1 แต่ไม่รับประกันทุกเวอร์ชัน การแมปธรรมดาไม่เพิ่ม sleep จับ/R3 ใช้สองตัวอย่างต่อช่วง การกดครั้งที่สองมาช้าประมาณ 33 ms ที่ 60 Hz การ์ดใช้จังหวะ/การยืนยันเดิม ระยะ ช่วงเวลาและ rollback ยังมีผล ผ่านการตรวจแพ็กเก็ต/ABI Windows 1,337,289 รายการ แพ็กเก็ต 445,763 และ loader จำลอง 9 รายการต่อเวอร์ชัน Linux รวมทั้ง launcher 2,250 คีย์ลัด 93 ผัง 693 ต่อ frontend และพรีวิว 12 สถานะ UI Linux ทดสอบบน Windows .NET ไม่ใช่ Mono/X11 ยังไม่ได้ยืนยัน Linux จริง จอยจริง หรือแมตช์/rollback ออนไลน์จริง จึงไม่รับประกันว่าจะไม่เกิด desync
 
 ## ซอร์สโค้ดและใบอนุญาต
 

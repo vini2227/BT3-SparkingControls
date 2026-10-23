@@ -1,9 +1,9 @@
 {
-  "version": "1.0 Beta",
-  "date": "2026-10-21",
-  "windows_exe_sha256": "a3e366dc2e9d0bc10c3c2dd74a815ac997565a65816716db25f305ce30677ceb",
-  "windows_filter_sha256": "67d0c05da43ceb7e875d3ff52b2b64163e53ee1b2844ba0057f153cb199b7eac",
-  "linux_filter_sha256": "bfdd06343056597702a141f1a8c341bf2657ecc30b0a7f6b7bc718467ab4098a",
+  "version": "1.0.3 Beta",
+  "date": "2026-10-22",
+  "windows_exe_sha256": "1bba1c8149c9584a563f2c33750b2d9520fe6d90ef19d953ca073a7d7dcb1cea",
+  "windows_filter_sha256": "168590e30ab009368d548d13ea70d81808f2958e30f262b35ead7ec82d02e99e",
+  "linux_filter_sha256": "b5d8a1af0c7172a1516dcc21283018b0f1de64d7cec4e7275671f50d8810c25c",
   "only_filter_source_difference": "export annotation",
   "shared_files_identical": [
     "UiLanguage.cs",

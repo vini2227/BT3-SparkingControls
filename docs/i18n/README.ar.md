@@ -10,17 +10,25 @@
 
 <div dir="rtl">
 
-# BT3 Sparking Controls — 1.0 Beta
+# BT3 Sparking Controls — 1.0.3 Beta
 
 ## دليل التحكم والتثبيت
 
 تخطيط تحكم وواجهة قتال مستوحيان من Sparking! ZERO للعبة Tenkaichi3Decomp. تظل الرسوم الحركية والضرر وتكلفة Ki والمدى والقدرات ونوافذ تنفيذ الحركات خاضعة لقواعد BT3. اللعبة ومواردها غير مرفقة.
 
+## الجديد في الإصدار 1.0.3 Beta
+
+- اضغط مطولاً على R2 + L1 للصعود السريع أو R2 + L2 للهبوط. يبقى L1/L2 منفرداً للحركة العادية، وأُلغي اختصار النقر المزدوج القديم. قد تنتظر الضغطة الثانية السريعة انتهاء نافذة اللعبة الأصلية ذات الإطارات السبعة.
+- إفلات ○ مع استمرار ضغط R1 يطلب إنهاء وضعية الهجوم المضاد والعودة إلى الحراسة، مع احترام نافذة الخروج الأصلية لحركة BT3. يدعم مدد ضغط مختلفة دون الحاجة إلى ضغط R1 مجدداً.
+- تظهر القوائم الأربع تدريجياً خلال 100 مللي ثانية وتختفي خلال 80 مللي ثانية دون إضافة انتظار للإدخال. في Linux تُعرض الإطارات المتغيرة أو المتحركة فوراً.
+
+[CHANGELOG](../../CHANGELOG.md)
+
 ## التنزيلات والعرض التوضيحي
 
-[**Windows x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-1.0-Beta-Windows.zip) · [**Linux x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-1.0-Beta-Linux-x64.zip) · [**1.0 Beta**](https://github.com/vini2227/BT3-SparkingControls/releases/tag/v1.0-beta)
+[**Windows x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.3-beta/BT3-SparkingControls-1.0.3-Beta-Windows.zip) · [**Linux x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.3-beta/BT3-SparkingControls-1.0.3-Beta-Linux-x64.zip) · [**1.0.3 Beta**](https://github.com/vini2227/BT3-SparkingControls/releases/tag/v1.0.3-beta)
 
-[▶ Gameplay demo — MP4, 167 MiB](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-1.0-Beta-Gameplay-Demo.mp4) · [TXT](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-Controls-and-Setup-Guide.txt) · [SHA256](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/SHA256SUMS.txt)
+[▶ Gameplay demo (recorded for 1.0 Beta) — MP4, 167 MiB](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-1.0-Beta-Gameplay-Demo.mp4) · [TXT](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.3-beta/BT3-SparkingControls-Controls-and-Setup-Guide.txt) · [SHA256](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.3-beta/SHA256SUMS.txt)
 
 ## التثبيت
 
@@ -54,6 +62,8 @@ bash start.sh --check /path/to/Tenkaichi3Decomp
 | `R2` | شحن Ki |
 | `L1` | الصعود |
 | `L2` | الهبوط |
+| `R2 + L1` | اندفاع Z عمودي إلى الأعلى |
+| `R2 + L2` | اندفاع Z عمودي إلى الأسفل |
 | `R1` | الدفاع خارج مجموعات هجماتك المدعومة |
 | `R2 + □` | الهجوم الخارق 1 |
 | `R2 + △` | الهجوم الخارق 2 |
@@ -87,7 +97,7 @@ bash start.sh --check /path/to/Tenkaichi3Decomp
 
 ## التوافق واللعب عبر الإنترنت والاختبارات
 
-يترجم البرنامج حزمة التحكم المحلية ذات 18 بايت قبل أخذ عينة الشبكة؛ يستقبل الطرف الآخر مدخلات BT3 الأصلية. لا يعدّل المدخلات البعيدة أو وظائف اتخاذ القرار القتالي. تُراجع الرموز و61 دالة كاملة ومراجعها لقبول تغييرات العناوين المتوافقة؛ قد تتطلب التغييرات البنيوية أو الرموز المفقودة تحديثاً. اجتازت نسختا Linux v0.1.37 وv0.1.38.1 فحص التوافق، دون ضمان كل الإصدارات. لا تُضاف فترات sleep للتحويلات البسيطة. يستخدم الإمساك وR3 مرحلتين بعينتين لكل حالة؛ يأتي الضغط الثاني بعد نحو 33 مللي ثانية عند 60 هرتز. تتبع البطاقات التوقيت والتأكيد الأصليين؛ المدى والنوافذ وrollback تظل مؤثرة. نجحت 480,183 مراجعة حزم/ABI لـ Windows، و160,061 للحزم و9 للمحمّل المُحاكى لكل إصدار Linux، و2,250 للواجهة و93 للاختصارات و693 للتخطيط لكل واجهة أمامية مع 12 حالة معاينة. اختُبرت واجهة Linux على Windows .NET لا Mono/X11. لم يُتحقق بعد من Linux الفعلي أو وحدات التحكم المادية أو المباريات وrollback الحقيقيين عبر الإنترنت. لا يوجد ضمان شامل لعدم فقدان التزامن.
+يترجم البرنامج حزمة التحكم المحلية ذات 18 بايت قبل أخذ عينة الشبكة؛ يستقبل الطرف الآخر مدخلات BT3 الأصلية. لا يعدّل المدخلات البعيدة أو وظائف اتخاذ القرار القتالي. تُراجع الرموز و61 دالة كاملة ومراجعها لقبول تغييرات العناوين المتوافقة؛ قد تتطلب التغييرات البنيوية أو الرموز المفقودة تحديثاً. اجتازت نسختا Linux v0.1.37 وv0.1.38.1 فحص التوافق، دون ضمان كل الإصدارات. لا تُضاف فترات sleep للتحويلات البسيطة. يستخدم الإمساك وR3 مرحلتين بعينتين لكل حالة؛ يأتي الضغط الثاني بعد نحو 33 مللي ثانية عند 60 هرتز. تتبع البطاقات التوقيت والتأكيد الأصليين؛ المدى والنوافذ وrollback تظل مؤثرة. نجحت 1,337,289 مراجعة حزم/ABI لـ Windows، و445,763 للحزم و9 للمحمّل المُحاكى لكل إصدار Linux، و2,250 للواجهة و93 للاختصارات و693 للتخطيط لكل واجهة أمامية مع 12 حالة معاينة. اختُبرت واجهة Linux على Windows .NET لا Mono/X11. لم يُتحقق بعد من Linux الفعلي أو وحدات التحكم المادية أو المباريات وrollback الحقيقيين عبر الإنترنت. لا يوجد ضمان شامل لعدم فقدان التزامن.
 
 ## المصدر والترخيص
 

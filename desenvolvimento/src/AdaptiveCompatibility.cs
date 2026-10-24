@@ -6,10 +6,11 @@ using System.Collections.Generic;
 using System.Web.Script.Serialization;
 using System.Security.Cryptography;
 sealed class PeSection { public int Rva,VirtualSize,Raw,RawSize,Header; public uint Flags; }
-sealed class PeSymbol { public int Rva,Section,Type; }
+sealed class PeSymbol { public int Rva,Section,Type; public string Scope; }
 sealed class PeImage {
     public readonly byte[] Bytes; public readonly long ImageBase; public readonly int SizeOfImage,PeOffset;
     public readonly List<PeSection> Sections=new List<PeSection>();
+    readonly Dictionary<string,List<PeSymbol>> candidates=new Dictionary<string,List<PeSymbol>>(StringComparer.Ordinal);
     readonly Dictionary<string,PeSymbol> symbols=new Dictionary<string,PeSymbol>(StringComparer.Ordinal);
     public static string Digest(byte[] b) { using(var sha=SHA256.Create())return Program.Hex(sha.ComputeHash(b)); }
     void Check(long offset,long size) { if(offset<0 || size<0 || offset+size>Bytes.LongLength)throw new IOException(UiLanguage.Text("Executavel PE truncado ou invalido.")); }
@@ -41,6 +42,7 @@ sealed class PeImage {
         if(count>2000000)throw new IOException(UiLanguage.Text("Tabela de simbolos fora dos limites."));
         Check(table,(long)count*18+4);int strings=checked(table+count*18),stringSize=I32(strings);Check(strings,stringSize);
         if(stringSize<4)throw new IOException(UiLanguage.Text("Tabela de nomes PE invalida."));
+        string scope="";
         for(int i=0;i<count;) {
             int at=table+i*18;string name;
             if(U32(at)==0) {
@@ -56,19 +58,33 @@ sealed class PeImage {
             }
             short section=BitConverter.ToInt16(Bytes,at+12);int aux=Bytes[at+17];
             if(i+aux>=count)throw new IOException(UiLanguage.Text("Registro auxiliar PE invalido."));
+            if(name==".file" && aux>0)scope=Encoding.ASCII.GetString(Bytes,at+18,aux*18).TrimEnd('\0');
             if(section>0 && section<=Sections.Count) {
                 long rva=(long)Sections[section-1].Rva+U32(at+8);
                 if(rva<0 || rva>=SizeOfImage) { i+=1+aux;continue; } // COFF may include non-address sentinel/debug symbols.
-                var symbol=new PeSymbol { Rva=(int)rva,Section=section,Type=U16(at+14) };
+                if(U16(at+14)==32)scope=name;
+                var symbol=new PeSymbol { Rva=(int)rva,Section=section,Type=U16(at+14),Scope=scope };
+                List<PeSymbol> matches;if(!candidates.TryGetValue(name,out matches))candidates[name]=matches=new List<PeSymbol>();matches.Add(symbol);
                 PeSymbol previous;
                 if(!symbols.TryGetValue(name,out previous) || symbol.Type==32)symbols[name]=symbol;
             }
             i+=1+aux;
         }
     }
+    public bool HasSymbol(string name){return symbols.ContainsKey(name);}
     public int Symbol(string name) {
         if(name=="$image")return 0;PeSymbol s;if(!symbols.TryGetValue(name,out s))throw new IOException(UiLanguage.Text("Atualizacao ainda nao reconhecida: falta o simbolo ")+name+UiLanguage.Text(". Nenhum patch foi aplicado."));
         return s.Rva;
+    }
+    public bool MatchesSymbol(string name,long rva,string owner,string scope=null) {
+        List<PeSymbol> matches;
+        if(!candidates.TryGetValue(name,out matches))return false;
+        if(scope!=null)return matches.Any(s=>s.Rva==rva&&s.Scope==scope);
+        if(name.StartsWith(".",StringComparison.Ordinal))return Symbol(name)==rva;
+        // Local COFF names may repeat across translation units. Resolve them in
+        // the referencing function's COFF emission group, never against an unrelated duplicate.
+        if(matches.Select(s=>s.Rva).Distinct().Count()>1){PeSymbol function;if(!symbols.TryGetValue(owner,out function)||string.IsNullOrEmpty(function.Scope))return false;return matches.Any(s=>s.Rva==rva&&s.Scope==owner);}
+        return matches.Any(s=>s.Rva==rva);
     }
     public int RawOffset(int rva,int count) {
         foreach(var section in Sections)if(rva>=section.Rva && (long)rva+count<=section.Rva+(long)section.RawSize) {
@@ -85,9 +101,11 @@ sealed class PeImage {
         return end-s.Rva;
     }
 }
-public sealed class OnlineReference { public int offset,width,addend,bias; public string symbol,kind,data_expected; }
+public sealed class OnlineReference { public int offset,width,addend,bias; public string symbol,kind,data_expected,symbol_scope; }
 public sealed class OnlineSignature { public string name,expected,mask; public int length; public OnlineReference[] references; }
+public sealed class PacketContract { public string entry,entry_call_symbol,packet;public int entry_call_offset,return_offset;public OnlineSignature caller; }
 public sealed class OnlineMetadata {
+    public PacketContract packet_contract;
     public int format,entry_offset,trampoline_length,online_addend;
     public string payload_sha256,baseline_game_sha256,online_symbol;public string[] approved_history_sha256;
     public OnlineSignature[] functions;public OnlineReference[] game_references;public string[] globals;
@@ -100,33 +118,63 @@ static class OnlineCompatibility {
     public static void Resolve(string exe,Profile profile){
         var image=new PeImage(File.ReadAllBytes(exe));
         string report;
+        if(VariantSupport.Resolve(image,profile,out report)){File.WriteAllText(Path.Combine(Program.Root,"compatibility-report.txt"),report);return;}
         try{report=ResolveImage(image,profile,Metadata());}
-        catch(IOException){string legacy=Path.Combine(Program.Root,"compatibility-legacy.json");if(!File.Exists(legacy))throw;var previous=new JavaScriptSerializer {MaxJsonLength=4*1024*1024}.Deserialize<OnlineMetadata>(File.ReadAllText(legacy));report=ResolveImage(image,profile,previous);}
+        catch(IOException primary){string legacy=Path.Combine(Program.Root,"compatibility-legacy.json");if(!File.Exists(legacy))throw;var previous=new JavaScriptSerializer {MaxJsonLength=4*1024*1024}.Deserialize<OnlineMetadata>(File.ReadAllText(legacy));try{report=ResolveImage(image,profile,previous);}catch(IOException secondary){throw new IOException(primary.Message+Environment.NewLine+"Legacy profile: "+secondary.Message,primary);}}
 
         File.WriteAllText(Path.Combine(Program.Root,"compatibility-report.txt"),report);
     }
-    public static string ResolveImage(PeImage image,Profile profile,OnlineMetadata metadata){
-        byte[] template=File.ReadAllBytes(Path.Combine(Program.Root,"SparkingControls.payload"));
-        if(metadata.format!=2||metadata.payload_sha256!=profile.payload_sha256||PeImage.Digest(template)!=metadata.payload_sha256||metadata.functions==null||metadata.functions.Length<50||metadata.game_references==null||metadata.game_references.Length!=24||metadata.entry_offset!=0x1000||metadata.trampoline_length!=6||image.ImageBase!=profile.image_base)throw Changed("compatibility metadata");
-        var report=new StringBuilder();report.AppendLine("Automatic resolution: COFF symbols, complete native instruction signatures and symbolic reference targets.");report.AppendLine("Game SHA256: "+PeImage.Digest(image.Bytes));
+    static void CheckSignature(PeImage image,OnlineSignature signature) {
+        int rva=image.Symbol(signature.name);byte[] expected=Program.Unhex(signature.expected),mask=Program.Unhex(signature.mask);
+        if(signature.length!=expected.Length||mask.Length!=expected.Length||signature.length<5||image.FunctionLength(signature.name)!=signature.length)throw Changed(signature.name+" length");
+        byte[] actual=image.Read(rva,signature.length);
+        for(int i=0;i<actual.Length;i++)if((actual[i]&mask[i])!=(expected[i]&mask[i]))throw Changed(signature.name+" + 0x"+i.ToString("X"));
+        foreach(var reference in signature.references){
+            long value=Number(actual,reference.offset,reference.width);
+            long target=reference.kind=="relative"?image.ImageBase+rva+reference.offset+reference.bias+value:value;
+            if(!string.IsNullOrEmpty(reference.data_expected)){
+                byte[] content=Program.Unhex(reference.data_expected);long location=target-image.ImageBase;
+                if(location<0||location>int.MaxValue||!image.Sections.Any(section=>location>=section.Rva&&location+content.Length<=section.Rva+(long)section.RawSize&&(section.Flags&0xa0000000)==0)||!image.Read((int)location,content.Length).SequenceEqual(content))throw Changed(signature.name+" literal bytes");
+            }else if(!image.MatchesSymbol(reference.symbol,target-image.ImageBase-reference.addend,signature.name,reference.symbol_scope))throw Changed(signature.name+" target "+reference.symbol);
+        }
+    }
+    // The original reader still executes normally. Only its returned local packet is
+    // translated. Its device/keyboard collection body is not an auxiliary dependency.
+    // Bound this fallback to a reviewed Windows ABI and exact packet-producing block,
+    // including the shared epilogue, and require the unchanged net sampling caller.
+    static void CheckPacketContract(PeImage image,PacketContract c) {
+        int rva=image.Symbol("Port_PadRead"),length=image.FunctionLength("Port_PadRead");
+        if(length<256||length>32768||c.entry_call_offset!=0x5b||c.return_offset!=0x6a||c.caller==null||c.caller.name!="sample_local")throw Changed("input contract metadata");
+        byte[] actual=image.Read(rva,length),entry=Program.Unhex(c.entry),packet=Program.Unhex(c.packet);
+        if(entry.Length!=160||packet.Length!=91)throw Changed("input contract bounds");
+        for(int i=0;i<entry.Length;i++)if((i<c.entry_call_offset||i>=c.entry_call_offset+4)&&actual[i]!=entry[i])throw Changed("Port_PadRead entry/ABI");
+        if(rva+c.entry_call_offset+4+BitConverter.ToInt32(actual,c.entry_call_offset)!=image.Symbol(c.entry_call_symbol))throw Changed("Port_PadRead entry target");
+        int found=-1;
+        for(int i=entry.Length;i+packet.Length+5<=actual.Length;i++) {
+            bool equal=true;for(int j=0;j<packet.Length;j++)if(actual[i+j]!=packet[j]){equal=false;break;}
+            if(!equal)continue;
+            if(found>=0)throw Changed("ambiguous packet writer");found=i;
+        }
+        if(found<0||actual[found+packet.Length]!=0xe9||found+packet.Length+5+BitConverter.ToInt32(actual,found+packet.Length+1)!=c.return_offset)throw Changed("Port_PadRead packet/return");
+        CheckSignature(image,c.caller);
+    }
+    public static string ResolveImage(PeImage image,Profile profile,OnlineMetadata metadata,string resourceRoot=null){
+        byte[] template=File.ReadAllBytes(Path.Combine(resourceRoot??Program.Root,"SparkingControls.payload"));
+        if(metadata.format!=2||metadata.payload_sha256!=profile.payload_sha256||PeImage.Digest(template)!=metadata.payload_sha256||metadata.functions==null||metadata.functions.Length<50||metadata.game_references==null||(resourceRoot==null?metadata.game_references.Length!=24:metadata.game_references.Length<24||metadata.game_references.Length>64)||metadata.entry_offset<0x1000||metadata.entry_offset>=0xe000||metadata.trampoline_length!=6||image.ImageBase!=profile.image_base)throw Changed("compatibility metadata");
+        var report=new StringBuilder();report.AppendLine("Automatic resolution: COFF symbols, native interface signatures, bounded input ABI contract and symbolic reference targets.");report.AppendLine("Game SHA256: "+PeImage.Digest(image.Bytes));
         // Preserve exact historical executables accepted by the previous release.
         // A full-file cryptographic match is required here. Unknown hashes still
         // pass every instruction, address-target and literal-content check below.
         bool approvedHistory=metadata.approved_history_sha256!=null&&metadata.approved_history_sha256.Contains(PeImage.Digest(image.Bytes));
         foreach(var signature in metadata.functions){
-            int rva=image.Symbol(signature.name);if(approvedHistory){report.AppendLine("PASS exact historical executable: "+signature.name);continue;}byte[] expected=Program.Unhex(signature.expected),mask=Program.Unhex(signature.mask);
-            if(signature.length!=expected.Length||mask.Length!=expected.Length||signature.length<5||image.FunctionLength(signature.name)!=signature.length)throw Changed(signature.name+" length");
-            byte[] actual=image.Read(rva,signature.length);
-            for(int i=0;i<actual.Length;i++)if((actual[i]&mask[i])!=(expected[i]&mask[i]))throw Changed(signature.name+" + 0x"+i.ToString("X"));
-            foreach(var reference in signature.references){
-                long value=Number(actual,reference.offset,reference.width);
-                long target=reference.kind=="relative"?image.ImageBase+rva+reference.offset+reference.bias+value:value;
-                if(!string.IsNullOrEmpty(reference.data_expected)){
-                    byte[] content=Program.Unhex(reference.data_expected);long location=target-image.ImageBase;
-                    if(location<0||location>int.MaxValue||!image.Sections.Any(section=>location>=section.Rva&&location+content.Length<=section.Rva+(long)section.RawSize&&(section.Flags&0xa0000000)==0)||!image.Read((int)location,content.Length).SequenceEqual(content))throw Changed(signature.name+" literal bytes");
-                }else if(target!=image.ImageBase+image.Symbol(reference.symbol)+reference.addend)throw Changed(signature.name+" target "+reference.symbol);
+            if(approvedHistory){report.AppendLine("PASS exact historical executable: "+signature.name);continue;}
+            try { CheckSignature(image,signature); }
+            catch(IOException) {
+                if(signature.name!="Port_PadRead" || metadata.packet_contract==null)throw;
+                CheckPacketContract(image,metadata.packet_contract);
+                report.AppendLine("PASS input boundary contract: packet ABI, buffer layout, return path and online sampling caller; input collection implementation may differ.");
             }
-            report.AppendLine("PASS "+signature.name+" @ 0x"+rva.ToString("X"));
+            report.AppendLine("PASS "+signature.name+" @ 0x"+image.Symbol(signature.name).ToString("X"));
         }
         byte[] payload=(byte[])template.Clone();
         foreach(var reference in metadata.game_references)Put(payload,reference.offset,reference.width,image.ImageBase+image.Symbol(reference.symbol)+reference.addend);
@@ -140,7 +188,7 @@ static class OnlineCompatibility {
         globals["online_mode"]=checked(image.Symbol(metadata.online_symbol)+metadata.online_addend);
         profile.patches=new[]{new Patch {rva=site,expected=Program.Hex(prologue),replacement=Program.Hex(jump)}};
         profile.symbols=globals;profile.resolved_payload=payload;profile.game_sha256=PeImage.Digest(image.Bytes);
-        report.AppendLine("PASS: one local packet hook, 24 rebased payload references, all HUD globals and the native online status.");
+        report.AppendLine("PASS: one local packet hook, rebased payload references, all HUD globals and the native online status.");
         report.AppendLine("No game file changed. Resolution occurs at launch/relaunch, never in the input loop. Structural compatibility is not an online gameplay test.");return report.ToString();
     }
 }
@@ -156,7 +204,7 @@ static class OnlineCompatibilityTests {
             foreach(var section in image.Sections)Buffer.BlockCopy(BitConverter.GetBytes(section.Rva+delta),0,moved,section.Header+12,4);
             Buffer.BlockCopy(BitConverter.GetBytes(image.SizeOfImage+delta),0,moved,image.PeOffset+24+56,4);
             // Relative references move with their containing section. Absolute references need the same delta.
-            foreach(var f in metadata.functions)foreach(var reference in f.references)if(reference.kind=="absolute"){
+            foreach(var f in metadata.functions.Where(f=>f.name!="Port_PadRead").Concat(metadata.packet_contract==null?new OnlineSignature[0]:new[]{metadata.packet_contract.caller}))foreach(var reference in f.references)if(reference.kind=="absolute"){
                 int off=image.RawOffset(image.Symbol(f.name)+reference.offset,reference.width);
                 if(reference.width==4)Buffer.BlockCopy(BitConverter.GetBytes(checked(BitConverter.ToInt32(moved,off)+delta)),0,moved,off,4);
                 else Buffer.BlockCopy(BitConverter.GetBytes(BitConverter.ToInt64(moved,off)+delta),0,moved,off,8);
@@ -173,6 +221,25 @@ static class OnlineCompatibilityTests {
             log.AppendLine("PASS: moved executable sections rebuild hook, trampoline, 24 payload targets and HUD at three allocation addresses.");
             foreach(string name in new[]{"Port_PadRead","BtlInput_BuildCommands","BtlAct_CanFuse","Port_NetActive"}){
                 var bad=(byte[])bytes.Clone();bad[image.RawOffset(image.Symbol(name),1)]^=1;bool refused=false;try{OnlineCompatibility.ResolveImage(new PeImage(bad),Program.LoadProfile(),metadata);}catch(IOException){refused=true;}Assert(refused,"changed instructions "+name);
+            }
+            if(metadata.packet_contract!=null && image.FunctionLength("Port_PadRead")!=metadata.functions.First(f=>f.name=="Port_PadRead").length){
+                var padded=(byte[])bytes.Clone();int padEnd=image.RawOffset(image.Symbol("Port_PadRead")+image.FunctionLength("Port_PadRead")-1,1);
+                Assert(padded[padEnd]==0x90,"fixture trailing alignment NOP");padded[padEnd]=0xcc;
+                OnlineCompatibility.ResolveImage(new PeImage(padded),Program.LoadProfile(),metadata);
+                foreach(string hex in new[]{metadata.packet_contract.packet,"b812000000"}) {
+                    byte[] pattern=Program.Unhex(hex);var bad=(byte[])bytes.Clone();int loc=-1,begin=image.RawOffset(image.Symbol("Port_PadRead"),image.FunctionLength("Port_PadRead"));
+                    for(int i=begin;i<begin+image.FunctionLength("Port_PadRead")-pattern.Length;i++)if(bad.Skip(i).Take(pattern.Length).SequenceEqual(pattern)){loc=i;break;}
+                    Assert(loc>=0,"packet fixture located");bad[loc]^=1;bool refused=false;try{OnlineCompatibility.ResolveImage(new PeImage(bad),Program.LoadProfile(),metadata);}catch(IOException){refused=true;}Assert(refused,"packet ABI mutation rejected");
+                }
+                var netBad=(byte[])bytes.Clone();netBad[image.RawOffset(image.Symbol("sample_local"),1)]^=1;bool netRefused=false;try{OnlineCompatibility.ResolveImage(new PeImage(netBad),Program.LoadProfile(),metadata);}catch(IOException){netRefused=true;}Assert(netRefused,"online sampling mutation rejected");
+                var duplicate=metadata.functions.First(f=>f.name=="Port_NetActive").references.First(r=>r.symbol=="k_.128");
+                var wrong=(byte[])bytes.Clone();int fieldAt=image.RawOffset(image.Symbol("Port_NetActive")+duplicate.offset,4);
+                long wrongRva=image.Symbol(duplicate.symbol)+duplicate.addend;
+                long wrongDisp=wrongRva-(image.Symbol("Port_NetActive")+duplicate.offset+duplicate.bias);
+                Buffer.BlockCopy(BitConverter.GetBytes(checked((int)wrongDisp)),0,wrong,fieldAt,4);
+                bool duplicateRefused=false;try{OnlineCompatibility.ResolveImage(new PeImage(wrong),Program.LoadProfile(),metadata);}catch(IOException){duplicateRefused=true;}Assert(duplicateRefused,"same-named local from another function rejected");
+                log.AppendLine("PASS: duplicate COFF names resolve in the owner group; redirect to unrelated same-named local rejected.");
+                log.AppendLine("PASS: input-reader alignment changes accepted; packet format, return and online sampling changes rejected.");
             }
             var redirect=(byte[])bytes.Clone();var owner=metadata.functions.First(f=>f.references.Length>0);var field=owner.references[0];redirect[image.RawOffset(image.Symbol(owner.name)+field.offset,1)]^=1;bool rejected=false;try{OnlineCompatibility.ResolveImage(new PeImage(redirect),Program.LoadProfile(),metadata);}catch(IOException){rejected=true;}Assert(rejected,"changed masked target rejected");
             var stripped=(byte[])bytes.Clone();Buffer.BlockCopy(new byte[4],0,stripped,image.PeOffset+16,4);rejected=false;try{OnlineCompatibility.ResolveImage(new PeImage(stripped),Program.LoadProfile(),metadata);}catch(IOException){rejected=true;}Assert(rejected,"stripped symbols rejected");

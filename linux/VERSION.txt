@@ -1,4 +1,2 @@
-BT3 Sparking Controls
-1.0.3 Beta
-Counter release acknowledged before returning to guard
-Build date: 2026-10-22
+BT3 Sparking Controls 1.0.6 Beta — Linux x64
+Split-screen HUD update; native resolver unchanged.

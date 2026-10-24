@@ -71,6 +71,6 @@ for ins in cs.disasm(net,base+symbols['Port_NetActive']['rva']):
  if ins.mnemonic=='mov' and any(o.type==3 and ins.reg_name(o.mem.base)=='rip' for o in ins.operands):netrefs.append(ins.address+ins.size+ins.disp-base)
 assert len(netrefs)>=1
 nettarget=netrefs[0];netname,netadd=target(base+nettarget)
-meta=dict(approved_history_sha256=old.get('approved_history_sha256',[]),format=2,payload_sha256=hashlib.sha256(payload).hexdigest(),baseline_game_sha256=hashlib.sha256(d).hexdigest(),functions=functions,game_references=references,globals=[n for n in needed if n.startswith(('g','s'))],online_symbol=netname,online_addend=netadd,entry_offset=0x1000,trampoline_length=6)
+meta=dict(packet_contract=old.get('packet_contract'),approved_history_sha256=old.get('approved_history_sha256',[]),format=2,payload_sha256=hashlib.sha256(payload).hexdigest(),baseline_game_sha256=hashlib.sha256(d).hexdigest(),functions=functions,game_references=references,globals=[n for n in needed if n.startswith(('g','s'))],online_symbol=netname,online_addend=netadd,entry_offset=0x1000,trampoline_length=6)
 (dev/'compatibility.json').write_text(json.dumps(meta,separators=(',',':')),encoding='utf-8')
 print('Built reviewed compatibility metadata:',len(functions),'functions;',len(references),'payload references')

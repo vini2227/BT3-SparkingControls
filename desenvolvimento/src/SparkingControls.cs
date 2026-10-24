@@ -1,4 +1,4 @@
-// Standalone add-on. Build with the Windows .NET Framework C# compiler (x64).
+﻿// Standalone add-on. Build with the Windows .NET Framework C# compiler (x64).
 // The game is never edited on disk. Only our own suspended child is patched.
 using System;
 using System.IO;
@@ -17,7 +17,7 @@ using System.Windows.Forms;
 public sealed class Patch { public int rva; public string expected, replacement; }
 public sealed class Relocation { public int offset,sign,width; }
 public sealed class Profile {
-    public int format; public string game_sha256, payload_sha256;
+    public int format; public string game_sha256, payload_sha256,variant;
     public long image_base, allocation; public int allocation_size;
     public Patch[] patches; public Dictionary<string,int> symbols;
     public Relocation[] relocations;
@@ -153,35 +153,54 @@ sealed class TechniquePrompt {
 
 sealed class Reader {
     readonly Memory m; readonly Profile p;
-    readonly int[] switchReport={-1,-1};
-    readonly int[] fusionReport={0,0};
-    readonly uint[] oldSeq=new uint[2]; readonly long[] freshAt=new long[2];
+    readonly int[] switchReport={-1,-1,-1,-1};
+    readonly int[] fusionReport={0,0,0,0};
+    readonly uint[] oldSeq=new uint[4]; readonly long[] freshAt=new long[4];
     readonly Dictionary<long,List<string>> nameCache=new Dictionary<long,List<string>>();
     public Reader(Memory memory,Profile profile) { m=memory;p=profile; }
     long Sym(string n) { return p.image_base+p.symbols[n]; }
     public int AspectMilli { get { return m.I32(Sym("sAspectMilli")); } }
+    // BattleSetup.rule.screenMode is at gBattleWork + 0x08 + 0x1c. Online presents one local view.
+    public bool LocalSplit {get{return HudLayout.IsLocalSplit(m.I32(Sym("online_mode")),m.I32(Sym("gBattleWork")+0x24));}}
+    public bool Quad {get{return p.variant=="tagteam"&&m.I32(Sym("online_mode"))==0&&m.I32(Sym("gBattleWork")+0x19f8)!=0&&m.I32(p.allocation+0xf900)==4;}}
+    int PlayerCount {get{return Quad?4:2;}}
+    long Mail(int side){return p.allocation+0xf000+(side/2)*0x1000;}
+    bool Owns(long chr,int side){return p.variant=="tagteam"&&m.I32(Sym("online_mode"))==0?m.I32(chr+4)==side:m.I32(chr)==side;}
     public string MenuStatus {get;private set;}
     static int I(byte[] b,int off) { return BitConverter.ToInt32(b,off); }
+    static string Text(byte[] data,int offset,int count){int end=offset;while(end<offset+count&&data[end]!=0)end++;return Encoding.UTF8.GetString(data,offset,end-offset);}
+    public void RefreshCharacterArt(TransformationArt art,TransformationPanel[] panels){
+        if(p.variant!="characters")return;
+        bool online=m.I32(Sym("online_mode"))>0;
+        foreach(int id in panels.SelectMany(panel=>panel.Options).Select(o=>o.Character).Distinct()){
+            long address=0;
+            if(!online&&id>=198&&id<255)address=Sym("sChara")+(id-198)*0x2464;
+            if(!online&&id>=0&&id<161){int entry=BitConverter.ToInt16(m.Read(Sym("sReplOf")+id*2,2),0);if(entry>0&&entry<=161)address=Sym("sRepl")+(entry-1)*0x2464;}
+            if(address==0){art.SetCustom(id,null);continue;}
+            byte[] b=m.Read(address,0x2464);int baseId=I(b,4932);if(baseId<0||baseId>=161){art.SetCustom(id,null);continue;}
+            art.SetCustom(id,new CustomCharacterArt {Base=baseId,Portrait=Text(b,5344,400),Name=Text(b,9036,64),NameSet=I(b,9100)!=0||id>=198,Label=Text(b,9104,96),LabelSet=I(b,9200)!=0});
+        }
+    }
     public TransformationPanel[] SampleTransformations() {
         var panels=new List<TransformationPanel>();
         if(m.I32(Sym("gBattleWork")+0x19f8)==0 || (m.U32(Sym("gBattleWork")+0x19f0)&0xff00)!=0)return panels.ToArray();
         bool online=m.I32(Sym("online_mode"))>0;int localSide=online?m.I32(p.allocation+0xf40c):-1;
-        for(int side=0;side<2;side++) {
+        for(int side=0;side<PlayerCount;side++) {
             if(online&&side!=localSide)continue;
-            long fusion=p.allocation+0xf700+side*32;int phase=m.I32(fusion+8);
+            long fusion=Mail(side)+0x700+(side&1)*32;int phase=m.I32(fusion+8);
             if(phase!=fusionReport[side]) {
-                fusionReport[side]=phase;long actor=m.Pointer32(p.allocation+0xf004+side*16);
+                fusionReport[side]=phase;long actor=m.Pointer32(Mail(side)+0x004+(side&1)*16);
                 Program.SessionLog("Fusion phase="+phase+" side="+side+" reads="+m.I32(fusion+28)+" action="+(actor==0?-1:m.I32(actor+0x948)));
             }
-            long diagnostic=p.allocation+0xf600+side*64;
+            long diagnostic=Mail(side)+0x600+(side&1)*64;
             int status=m.I32(diagnostic+40);
             if(status!=switchReport[side]) {
                 switchReport[side]=status;
                 if(status>0)Program.SessionLog("Switch status="+status+" side="+side+" target="+m.I32(diagnostic)+" age="+m.I32(diagnostic+4)+" attempts="+m.I32(diagnostic+36));
             }
-            long address=p.allocation+0xf100+side*128;byte[] box=m.Read(address,128);uint seq=BitConverter.ToUInt32(box,0);
+            long address=Mail(side)+0x100+(side&1)*128;byte[] box=m.Read(address,128);uint seq=BitConverter.ToUInt32(box,0);
             if((seq&1)!=0 || m.U32(address)!=seq || (I(box,12)!=1 && I(box,12)!=2 && I(box,12)!=3))continue;
-            long chr=BitConverter.ToUInt32(box,4);if(chr==0 || m.I32(chr)!=side || m.I32(chr+0x1278)!=0 || m.I32(chr+0xc)!=I(box,16))continue;
+            long chr=BitConverter.ToUInt32(box,4);if(chr==0 || !Owns(chr,side) || m.I32(chr+0x1278)!=0 || m.I32(chr+0xc)!=I(box,16))continue;
             var options=new List<TransformationOption>();
             for(int slot=0;slot<4;slot++) {
                 int at=32+slot*16,id=I(box,at),cost=I(box,at+4);
@@ -196,14 +215,17 @@ sealed class Reader {
     }
     public TechniquePrompt[] SamplePrompts() {
         var result=new List<TechniquePrompt>();
+        // The variant has only two shared native prompt-state rows. Do not draw
+        // a guessed replacement over a different fighter in the four-view mode.
+        if(Quad)return result.ToArray();
         if(m.I32(Sym("gBattleWork")+0x19f8)==0 || (m.U32(Sym("gBattleWork")+0x19f0)&0xf900)!=0)return result.ToArray();
         long hud=m.Pointer32(Sym("gHud"));if(hud==0 || (m.U32(hud+0x30)&0x10)==0)return result.ToArray();
         long prompt=m.Pointer32(Sym("gHudPrompt"));if(prompt==0)return result.ToArray();
         byte[] data=m.Read(prompt,0x2d0);bool online=m.I32(Sym("online_mode"))>0;
         int localSide=online?m.I32(p.allocation+0xf40c):-1;
-        for(int side=0;side<2;side++) {
+        for(int side=0;side<Math.Min(2,PlayerCount);side++) {
             if(online&&side!=localSide)continue;
-            long chr=m.Pointer32(p.allocation+0xf004+side*16);if(chr==0 || m.I32(chr)!=side || m.I32(chr+0x1278)!=0)continue;
+            long chr=m.Pointer32(Mail(side)+0x004+(side&1)*16);if(chr==0 || !Owns(chr,side) || m.I32(chr+0x1278)!=0)continue;
             int action=m.I32(chr+0x948),slot=(action-0x106)%3;
             if(action<0x106 || action>0x13b || slot==1)continue;
             long sprites=BitConverter.ToUInt32(data,4),nodes=BitConverter.ToUInt32(data,8);if(sprites==0 || nodes==0)continue;
@@ -239,7 +261,7 @@ sealed class Reader {
         return result.ToArray();
     }
     public MoveRow[][] Sample() {
-        MoveRow[][] result=new MoveRow[2][];MenuStatus="waiting for fresh charge input";
+        MoveRow[][] result=new MoveRow[PlayerCount][];MenuStatus="waiting for fresh charge input";
         if(m.I32(Sym("gBattleWork")+0x19f8)==0) { MenuStatus="battle inactive";nameCache.Clear(); return result; }
         uint flags=m.U32(Sym("gBattleWork")+0x19f0);
         if((flags&0xe700)!=0){MenuStatus="battle flags="+flags.ToString("X");return result;} // pause, demo, ready, loading, restart
@@ -247,9 +269,9 @@ sealed class Reader {
         long hud=m.Pointer32(Sym("gHud"));
         if(hud==0 || (m.U32(hud+0x30)&1)==0){MenuStatus="native HUD hidden";return result;}
         bool online=m.I32(Sym("online_mode"))>0;int localSide=online?m.I32(p.allocation+0xf40c):-1;
-        for(int side=0;side<2;side++) {
+        for(int side=0;side<PlayerCount;side++) {
             if(online&&side!=localSide)continue;
-            long mail=p.allocation+0xf000+side*16;
+            long mail=Mail(side)+0x000+(side&1)*16;
             byte[] box=m.Read(mail,16); uint seq=BitConverter.ToUInt32(box,0);
             if((seq&1)!=0 || m.U32(mail)!=seq) continue;
             if(seq!=oldSeq[side]) { oldSeq[side]=seq; freshAt[side]=Environment.TickCount; }
@@ -259,7 +281,7 @@ sealed class Reader {
             long chr=BitConverter.ToUInt32(box,4);
             if(chr==0) continue;
             byte[] fighter=m.Read(chr,0x1600);
-            if(I(fighter,0)!=side || I(fighter,0x1278)!=0) continue;
+            if(!Owns(chr,side) || I(fighter,0x1278)!=0) continue;
             int slot=I(fighter,0x994),count=I(fighter,0x998),objid=I(fighter,0xc);
             if(slot<0 || slot>=count || count>5 || objid<0 || objid>=4096) continue;
             long obj=m.Pointer32(Sym("gBtlObjTbl")+objid*4);
@@ -430,6 +452,22 @@ static class HudLayout {
         RectangleF picture=Picture(size,aspectMilli);float limit=mode==PanelLayoutMode.Classic?4f/3f:mode==PanelLayoutMode.Expanded?16f/9f:3f/2f;float width=Math.Min(picture.Width,picture.Height*limit);
         return new RectangleF(picture.X+(picture.Width-width)/2,picture.Y,width,picture.Height);
     }
+    public static bool IsLocalSplit(int onlineMode,int screenMode){return onlineMode==0&&screenMode==1;}
+    public static RectangleF PlayerArea(Size size,int aspectMilli,PanelLayoutMode mode,int side,bool localSplit){return PlayerArea(size,aspectMilli,mode,side,localSplit,false);}
+    public static RectangleF PlayerArea(Size size,int aspectMilli,PanelLayoutMode mode,int side,bool localSplit,bool quad){
+        if(quad){
+            RectangleF quadPicture=Picture(size,aspectMilli);float vw=quadPicture.Width/2,vh=quadPicture.Height/2;
+            var quadView=new RectangleF(quadPicture.Left+(side%2)*vw,quadPicture.Top+(side/2)*vh,vw,vh);
+            float quadLimit=mode==PanelLayoutMode.Classic?4f/3f:mode==PanelLayoutMode.Expanded?16f/9f:3f/2f,quadWidth=Math.Min(quadView.Width,quadView.Height*quadLimit);
+            return new RectangleF(quadView.Left+(quadView.Width-quadWidth)/2,quadView.Top,quadWidth,quadView.Height);
+        }
+        if(!localSplit)return Controls(size,aspectMilli,mode);
+        RectangleF picture=Picture(size,aspectMilli);
+        var view=new RectangleF(picture.Left+(side==0?0:picture.Width/2),picture.Top,picture.Width/2,picture.Height);
+        float limit=mode==PanelLayoutMode.Classic?4f/3f:mode==PanelLayoutMode.Expanded?16f/9f:3f/2f;
+        float width=Math.Min(view.Width,view.Height*limit);
+        return new RectangleF(view.Left+(view.Width-width)/2,view.Top,width,view.Height);
+    }
     public static RectangleF Dock(RectangleF area,SizeF panel,int side,bool top) {
         float margin=area.Width*.025f,x=side==0?area.Left+margin:area.Right-margin-panel.Width;
         float y=top?area.Top+area.Height*.30f:area.Bottom-area.Height*.065f-panel.Height;
@@ -475,12 +513,14 @@ sealed class Overlay : Form {
     readonly PrivateFontCollection menuFonts=new PrivateFontCollection();
     readonly GameMenuSkin menuSkin; readonly NativeMenuMetrics menuMetrics; Bitmap alphaCanvas;string lastVisualKey;
     Bitmap menuScratch;bool updateMenuSnapshots;
-    readonly HudMenuFade[] attackFades={new HudMenuFade(),new HudMenuFade()},cardFades={new HudMenuFade(),new HudMenuFade()};
+    readonly HudMenuFade[] attackFades={new HudMenuFade(),new HudMenuFade(),new HudMenuFade(),new HudMenuFade()},cardFades={new HudMenuFade(),new HudMenuFade(),new HudMenuFade(),new HudMenuFade()};
+    bool quad;
     DateTime nextPresentation=DateTime.MinValue,nextPreferenceRead=DateTime.MinValue,nextHudError=DateTime.MinValue,nextHudNotice=DateTime.MinValue;string lastHudNotice;
     readonly GameButtonIcons buttonIcons; readonly TransformationArt transformationArt;
     TransformationPanel[] transformations=new TransformationPanel[0];
-    MoveRow[][] rows=new MoveRow[2][]; TechniquePrompt[] prompts=new TechniquePrompt[0]; readonly bool preview;
-    readonly RectangleF[] panelBounds=new RectangleF[2];
+    MoveRow[][] rows=new MoveRow[4][]; TechniquePrompt[] prompts=new TechniquePrompt[0]; readonly bool preview;
+    readonly RectangleF[] panelBounds=new RectangleF[4];
+    bool localSplit;
     int aspectMilli;readonly LayoutShortcut layoutShortcut=new LayoutShortcut();readonly FrameShortcut frameShortcut=new FrameShortcut();bool frameShortcutNotice,attackShortcutNotice;readonly AttackShortcut attackShortcut=new AttackShortcut();DateTime layoutNoticeUntil=DateTime.MinValue;
     RectangleF ControlArea { get { return HudLayout.Controls(ClientSize,aspectMilli,PanelPlacement.Mode); } }
     public void SetPreviewAspect(int value) { aspectMilli=value; }
@@ -534,10 +574,10 @@ sealed class Overlay : Form {
             try{if(attackShortcut.Update(attackDown,true)){attackShortcutNotice=true;frameShortcutNotice=false;lastVisualKey=null;layoutNoticeUntil=DateTime.UtcNow.AddSeconds(1.8);}}catch(IOException ex){HudReadError("attack shortcut setting",ex);}catch(UnauthorizedAccessException ex){HudReadError("attack shortcut setting",ex);}
 
             // A transient prompt/card read must not blank the other independent components.
-            try{aspectMilli=reader.AspectMilli;}catch(IOException ex){HudReadError("aspect",ex);}
-            try{rows=reader.Sample();}catch(IOException ex){rows=new MoveRow[2][];HudReadError("attacks",ex);}
+            try{aspectMilli=reader.AspectMilli;quad=reader.Quad;localSplit=reader.LocalSplit||quad;}catch(IOException ex){HudReadError("aspect",ex);}
+            try{rows=reader.Sample();}catch(IOException ex){rows=new MoveRow[4][];HudReadError("attacks",ex);}
             try{prompts=reader.SamplePrompts();}catch(IOException ex){prompts=new TechniquePrompt[0];HudReadError("prompts",ex);}
-            try{transformations=reader.SampleTransformations();}catch(IOException ex){transformations=new TransformationPanel[0];HudReadError("cards",ex);}
+            try{transformations=reader.SampleTransformations();reader.RefreshCharacterArt(transformationArt,transformations);}catch(IOException ex){transformations=new TransformationPanel[0];HudReadError("cards",ex);}
             PresentAlphaHud();HudNotice("mode="+PanelPlacement.Mode+"; attacks="+HudPreferences.ShowAttacks+"; aspect="+aspectMilli+"; client="+ClientSize+"; moves="+(rows[0]!=null||rows[1]!=null)+"; cards="+transformations.Length+"; "+reader.MenuStatus);
         } catch(IOException ex) { HudReadError("window",ex);Clear(); }
         catch(InvalidOperationException ex) { HudReadError("window",ex);Clear(); }
@@ -561,7 +601,7 @@ sealed class Overlay : Form {
         if(DateTime.UtcNow>=nextPresentation)Native.SetWindowPos(Handle,new IntPtr(-1),0,0,0,0,0x13);
         AlphaHud.Present(this,alphaCanvas);nextPresentation=DateTime.UtcNow.AddSeconds(1);
     }
-    void Clear() { if(rows[0]!=null || rows[1]!=null || prompts.Length>0 || transformations.Length>0 || attackFades.Any(f=>f.Opacity>0)||cardFades.Any(f=>f.Opacity>0)) { rows=new MoveRow[2][];prompts=new TechniquePrompt[0];transformations=new TransformationPanel[0];ResetMenuFades();lastVisualKey=null;if(preview)Invalidate();else PresentAlphaHud(); } }
+    void Clear() { if(rows.Any(r=>r!=null) || prompts.Length>0 || transformations.Length>0 || attackFades.Any(f=>f.Opacity>0)||cardFades.Any(f=>f.Opacity>0)) { rows=new MoveRow[4][];prompts=new TechniquePrompt[0];transformations=new TransformationPanel[0];ResetMenuFades();lastVisualKey=null;if(preview)Invalidate();else PresentAlphaHud(); } }
     protected override void OnPaint(PaintEventArgs e) {
         if(!preview)return;
         base.OnPaint(e); Graphics g=e.Graphics;g.SmoothingMode=SmoothingMode.AntiAlias;
@@ -577,14 +617,14 @@ sealed class Overlay : Form {
         foreach(var prompt in prompts)prompt.Draw(g,ClientSize,buttonIcons);
         // The established move panel is drawn LAST and always stays above prompt covers.
         if(preview){
-            if(HudPreferences.ShowAttacks)for(int side=0;side<2;side++)if(rows[side]!=null)DrawPanel(g,side,rows[side]);
+            if(HudPreferences.ShowAttacks)for(int side=0;side<rows.Length;side++)if(rows[side]!=null)DrawPanel(g,side,rows[side]);
             foreach(var panel in transformations)DrawTransformations(g,panel);
         }else DrawAnimatedMenus(g);
         if(!preview&&DateTime.UtcNow<layoutNoticeUntil)DrawLayoutNotice(g);
     }
     bool UpdateMenuFades(double now){
         bool changed=false;
-        for(int side=0;side<2;side++){
+        for(int side=0;side<rows.Length;side++){
             changed|=attackFades[side].Update(HudPreferences.ShowAttacks&&rows[side]!=null,now);
             changed|=cardFades[side].Update(transformations.Any(p=>p.DisplaySide==side),now);
         }
@@ -592,11 +632,11 @@ sealed class Overlay : Form {
     }
     void ResetMenuFades(){foreach(var fade in attackFades)fade.Reset();foreach(var fade in cardFades)fade.Reset();}
     void DrawAnimatedMenus(Graphics g){
-        for(int side=0;side<2;side++){
+        for(int side=0;side<rows.Length;side++){
             int index=side;
             DrawFadedMenu(g,attackFades[side],rows[side]!=null?new Action<Graphics>(canvas=>DrawPanel(canvas,index,rows[index])):null,side);
         }
-        for(int side=0;side<2;side++){
+        for(int side=0;side<rows.Length;side++){
             var panel=transformations.FirstOrDefault(p=>p.DisplaySide==side);
             DrawFadedMenu(g,cardFades[side],panel!=null?new Action<Graphics>(canvas=>DrawTransformations(canvas,panel)):null,side);
         }
@@ -619,7 +659,7 @@ sealed class Overlay : Form {
     }
     void PresentAlphaHud() {
         if(preview || ClientSize.Width<1 || ClientSize.Height<1)return;
-        var key=new StringBuilder();key.Append(Bounds.ToString()).Append(aspectMilli).Append(PanelPlacement.Mode).Append(HudPreferences.ShowAttacks).Append(AttackAppearance.OuterFrame).Append(DateTime.UtcNow<layoutNoticeUntil);
+        var key=new StringBuilder();key.Append(Bounds.ToString()).Append(aspectMilli).Append(localSplit).Append(quad).Append(PanelPlacement.Mode).Append(HudPreferences.ShowAttacks).Append(AttackAppearance.OuterFrame).Append(DateTime.UtcNow<layoutNoticeUntil);
         foreach(var set in rows){key.Append('|');if(set!=null)foreach(var row in set)key.Append(row.Button).Append(row.Name).Append(row.Cost).Append(row.Available).Append(row.Selected);}
         foreach(var set in transformations){key.Append(set.Side).Append(set.OnlineLocal).Append(set.IsSwitch).Append(set.IsFusion).Append(set.HasFusion).Append(set.HasForms);foreach(var item in set.Options)key.Append(item.Character).Append(':').Append(item.Health).Append(':').Append(item.HealthMax).Append(':').Append(item.Cost).Append(':').Append(item.Available).Append(':').Append(transformationArt.Get(item.Character)!=null);}
         foreach(var prompt in prompts)key.Append(prompt.Button).Append(prompt.Project(ClientSize).ToString());
@@ -637,8 +677,10 @@ sealed class Overlay : Form {
         return new RectangleF(source.X+(source.Width-width)/2,source.Y+(source.Height-height)/2,width,height);
     }
     void DrawTransformations(Graphics g,TransformationPanel panel) {
-        RectangleF area=ControlArea;
+        bool split=localSplit&&!panel.OnlineLocal;
+        RectangleF area=HudLayout.PlayerArea(ClientSize,aspectMilli,PanelPlacement.Mode,panel.DisplaySide,split,quad);
         float scale=Math.Max(.65f,Math.Min(1.8f,area.Height/900f));
+        if(split)scale*=.70f;
         scale=Math.Min(scale,Math.Min(area.Width*.94f/350f,area.Height*.64f/274f));
         float cardW=104*scale,cardH=108*scale,gap=7*scale,pad=12*scale;
         int[] gridX={0,1,1,2};float[] gridY={.5f,0,1,.5f};
@@ -646,7 +688,7 @@ sealed class Overlay : Form {
         float tabs=27*scale;
         float width=3*cardW+2*gap+2*pad;
         float height=2*cardH+gap+2*pad+tabs;
-        RectangleF dock=HudLayout.Dock(area,new SizeF(width,height),panel.DisplaySide,true);float x=dock.X,y=dock.Y;
+        RectangleF dock=HudLayout.Dock(area,new SizeF(width,height),split?0:panel.DisplaySide,true);float x=dock.X,y=dock.Y;
         panelBounds[panel.DisplaySide]=dock;
         // Cards are drawn directly over the game; no outer panel background or border.
         if(panel.HasForms&&panel.HasFusion&&!panel.IsSwitch) {
@@ -699,18 +741,27 @@ sealed class Overlay : Form {
     public void SetOnlineSidePreview(bool online) { foreach(var panel in transformations){panel.Side=1;panel.OnlineLocal=online;} }
     public void SetSwitchPreview() { SetTransformationPreview();foreach(var panel in transformations){panel.IsSwitch=true;for(int i=0;i<panel.Options.Length;i++){panel.Options[i].HealthMax=30000;panel.Options[i].Health=25000-i*8500;}} }
     public void SetTransformationPreview() {
-        rows=new MoveRow[2][];transformations=new[]{new TransformationPanel {Side=0,Options=new[]{new TransformationOption {Slot=0,Character=4,Cost=1,Available=true},new TransformationOption {Slot=1,Character=5,Cost=2,Available=true},new TransformationOption {Slot=2,Character=6,Cost=3,Available=false}}}};
+        rows=new MoveRow[4][];transformations=new[]{new TransformationPanel {Side=0,Options=new[]{new TransformationOption {Slot=0,Character=4,Cost=1,Available=true},new TransformationOption {Slot=1,Character=5,Cost=2,Available=true},new TransformationOption {Slot=2,Character=6,Cost=3,Available=false}}}};
     }
     void DrawPanel(Graphics g,int side,MoveRow[] moves) {
-        RectangleF area=ControlArea;
+        RectangleF area=HudLayout.PlayerArea(ClientSize,aspectMilli,PanelPlacement.Mode,side,localSplit,quad);
         float scale=.75f*Math.Max(.65f,Math.Min(1.8f,area.Height/900f));
         scale=Math.Min(scale,area.Height*.65f/(48*moves.Length+24));
-        float commandWidth,costWidth;bool split=rows[0]!=null && rows[1]!=null;
-        float margin=area.Width*.025f,slotWidth=split?(area.Width-3*margin)/2:area.Width-2*margin;
-        scale=Math.Min(scale,slotWidth/400f);
-        float w=MeasurePanelWidth(g,menuFamily,moves,scale,(int)area.Width,split,out commandWidth,out costWidth,menuMetrics),rh=48*scale;
-        float pad=12*scale;w=Math.Min(w,slotWidth-2*pad);float frameW=w+2*pad;
-        panelBounds[side]=HudLayout.Dock(area,new SizeF(frameW,rh*moves.Length+2*pad),side,false);
+        if(localSplit)scale=Math.Min(scale*.70f,area.Width*.90f/824f);
+        float commandWidth,costWidth;
+        float margin=area.Width*.025f,slotWidth=area.Width-2*margin;
+        // Each local half has its own left anchor. Neither size nor position depends on the other menu.
+        float w=MeasurePanelWidth(g,menuFamily,moves,scale,localSplit?int.MaxValue:(int)area.Width,false,out commandWidth,out costWidth,menuMetrics);
+        if(localSplit){
+            float available=area.Width*.90f;
+            w=Math.Min(w,available-24*scale);
+        }else{
+            // Keep the established single-view layout.
+            scale=Math.Min(scale,slotWidth/400f);
+            w=MeasurePanelWidth(g,menuFamily,moves,scale,(int)area.Width,false,out commandWidth,out costWidth,menuMetrics);
+        }
+        float rh=48*scale,pad=12*scale;w=Math.Min(w,slotWidth-2*pad);float frameW=w+2*pad;
+        panelBounds[side]=HudLayout.Dock(area,new SizeF(frameW,rh*moves.Length+2*pad),localSplit?0:side,false);
         float frameX=panelBounds[side].X,frameY=panelBounds[side].Y;
         if(AttackAppearance.OuterFrame)menuSkin.Frame(g,panelBounds[side],scale);float x=frameX+pad,y=frameY+pad;
         for(int i=0;i<moves.Length;i++) {
@@ -1060,6 +1111,7 @@ static class Program {
     [STAThread] public static int Main(string[] args) {
         Native.SetProcessDPIAware(); Application.EnableVisualStyles();Application.SetCompatibleTextRenderingDefault(false);
         try {
+            if(args.Length==2&&args[0]=="--variant-test")return VariantTests.Run(args[1]);
             UiLanguage.Load();PanelPlacement.Load();HudPreferences.Load();AttackAppearance.Load();ShortcutBindings.Load();string languageOverride=args.FirstOrDefault(a=>a.StartsWith("--lang="));if(languageOverride!=null)UiLanguage.Set(languageOverride.Substring(7),false);
             if(args.Length>1 && args[0]=="--compat-test"){return OnlineCompatibilityTests.Run(args[1]);}
             if(args.Length>0 && args[0]=="--selftest")throw new IOException("Use the separate packet-filter test report. The offline battle harness does not apply to this one-hook online prototype.");

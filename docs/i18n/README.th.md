@@ -8,25 +8,23 @@
 
 ---
 
-# BT3 Sparking Controls — 1.0.3 Beta
+# BT3 Sparking Controls — 1.0.6 Beta
 
 ## คู่มือการควบคุมและการติดตั้ง
 
 รูปแบบการควบคุมและ HUD ต่อสู้ที่ได้แรงบันดาลใจจาก Sparking! ZERO สำหรับ Tenkaichi3Decomp แอนิเมชัน ความเสียหาย ค่า Ki ระยะ ความสามารถ และช่วงเวลาที่ทำท่าได้ยังเป็นกฎของ BT3 ไม่รวมตัวเกมหรือทรัพยากรของเกม
 
-## สิ่งที่เปลี่ยนแปลงในรุ่น 1.0.3 Beta
+## สิ่งที่เปลี่ยนแปลงในรุ่น 1.0.6 Beta
 
-- กด R2 + L1 ค้างเพื่อขึ้นอย่างรวดเร็ว หรือ R2 + L2 เพื่อลง การกด L1/L2 อย่างเดียวยังคงเคลื่อนที่ตามปกติ และปิดทางลัดแบบกดสองครั้งเดิมแล้ว การกดครั้งที่สองอย่างรวดเร็วอาจต้องรอให้ช่วงรับคำสั่งเดิมเจ็ดเฟรมสิ้นสุดก่อน
-- เมื่อปล่อย ○ ขณะกด R1 ค้าง ตัวช่วยจะขอออกจากท่าสวนกลับและกลับไปป้องกันตามจังหวะออกจากแอนิเมชันเดิมของ BT3 รองรับการกดค้างนานต่างกันโดยไม่ต้องกด R1 ใหม่
-- เมนูทั้งสี่ค่อย ๆ ปรากฏใน 100 มิลลิวินาทีและหายไปใน 80 มิลลิวินาที โดยไม่เพิ่มเวลารออินพุต บน Linux เฟรมที่เปลี่ยนแปลงหรือมีแอนิเมชันจะแสดงทันที
+- Windows และ Linux: เมนูทั้งสี่อยู่ด้านซ้ายภายในมุมมองของผู้เล่นแต่ละคน โดยมีขนาดคงที่สำหรับ 4:3, 16:9, 16:10 และจอกว้างพิเศษ Windows: ตรวจสอบความเข้ากันได้แบบปรับตัวและตรวจจับ Decomp ต้นฉบับ, Char Package และ Tag Team อัตโนมัติ พร้อมข้อมูลตัวละครปรับแต่งและคอนโทรลเลอร์ในเครื่องสูงสุดสี่ตัว Linux 1.0.6 มีผังแบ่งหน้าจอใหม่ แต่คงไลบรารีและตัวตรวจสอบเดิมที่ทดสอบกับ v0.1.37/v0.1.38.1 ไม่รวมการรองรับรุ่นดัดแปลงของ Windows ใน Tag Team แบบสี่หน้าจอจะแสดงคำใบ้ boost เดิมโดยไม่มีไอคอนซ้อนเพิ่ม Char Package ปิดตัวละครปรับแต่งในการเล่นออนไลน์เอง การทดสอบอัตโนมัติไม่แทนการแข่งขันจริง ยังไม่ได้ตรวจสอบ Linux แบบเนทีฟและ rollback ออนไลน์ ไม่รับประกันทุกเวอร์ชันในอนาคตหรือการปราศจาก desync ทั้งหมด
 
 [CHANGELOG](../../CHANGELOG.md)
 
 ## ดาวน์โหลดและวิดีโอสาธิต
 
-[**Windows x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.3-beta/BT3-SparkingControls-1.0.3-Beta-Windows.zip) · [**Linux x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.3-beta/BT3-SparkingControls-1.0.3-Beta-Linux-x64.zip) · [**1.0.3 Beta**](https://github.com/vini2227/BT3-SparkingControls/releases/tag/v1.0.3-beta)
+[**Windows x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.6-beta/BT3-SparkingControls-1.0.6-Beta-Windows.zip) · [**Linux x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.6-beta/BT3-SparkingControls-1.0.6-Beta-Linux-x64.zip) · [**1.0.6 Beta**](https://github.com/vini2227/BT3-SparkingControls/releases/tag/v1.0.6-beta)
 
-[▶ Gameplay demo (recorded for 1.0 Beta) — MP4, 167 MiB](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-1.0-Beta-Gameplay-Demo.mp4) · [TXT](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.3-beta/BT3-SparkingControls-Controls-and-Setup-Guide.txt) · [SHA256](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.3-beta/SHA256SUMS.txt)
+[▶ Gameplay demo (recorded for 1.0 Beta) — MP4, 167 MiB](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-1.0-Beta-Gameplay-Demo.mp4) · [TXT](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.6-beta/BT3-SparkingControls-Controls-and-Setup-Guide.txt) · [SHA256](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.6-beta/SHA256SUMS.txt)
 
 ## การติดตั้ง
 
@@ -95,7 +93,7 @@ bash start.sh --check /path/to/Tenkaichi3Decomp
 
 ## ความเข้ากันได้ ออนไลน์ และการทดสอบ
 
-แปลงแพ็กเก็ตควบคุมท้องถิ่น 18 ไบต์ก่อนเก็บตัวอย่างเครือข่าย อีกฝ่ายได้รับอินพุต BT3 เดิม ไม่แก้ไขอินพุตระยะไกลหรือฟังก์ชันตัดสินการต่อสู้ ตรวจสัญลักษณ์ ฟังก์ชันเต็ม 61 รายการและการอ้างอิงเพื่อรับการเปลี่ยนที่อยู่ที่เข้ากันได้ การเปลี่ยนโครงสร้างหรือไม่มีสัญลักษณ์อาจต้องอัปเดต ตรวจผ่าน Linux v0.1.37 และ v0.1.38.1 แต่ไม่รับประกันทุกเวอร์ชัน การแมปธรรมดาไม่เพิ่ม sleep จับ/R3 ใช้สองตัวอย่างต่อช่วง การกดครั้งที่สองมาช้าประมาณ 33 ms ที่ 60 Hz การ์ดใช้จังหวะ/การยืนยันเดิม ระยะ ช่วงเวลาและ rollback ยังมีผล ผ่านการตรวจแพ็กเก็ต/ABI Windows 1,337,289 รายการ แพ็กเก็ต 445,763 และ loader จำลอง 9 รายการต่อเวอร์ชัน Linux รวมทั้ง launcher 2,250 คีย์ลัด 93 ผัง 693 ต่อ frontend และพรีวิว 12 สถานะ UI Linux ทดสอบบน Windows .NET ไม่ใช่ Mono/X11 ยังไม่ได้ยืนยัน Linux จริง จอยจริง หรือแมตช์/rollback ออนไลน์จริง จึงไม่รับประกันว่าจะไม่เกิด desync
+Windows และ Linux: เมนูทั้งสี่อยู่ด้านซ้ายภายในมุมมองของผู้เล่นแต่ละคน โดยมีขนาดคงที่สำหรับ 4:3, 16:9, 16:10 และจอกว้างพิเศษ Windows: ตรวจสอบความเข้ากันได้แบบปรับตัวและตรวจจับ Decomp ต้นฉบับ, Char Package และ Tag Team อัตโนมัติ พร้อมข้อมูลตัวละครปรับแต่งและคอนโทรลเลอร์ในเครื่องสูงสุดสี่ตัว Linux 1.0.6 มีผังแบ่งหน้าจอใหม่ แต่คงไลบรารีและตัวตรวจสอบเดิมที่ทดสอบกับ v0.1.37/v0.1.38.1 ไม่รวมการรองรับรุ่นดัดแปลงของ Windows ใน Tag Team แบบสี่หน้าจอจะแสดงคำใบ้ boost เดิมโดยไม่มีไอคอนซ้อนเพิ่ม Char Package ปิดตัวละครปรับแต่งในการเล่นออนไลน์เอง การทดสอบอัตโนมัติไม่แทนการแข่งขันจริง ยังไม่ได้ตรวจสอบ Linux แบบเนทีฟและ rollback ออนไลน์ ไม่รับประกันทุกเวอร์ชันในอนาคตหรือการปราศจาก desync ทั้งหมด
 
 ## ซอร์สโค้ดและใบอนุญาต
 

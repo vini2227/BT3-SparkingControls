@@ -1,13 +1,7 @@
 {
-  "version": "1.0.3 Beta",
-  "date": "2026-10-22",
-  "windows_exe_sha256": "1bba1c8149c9584a563f2c33750b2d9520fe6d90ef19d953ca073a7d7dcb1cea",
-  "windows_filter_sha256": "168590e30ab009368d548d13ea70d81808f2958e30f262b35ead7ec82d02e99e",
-  "linux_filter_sha256": "b5d8a1af0c7172a1516dcc21283018b0f1de64d7cec4e7275671f50d8810c25c",
-  "only_filter_source_difference": "export annotation",
-  "shared_files_identical": [
-    "UiLanguage.cs",
-    "Transformations.cs"
-  ],
-  "launcher": "Current 16-language launcher, sphere icon, 3 placements, persisted HUD controls and configurable shortcuts; Linux backend uses X11 and /proc memory reader."
+  "version": "1.0.6 Beta",
+  "frontend_sha256": "de3e4cb7ad0ce3b69bca73f35552ef02983c1fa9d42cd39771e1fee60d1754fe",
+  "native_sha256": "311455da989ed41848deeebdfe209e96b573d5d5b848c0b6aafb2162a757fda5",
+  "scope": "Split-screen HUD update; native resolver and library unchanged; no Windows variant support",
+  "build": "Managed frontend compiled with .NET Framework C# compiler; build.sh supports Mono mcs on Linux. Native library retained unchanged from tested 1.0.3."
 }

@@ -8,25 +8,23 @@
 
 ---
 
-# BT3 Sparking Controls — 1.0.3 Beta
+# BT3 Sparking Controls — 1.0.6 Beta
 
 ## 操作與安裝指南
 
 為 Tenkaichi3Decomp 提供受 Sparking! ZERO 啟發的操作配置與戰鬥 HUD。動畫、傷害、氣力消耗、距離、角色能力和動作窗口仍遵循 BT3。安裝包不包含遊戲或其資源。
 
-## 1.0.3 Beta 版本更新
+## 1.0.6 Beta 版本更新
 
-- 按住 R2 + L1 快速上升，或 R2 + L2 快速下降。單獨按 L1/L2 仍為普通移動；舊的雙擊快捷操作已停用。快速第二次按鍵可能需要等待遊戲原有的七影格雙擊視窗結束。
-- 持續按住 R1 時放開 ○，輔助程式會請求退出反擊架勢並恢復防禦，仍遵守 BT3 動畫原有的退出時機。支援不同的按住時間，無需再次按 R1。
-- 四種選單以 100 毫秒淡入、80 毫秒淡出，不增加輸入等待。Linux 會立即顯示已變更或播放動畫的畫面。
+- Windows 和 Linux：四類選單均位於各玩家視埠左側，在 4:3、16:9、16:10 和超寬螢幕下保持穩定尺寸。Windows：自適應相容性檢查，自動辨識原版 Decomp、Char Package 和 Tag Team；讀取自訂角色資料，支援最多四個本機控制器。Linux 1.0.6 包含新的分割畫面配置，但保留原生程式庫和解析器，已檢查的目標為 v0.1.37/v0.1.38.1；不包含 Windows 分支支援。Tag Team 四視圖模式保留原生 boost 提示，不加入額外覆蓋圖示。Char Package 本身禁止自訂角色連線。自動化測試不等同於實際對戰；原生 Linux 和線上回滾尚未驗證。無法保證支援所有未來版本或完全避免不同步。
 
 [CHANGELOG](../../CHANGELOG.md)
 
 ## 下載與示範
 
-[**Windows x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.3-beta/BT3-SparkingControls-1.0.3-Beta-Windows.zip) · [**Linux x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.3-beta/BT3-SparkingControls-1.0.3-Beta-Linux-x64.zip) · [**1.0.3 Beta**](https://github.com/vini2227/BT3-SparkingControls/releases/tag/v1.0.3-beta)
+[**Windows x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.6-beta/BT3-SparkingControls-1.0.6-Beta-Windows.zip) · [**Linux x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.6-beta/BT3-SparkingControls-1.0.6-Beta-Linux-x64.zip) · [**1.0.6 Beta**](https://github.com/vini2227/BT3-SparkingControls/releases/tag/v1.0.6-beta)
 
-[▶ Gameplay demo (recorded for 1.0 Beta) — MP4, 167 MiB](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-1.0-Beta-Gameplay-Demo.mp4) · [TXT](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.3-beta/BT3-SparkingControls-Controls-and-Setup-Guide.txt) · [SHA256](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.3-beta/SHA256SUMS.txt)
+[▶ Gameplay demo (recorded for 1.0 Beta) — MP4, 167 MiB](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-1.0-Beta-Gameplay-Demo.mp4) · [TXT](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.6-beta/BT3-SparkingControls-Controls-and-Setup-Guide.txt) · [SHA256](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.6-beta/SHA256SUMS.txt)
 
 ## 安裝
 
@@ -95,7 +93,7 @@ bash start.sh --check /path/to/Tenkaichi3Decomp
 
 ## 相容性、連線與測試
 
-輔助程式在網路取樣前轉換本地 18 位元組控制器封包，對手收到 BT3 原生輸入，不修改遠端輸入或戰鬥決策函式。透過符號、61 個完整函式及參照驗證相容位址變動；結構改變或缺少符號仍可能需要更新。Linux v0.1.37 與 v0.1.38.1 已通過相容檢查，不保證支援所有舊版或新版。簡單映射不額外加入 sleep；抓投／R3 每階段兩次取樣，60 Hz 時第二次按下約晚 33 毫秒。卡片遵循原生時序與確認，距離、窗口及 rollback 仍影響結果。通過 Windows 1,337,289 項封包／ABI、每個 Linux 版本 445,763 項封包及 9 項模擬載入器、每前端 2,250 項啟動器、93 項快捷鍵、693 項版面檢查及 12 個預覽狀態。Linux 介面於 Windows .NET 而非 Mono/X11 測試。實際 Linux 執行、實體控制器及真實連線／rollback 尚未驗證，不保證完全無失步。
+Windows 和 Linux：四類選單均位於各玩家視埠左側，在 4:3、16:9、16:10 和超寬螢幕下保持穩定尺寸。Windows：自適應相容性檢查，自動辨識原版 Decomp、Char Package 和 Tag Team；讀取自訂角色資料，支援最多四個本機控制器。Linux 1.0.6 包含新的分割畫面配置，但保留原生程式庫和解析器，已檢查的目標為 v0.1.37/v0.1.38.1；不包含 Windows 分支支援。Tag Team 四視圖模式保留原生 boost 提示，不加入額外覆蓋圖示。Char Package 本身禁止自訂角色連線。自動化測試不等同於實際對戰；原生 Linux 和線上回滾尚未驗證。無法保證支援所有未來版本或完全避免不同步。
 
 ## 原始碼與授權
 

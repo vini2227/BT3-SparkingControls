@@ -1,3 +1,57 @@
+# 1.0.6 Beta — Changes
+
+This release contains all changes since public 1.0.3 Beta. Windows and Linux packages are available; platform-specific differences are listed below.
+
+## Automatic Windows variant detection
+
+- Select the game's EXE as usual. The launcher automatically distinguishes the original Decomp, the supplied Char Package 0.1.38.1 Windows build and the supplied Tag Team Beta Windows x64 build. No variant selector is needed.
+- Check native interfaces and symbolic references before applying a profile. Filenames and hashes alone do not grant compatibility. Timestamp and section-address changes are accepted by the tested profiles; incompatible native interface changes are rejected.
+- Preserve the original input payload byte-for-byte and keep the original compatibility path. Saved preferences, controller mappings and regular single/two-view HUD behavior remain intact.
+- Char Package: use the variant's native transformation/fusion queries. Read active character/replacement names, form labels, portrait paths and fallback base portraits from the game's package tables, respecting its assigned IDs and enabled packages. Its custom characters remain disabled online by the game itself.
+- Tag Team: use the variant's controller-to-fighter/view mapping and private state banks for up to four local controllers. Attack, transformation, fusion and team-switch panels stay in their own quarter at 4:3, 16:9, 16:10 and ultrawide ratios. Game restrictions on changing/fusing an extra fighter still apply.
+
+## Validation and current limits
+
+- Original Decomp: 1,337,289 packet/ABI/native-command checks passed.
+- Char Package: 1,337,289 packet/ABI/native-command checks passed.
+- Tag Team: 1,361,661 packet/ABI/native-command checks passed, including four-controller state isolation. An additional 696-check focused run verified four-controller output with executable code protected read/execute and private state left writable.
+- Existing visual regressions: 1,056 card-layout, 425 split attack, 693 responsive and 180 fade checks passed. New variant HUD/metadata tests: 1,299 checks passed.
+- Native packet tests use emulated query results and exercise selected actual native command functions. They do not replace a live game test. Live local/online play, physical controllers and rollback end-to-end were not tested.
+- In Tag Team's four-view mode, the extra Square/Circle replacement over native boost hints is not drawn: the original hints remain. The game exposes only two shared prompt-state rows to the existing reader; guessing their owner would risk covering another player's HUD. The remapped controls and all four menu types remain active.
+- Support is for the supplied Windows variants with the reviewed interfaces, not arbitrary forks or every future revision. The Linux resolver is unchanged.
+
+---
+
+## Adaptive Windows compatibility
+
+- Recognize the updated installed game without changing its files or adding its hash to an allowlist.
+- Keep the reviewed battle/HUD signatures and symbolic address checks. When the input collection body changes, validate a bounded Windows input boundary contract instead: entry ABI and register preservation, exact 18-byte active-low packet writer, return path, and the native online sampling caller.
+- Resolve repeated compiler-local COFF names in their function emission group. Unrelated variables with the same name no longer cause a false incompatibility or become interchangeable targets.
+- Preserve the primary compatibility failure in diagnostic logs if the legacy profile also fails.
+- Keep the existing historical profiles, controls, preferences, fades and all four splitscreen menus. The native input payload is unchanged.
+
+This is bounded compatibility detection, not support for arbitrary future game changes. Different packet layouts, entry ABI, battle interfaces or online sampling code still require review. The static contract does not prove arbitrary code behavior or online synchronization.
+
+Validation: current installed Windows executable accepted; changed timestamps, relocated sections and input-reader alignment accepted; changed packet output/return, native interfaces, sampling caller, unrelated duplicate-symbol targets and stripped symbols rejected. 1,337,289 packet/ABI/native-command checks passed at three allocation addresses against the current game's native functions. Live online gameplay and older executable runtime tests were not performed. The Linux resolver is unchanged.
+
+---
+
+## Local splitscreen menus — Windows and Linux
+
+- Detect local split mode from the battle screen setting, independently of visible menus. Online remains a single local view.
+- Position both attack menus at the bottom-left of their own player viewport. Exclude decorative letterbox/pillarbox regions before dividing the rendered picture.
+- Keep size and position stable when the other player opens or closes their menu. Both players use the same typography scale.
+- Use compact scaling with safe bounds at 4:3, 16:9, 16:10, 21:9 and 32:9. Existing Centered/Expanded/Classic choices apply within each viewport.
+- Transformations, fusion and teammate switching also use each player viewport with a left anchor. Their card grid, header spacing and size remain identical across the three menu types, including empty slots.
+- Preserve current single-screen positioning, attack visibility, frame option, settings and fade animation.
+- Read-only HUD change; native input payload and Linux shared library are byte-for-byte unchanged.
+
+Validation: 1,056 card-menu checks, 425 attack splitscreen cases, 693 responsive checks and 180 fade checks per frontend under Windows .NET. Seven render resolutions, three placements, both frame styles, solo/both visible menus and letterboxing. Windows extracted executable compatibility check passed. Native Linux runtime and live split gameplay remain unverified.
+
+Linux 1.0.6 includes the split-screen HUD improvements. Its native library and compatibility resolver remain unchanged from 1.0.3: reviewed official Linux v0.1.37 and v0.1.38.1 only. Automatic Char Package / Tag Team detection and the adaptive Windows input-boundary checks are Windows-only. The common release number does not imply identical platform support.
+
+---
+
 # BT3 Sparking Controls 1.0.3 Beta — October 22, 2026
 
 This release includes all improvements since the public 1.0 Beta.

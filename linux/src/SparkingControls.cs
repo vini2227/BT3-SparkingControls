@@ -1,4 +1,4 @@
-// Standalone add-on. Build with the Windows .NET Framework C# compiler (x64).
+﻿// Standalone add-on. Build with the Windows .NET Framework C# compiler (x64).
 // The game is never edited on disk. Only our own suspended child is patched.
 using System;
 using System.IO;
@@ -126,6 +126,8 @@ sealed class Reader {
     public Reader(Memory memory,Profile profile) { m=memory;p=profile;m.Reopened+=()=>{nameCache.Clear();Array.Clear(oldSeq,0,oldSeq.Length);Array.Clear(freshAt,0,freshAt.Length);}; }
     long Sym(string n) { return p.image_base+p.symbols[n]; }
     public int AspectMilli { get { return m.I32(Sym("sAspectMilli")); } }
+    // BattleSetup.rule.screenMode is at gBattleWork + 0x08 + 0x1c. Online presents one local view.
+    public bool LocalSplit {get{return HudLayout.IsLocalSplit(m.I32(Sym("online_mode")),m.I32(Sym("gBattleWork")+0x24));}}
     public string MenuStatus {get;private set;}
     static int I(byte[] b,int off) { return BitConverter.ToInt32(b,off); }
     public TransformationPanel[] SampleTransformations() {
@@ -396,6 +398,15 @@ static class HudLayout {
         RectangleF picture=Picture(size,aspectMilli);float limit=mode==PanelLayoutMode.Classic?4f/3f:mode==PanelLayoutMode.Expanded?16f/9f:3f/2f;float width=Math.Min(picture.Width,picture.Height*limit);
         return new RectangleF(picture.X+(picture.Width-width)/2,picture.Y,width,picture.Height);
     }
+    public static bool IsLocalSplit(int onlineMode,int screenMode){return onlineMode==0&&screenMode==1;}
+    public static RectangleF PlayerArea(Size size,int aspectMilli,PanelLayoutMode mode,int side,bool localSplit){
+        if(!localSplit)return Controls(size,aspectMilli,mode);
+        RectangleF picture=Picture(size,aspectMilli);
+        var view=new RectangleF(picture.Left+(side==0?0:picture.Width/2),picture.Top,picture.Width/2,picture.Height);
+        float limit=mode==PanelLayoutMode.Classic?4f/3f:mode==PanelLayoutMode.Expanded?16f/9f:3f/2f;
+        float width=Math.Min(view.Width,view.Height*limit);
+        return new RectangleF(view.Left+(view.Width-width)/2,view.Top,width,view.Height);
+    }
     public static RectangleF Dock(RectangleF area,SizeF panel,int side,bool top) {
         float margin=area.Width*.025f,x=side==0?area.Left+margin:area.Right-margin-panel.Width;
         float y=top?area.Top+area.Height*.30f:area.Bottom-area.Height*.065f-panel.Height;
@@ -447,6 +458,7 @@ sealed class Overlay : Form {
     TransformationPanel[] transformations=new TransformationPanel[0];
     MoveRow[][] rows=new MoveRow[2][]; TechniquePrompt[] prompts=new TechniquePrompt[0]; readonly bool preview;
     readonly RectangleF[] panelBounds=new RectangleF[2];
+    bool localSplit;
     int aspectMilli;readonly LayoutShortcut layoutShortcut=new LayoutShortcut();readonly FrameShortcut frameShortcut=new FrameShortcut();bool frameShortcutNotice,attackShortcutNotice;readonly AttackShortcut attackShortcut=new AttackShortcut();DateTime layoutNoticeUntil=DateTime.MinValue;
     RectangleF ControlArea { get { return HudLayout.Controls(ClientSize,aspectMilli,PanelPlacement.Mode); } }
     public void SetPreviewAspect(int value) { aspectMilli=value; }
@@ -487,7 +499,7 @@ sealed class Overlay : Form {
             try{if(attackShortcut.Update(attackDown,true)){attackShortcutNotice=true;frameShortcutNotice=false;lastVisualKey=null;layoutNoticeUntil=DateTime.UtcNow.AddSeconds(1.8);}}catch(IOException ex){HudReadError("attack shortcut setting",ex);}catch(UnauthorizedAccessException ex){HudReadError("attack shortcut setting",ex);}
 
             // A transient prompt/card read must not blank the other independent components.
-            try{aspectMilli=reader.AspectMilli;}catch(IOException ex){HudReadError("aspect",ex);}
+            try{aspectMilli=reader.AspectMilli;localSplit=reader.LocalSplit;}catch(IOException ex){HudReadError("aspect",ex);}
             try{rows=reader.Sample();}catch(IOException ex){rows=new MoveRow[2][];HudReadError("attacks",ex);}
             try{prompts=reader.SamplePrompts();}catch(IOException ex){prompts=new TechniquePrompt[0];HudReadError("prompts",ex);}
             try{transformations=reader.SampleTransformations();}catch(IOException ex){transformations=new TransformationPanel[0];HudReadError("cards",ex);}
@@ -571,7 +583,7 @@ sealed class Overlay : Form {
     }
     void PresentAlphaHud() {
         if(preview || ClientSize.Width<1 || ClientSize.Height<1)return;
-        var key=new StringBuilder();key.Append(Bounds.ToString()).Append(aspectMilli).Append(PanelPlacement.Mode).Append(HudPreferences.ShowAttacks).Append(AttackAppearance.OuterFrame).Append(DateTime.UtcNow<layoutNoticeUntil);
+        var key=new StringBuilder();key.Append(Bounds.ToString()).Append(aspectMilli).Append(localSplit).Append(PanelPlacement.Mode).Append(HudPreferences.ShowAttacks).Append(AttackAppearance.OuterFrame).Append(DateTime.UtcNow<layoutNoticeUntil);
         foreach(var set in rows){key.Append('|');if(set!=null)foreach(var row in set)key.Append(row.Button).Append(row.Name).Append(row.Cost).Append(row.Available).Append(row.Selected);}
         foreach(var set in transformations){key.Append(set.Side).Append(set.OnlineLocal).Append(set.IsSwitch).Append(set.IsFusion).Append(set.HasFusion).Append(set.HasForms);foreach(var item in set.Options)key.Append(item.Character).Append(':').Append(item.Health).Append(':').Append(item.HealthMax).Append(':').Append(item.Cost).Append(':').Append(item.Available).Append(':').Append(transformationArt.Get(item.Character)!=null);}
         foreach(var prompt in prompts)key.Append(prompt.Button).Append(prompt.Project(ClientSize).ToString());
@@ -589,8 +601,10 @@ sealed class Overlay : Form {
         return new RectangleF(source.X+(source.Width-width)/2,source.Y+(source.Height-height)/2,width,height);
     }
     void DrawTransformations(Graphics g,TransformationPanel panel) {
-        RectangleF area=ControlArea;
+        bool split=localSplit&&!panel.OnlineLocal;
+        RectangleF area=HudLayout.PlayerArea(ClientSize,aspectMilli,PanelPlacement.Mode,panel.DisplaySide,split);
         float scale=Math.Max(.65f,Math.Min(1.8f,area.Height/900f));
+        if(split)scale*=.70f;
         scale=Math.Min(scale,Math.Min(area.Width*.94f/350f,area.Height*.64f/274f));
         float cardW=104*scale,cardH=108*scale,gap=7*scale,pad=12*scale;
         int[] gridX={0,1,1,2};float[] gridY={.5f,0,1,.5f};
@@ -598,7 +612,7 @@ sealed class Overlay : Form {
         float tabs=27*scale;
         float width=3*cardW+2*gap+2*pad;
         float height=2*cardH+gap+2*pad+tabs;
-        RectangleF dock=HudLayout.Dock(area,new SizeF(width,height),panel.DisplaySide,true);float x=dock.X,y=dock.Y;
+        RectangleF dock=HudLayout.Dock(area,new SizeF(width,height),split?0:panel.DisplaySide,true);float x=dock.X,y=dock.Y;
         panelBounds[panel.DisplaySide]=dock;
         // Cards are drawn directly over the game; no outer panel background or border.
         if(panel.HasForms&&panel.HasFusion&&!panel.IsSwitch) {
@@ -654,15 +668,24 @@ sealed class Overlay : Form {
         rows=new MoveRow[2][];transformations=new[]{new TransformationPanel {Side=0,Options=new[]{new TransformationOption {Slot=0,Character=4,Cost=1,Available=true},new TransformationOption {Slot=1,Character=5,Cost=2,Available=true},new TransformationOption {Slot=2,Character=6,Cost=3,Available=false}}}};
     }
     void DrawPanel(Graphics g,int side,MoveRow[] moves) {
-        RectangleF area=ControlArea;
+        RectangleF area=HudLayout.PlayerArea(ClientSize,aspectMilli,PanelPlacement.Mode,side,localSplit);
         float scale=.75f*Math.Max(.65f,Math.Min(1.8f,area.Height/900f));
         scale=Math.Min(scale,area.Height*.65f/(48*moves.Length+24));
-        float commandWidth,costWidth;bool split=rows[0]!=null && rows[1]!=null;
-        float margin=area.Width*.025f,slotWidth=split?(area.Width-3*margin)/2:area.Width-2*margin;
-        scale=Math.Min(scale,slotWidth/400f);
-        float w=MeasurePanelWidth(g,menuFamily,moves,scale,(int)area.Width,split,out commandWidth,out costWidth,menuMetrics),rh=48*scale;
-        float pad=12*scale;w=Math.Min(w,slotWidth-2*pad);float frameW=w+2*pad;
-        panelBounds[side]=HudLayout.Dock(area,new SizeF(frameW,rh*moves.Length+2*pad),side,false);
+        if(localSplit)scale=Math.Min(scale*.70f,area.Width*.90f/824f);
+        float commandWidth,costWidth;
+        float margin=area.Width*.025f,slotWidth=area.Width-2*margin;
+        // Each local half has its own left anchor. Neither size nor position depends on the other menu.
+        float w=MeasurePanelWidth(g,menuFamily,moves,scale,localSplit?int.MaxValue:(int)area.Width,false,out commandWidth,out costWidth,menuMetrics);
+        if(localSplit){
+            float available=area.Width*.90f;
+            w=Math.Min(w,available-24*scale);
+        }else{
+            // Keep the established single-view layout.
+            scale=Math.Min(scale,slotWidth/400f);
+            w=MeasurePanelWidth(g,menuFamily,moves,scale,(int)area.Width,false,out commandWidth,out costWidth,menuMetrics);
+        }
+        float rh=48*scale,pad=12*scale;w=Math.Min(w,slotWidth-2*pad);float frameW=w+2*pad;
+        panelBounds[side]=HudLayout.Dock(area,new SizeF(frameW,rh*moves.Length+2*pad),localSplit?0:side,false);
         float frameX=panelBounds[side].X,frameY=panelBounds[side].Y;
         if(AttackAppearance.OuterFrame)menuSkin.Frame(g,panelBounds[side],scale);float x=frameX+pad,y=frameY+pad;
         for(int i=0;i<moves.Length;i++) {

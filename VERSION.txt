@@ -1,4 +1,2 @@
-BT3 Sparking Controls
-1.0.3 Beta
-Counter release acknowledged before returning to guard
-Build date: 2026-10-22
+BT3 Sparking Controls 1.0.6 Beta
+Windows and Linux — see CHANGELOG.md for platform differences.

@@ -20,32 +20,40 @@ sealed class TransformationPanel {
     public int DisplaySide {get{return OnlineLocal?0:Side;}}public TransformationOption[] Options;
 }
 sealed class TransformationNames {public string[] names=new string[0];public int[][] faces=new int[0][];}
+sealed class CustomCharacterArt {public string Name,Label,Portrait;public int Base;public bool NameSet,LabelSet;}
 sealed class TransformationArt : IDisposable {
+    readonly Dictionary<int,CustomCharacterArt> custom=new Dictionary<int,CustomCharacterArt>();int generation;
+    public void SetCustom(int id,CustomCharacterArt value){lock(cache){CustomCharacterArt old;custom.TryGetValue(id,out old);if(old==null&&value==null)return;if(old!=null&&value!=null&&old.Name==value.Name&&old.Label==value.Label&&old.Portrait==value.Portrait&&old.Base==value.Base&&old.NameSet==value.NameSet&&old.LabelSet==value.LabelSet)return;if(value==null)custom.Remove(id);else custom[id]=value;generation++;Bitmap image;if(cache.TryGetValue(id,out image)&&image!=null)image.Dispose();cache.Remove(id);}}
     readonly string folder;readonly TransformationNames metadata;
     readonly Dictionary<int,Bitmap> cache=new Dictionary<int,Bitmap>();bool disposed;
     public TransformationArt(string exe) {
         folder=Path.GetDirectoryName(exe??"");
         try {metadata=new JavaScriptSerializer().Deserialize<TransformationNames>(File.ReadAllText(Path.Combine(Program.Root,"assets","transform-characters.json")));}catch(IOException){}catch(ArgumentException){}
     }
-    public string Name(int id) {return metadata!=null && metadata.names!=null && id>=0 && id<metadata.names.Length?metadata.names[id]:"#"+id;}
+    string OriginalName(int id) {return metadata!=null && metadata.names!=null && id>=0 && id<metadata.names.Length?metadata.names[id]:"#"+id;}
+    public string Name(int id){lock(cache){CustomCharacterArt c;if(!custom.TryGetValue(id,out c))return OriginalName(id);string fallback=OriginalName(c.Base);string[] lines=fallback.Split('\n');string name=c.NameSet?c.Name:lines[0];string label=c.LabelSet?c.Label:(lines.Length>1?lines[1]:"");return name+(string.IsNullOrEmpty(label)?"":"\n"+label);}}
     public RectangleF Crop(int id) {
+        CustomCharacterArt c;lock(cache){if(custom.TryGetValue(id,out c)&&string.IsNullOrEmpty(c.Portrait))id=c.Base;}
         int x=128,y=155;if(metadata!=null && metadata.faces!=null && id>=0 && id<metadata.faces.Length && metadata.faces[id].Length==2){x=metadata.faces[id][0];y=metadata.faces[id][1];}
         return new RectangleF(Math.Max(0,Math.Min(128,x-64)),Math.Max(0,Math.Min(384,y-56)),128,128);
     }
     public Bitmap Get(int id) {
+        int epoch;CustomCharacterArt customArt;
         lock(cache) {
             Bitmap ready;if(cache.TryGetValue(id,out ready))return ready;
             if(disposed || id<0 || id>=255)return null;
-            cache[id]=null;
+            cache[id]=null;epoch=generation;custom.TryGetValue(id,out customArt);
         }
         ThreadPool.QueueUserWorkItem(_=>{
             Bitmap art=null;
             try {
-                string relative=Path.Combine("pzs3us1",(0x2f8+id).ToString("D5")+".bin");
+                int pictureId=customArt==null?id:customArt.Base;
+                string relative=Path.Combine("pzs3us1",(0x2f8+pictureId).ToString("D5")+".bin");
                 string path=Path.Combine(folder,"mods",relative);if(!File.Exists(path))path=Path.Combine(folder,"gamedata",relative);
+                if(customArt!=null&&!string.IsNullOrEmpty(customArt.Portrait))path=Path.IsPathRooted(customArt.Portrait)?customArt.Portrait:Path.Combine(folder,customArt.Portrait);
                 var info=new FileInfo(path);if(info.Exists && info.Length>=8 && info.Length<8*1024*1024)art=Decode(File.ReadAllBytes(path));
             }catch(IOException){}catch(UnauthorizedAccessException){}catch(ArgumentException){}catch(OverflowException){}
-            lock(cache){if(disposed){if(art!=null)art.Dispose();}else cache[id]=art;}
+            lock(cache){if(disposed||epoch!=generation){if(art!=null)art.Dispose();if(epoch!=generation)cache.Remove(id);}else cache[id]=art;}
         });
         return null;
     }

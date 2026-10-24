@@ -8,25 +8,23 @@
 
 ---
 
-# BT3 Sparking Controls — 1.0.3 Beta
+# BT3 Sparking Controls — 1.0.6 Beta
 
 ## 操作・セットアップガイド
 
 Tenkaichi3Decomp 向けの、Sparking! ZERO に着想を得た操作配置と戦闘 HUD です。アニメーション、ダメージ、気力消費、射程、能力、行動可能なタイミングは BT3 の仕様に従います。ゲームとその素材は含まれません。
 
-## 1.0.3 Beta の変更点
+## 1.0.6 Beta の変更点
 
-- R2 + L1 長押しで高速上昇、R2 + L2 で高速下降します。L1/L2 単独では通常移動のままです。旧ダブルタップ操作は無効です。素早い2回目の入力は、ゲーム本来の7フレームの受付時間が終わるまで待つ場合があります。
-- R1 を押したまま ○ を離すと、カウンター姿勢の終了を要求してガードに戻ります。BT3 本来のアニメーション終了受付時間に従います。長押し時間が異なっても、R1 の押し直しは不要です。
-- 4種類のメニューが100ミリ秒でフェードイン、80ミリ秒でフェードアウトします。入力の待ち時間は追加しません。Linux では変更・アニメーションのあるフレームを即座に表示します。
+- Windows・Linux共通：4種類のメニューを各プレイヤーの表示領域内の左側に配置し、4:3、16:9、16:10、ウルトラワイドで安定したサイズを維持します。Windowsでは互換性検証を改善し、通常版Decomp、Char Package、Tag Teamを自動判別。カスタムキャラクター情報と最大4台のローカルコントローラーに対応します。Linux 1.0.6には新しい分割画面配置を含みますが、ネイティブライブラリと解析処理は従来のままで、検証対象はv0.1.37/v0.1.38.1です。Windowsの派生版対応は含みません。Tag Teamの4画面では追加のboostアイコンを重ねず、元の表示を残します。Char Package自体がカスタムキャラクターのオンライン使用を無効にしています。自動テストは実際の対戦を保証せず、ネイティブLinuxとオンラインのロールバックは未検証です。すべての将来版への対応や同期ずれ防止は保証できません。
 
 [CHANGELOG](../../CHANGELOG.md)
 
 ## ダウンロードと実演
 
-[**Windows x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.3-beta/BT3-SparkingControls-1.0.3-Beta-Windows.zip) · [**Linux x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.3-beta/BT3-SparkingControls-1.0.3-Beta-Linux-x64.zip) · [**1.0.3 Beta**](https://github.com/vini2227/BT3-SparkingControls/releases/tag/v1.0.3-beta)
+[**Windows x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.6-beta/BT3-SparkingControls-1.0.6-Beta-Windows.zip) · [**Linux x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.6-beta/BT3-SparkingControls-1.0.6-Beta-Linux-x64.zip) · [**1.0.6 Beta**](https://github.com/vini2227/BT3-SparkingControls/releases/tag/v1.0.6-beta)
 
-[▶ Gameplay demo (recorded for 1.0 Beta) — MP4, 167 MiB](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-1.0-Beta-Gameplay-Demo.mp4) · [TXT](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.3-beta/BT3-SparkingControls-Controls-and-Setup-Guide.txt) · [SHA256](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.3-beta/SHA256SUMS.txt)
+[▶ Gameplay demo (recorded for 1.0 Beta) — MP4, 167 MiB](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-1.0-Beta-Gameplay-Demo.mp4) · [TXT](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.6-beta/BT3-SparkingControls-Controls-and-Setup-Guide.txt) · [SHA256](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.6-beta/SHA256SUMS.txt)
 
 ## インストール
 
@@ -95,7 +93,7 @@ R2 を押すと技・入力・コストを表示します。**Centered** は中�
 
 ## 互換性・オンライン・検証
 
-ネットワーク取得前のローカル 18 バイト入力パケットを変換し、相手には BT3 の入力を送ります。相手の入力や戦闘判断関数は変更しません。シンボルと 61 個の完全な関数／参照を検証し、互換性のあるアドレス変更に対応します。構造変更やシンボル欠落では更新が必要な場合があります。Linux v0.1.37 と v0.1.38.1 を確認済みですが、全バージョンは保証しません。単純な割り当てに sleep は追加しません。つかみと R3 は各段階 2 サンプルで、60 Hz では 2 回目が約 33 ms 後です。カードは元のタイミング／確認に従い、距離、受付時間、ロールバックの影響も受けます。Windows 入力／ABI 1,337,289 件、各 Linux 版の入力 445,763 件とローダーエミュレーション 9 件、各 UI のランチャー 2,250 件、キー 93 件、配置 693 件とプレビュー 12 状態が成功。Linux UI は Windows .NET で検証し、Mono/X11 では未検証です。実 Linux、実コントローラー、実オンライン／ロールバックは未確認で、同期ずれが起きない保証はありません。
+Windows・Linux共通：4種類のメニューを各プレイヤーの表示領域内の左側に配置し、4:3、16:9、16:10、ウルトラワイドで安定したサイズを維持します。Windowsでは互換性検証を改善し、通常版Decomp、Char Package、Tag Teamを自動判別。カスタムキャラクター情報と最大4台のローカルコントローラーに対応します。Linux 1.0.6には新しい分割画面配置を含みますが、ネイティブライブラリと解析処理は従来のままで、検証対象はv0.1.37/v0.1.38.1です。Windowsの派生版対応は含みません。Tag Teamの4画面では追加のboostアイコンを重ねず、元の表示を残します。Char Package自体がカスタムキャラクターのオンライン使用を無効にしています。自動テストは実際の対戦を保証せず、ネイティブLinuxとオンラインのロールバックは未検証です。すべての将来版への対応や同期ずれ防止は保証できません。
 
 ## ソースとライセンス
 

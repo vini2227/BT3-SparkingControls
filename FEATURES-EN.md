@@ -1,4 +1,4 @@
-# BT3 Sparking Controls 1.0.3 Beta — Features and Differences
+# BT3 Sparking Controls 1.0.6 Beta — Features and Differences
 
 ## What this add-on is
 - A standalone, Sparking! ZERO-inspired control layout and battle HUD for Tenkaichi3Decomp.
@@ -66,8 +66,21 @@
 - Windows follows the game's online/offline child-process relaunch. Linux reinstalls the preload on the game's same-PID exec restart and reopens the child-memory reader when necessary; that Linux behavior still needs a real runtime test.
 - Windows package: current standalone EXE. Linux package: updated native x86-64 ELF integration plus a Mono launcher, without Wine/Proton.
 - Linux requires Mono/libgdiplus and X11 or working XWayland/compositing. Fully native Wayland overlays are not implemented. The Linux port is experimental and has not been gameplay-tested on Linux.
-- Compatible game address changes can be resolved automatically from symbols and reviewed signatures. Windows PE/COFF and Linux ELF resolvers verify 61 complete functions and their symbolic/data references; incompatible structural changes still require an update.
+- Windows uses reviewed native signatures and bounded input-boundary checks, with automatic original/Char Package/Tag Team profile detection. Linux retains its existing ELF resolver and 61-function checks. Incompatible interfaces still require review.
 - Linux compatibility was checked against official v0.1.37 and v0.1.38.1 x64 binaries. This does not claim support for every older or future build.
 - Grab and emergency sequences hold each press/release phase for two input samples to improve capture. The second press is about 33 ms later at 60 Hz; rollback, range and native action windows still apply. Transform, fusion and switching retain their native timing/acknowledgment.
 - Package validation includes 1,337,289 Windows packet checks; 445,763 Linux packet checks and 9 emulated loader checks on each of two game versions; 2,250 launcher, 93 shortcut and 693 responsive checks per frontend, plus 180 fade checks per frontend and 12 preview states. Counter tests execute the real native handler with varied hold durations, animation windows and delayed input acknowledgment.
 - Linux managed UI checks ran under Windows .NET. Native Mono/X11, real Linux LD_PRELOAD and live online/rollback behavior remain unverified.
+
+## Local splitscreen
+
+Attack panels use a stable bottom-left anchor within each player viewport, with compact shared typography and per-viewport safe areas. Opening the other menu does not move or resize a panel. Online retains its single local view.
+
+Transformation, fusion and teammate-switching menus also use their player viewport in local splitscreen, with the same card positions and stable size even when the other menu is closed. Their previous vertical position is retained.
+
+## Automatic Windows variants
+The original Decomp and the reviewed Char Package/Tag Team builds are recognized from their native interfaces after selecting the EXE. Char Package uses live package names and portraits; Tag Team has independent controls and menu viewports for up to four local players. See CHANGES-1.0.6-Beta.md for tested builds and limitations, including native boost hints in four-view mode.
+
+## 1.0.6 Beta — Platform differences
+
+Both packages include stable per-player split-screen menus. Windows additionally includes adaptive compatibility and automatic variant detection, custom character metadata and four-controller Tag Team menus. Linux retains the native library/resolver previously tested with official v0.1.37/v0.1.38.1. In four-view Tag Team, native boost hints are left visible without an additional button overlay. Char Package disables custom characters online. See CHANGELOG.md for complete tests and limitations.

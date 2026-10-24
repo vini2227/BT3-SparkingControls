@@ -1,8 +1,12 @@
-# BT3 Sparking Controls 1.0.3 Beta — Linux x64
+# BT3 Sparking Controls 1.0.6 Beta — Linux x64
 
 A Sparking! ZERO-inspired control layout and HUD for the native Linux version of Tenkaichi3Decomp. This is a beta port. Read FEATURES-EN.md for controls, differences and limitations.
 
-## Changes in 1.0.3 Beta
+## Changes in 1.0.6 Beta
+
+All four menu types are left-aligned within each local player viewport, with stable scale across supported aspect ratios. This Linux package includes the split-screen update; the adaptive Windows compatibility checks and automatic Char Package / Tag Team detection are not included. The native library and Linux resolver are unchanged.
+
+## Retained features
 
 Vertical Z Dash on R2 + L1/L2; legacy double taps disabled. Releasing Circle while holding R1 waits for native stance exit and resumes guard without another R1 press. All battle menus use 100 ms fade-in / 80 ms fade-out, with immediate dirty-frame presentation on Linux. Native BT3 animation windows still apply. Read CHANGELOG.md and the Controls and Setup Guide.
 

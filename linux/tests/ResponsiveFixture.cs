@@ -1,4 +1,4 @@
-using System;using System.IO;using System.Drawing;using System.Reflection;using System.Collections.Generic;
+﻿using System;using System.IO;using System.Drawing;using System.Reflection;using System.Collections.Generic;
 static class ResponsiveFixture {
  static int checks;
  static void Check(bool okay,string message){checks++;if(!okay)throw new Exception(message);}
@@ -41,8 +41,8 @@ static class ResponsiveFixture {
       sg.DrawString(size.Width+"x"+size.Height+" / game aspect "+aspect+" / panel "+Rectangle.Round(bounds),label,Brushes.White,10,i*240+3);
       report.Add(size+" aspect="+aspect+" picture="+picture+" safe="+safe+" moves="+bounds);
       // Split local battle panels must fit without overlapping.
-      var original=(MoveRow[][])rows.GetValue(overlay);rows.SetValue(overlay,new[]{original[0],original[0]});draw.Invoke(overlay,new object[]{g});var both=(RectangleF[])field.GetValue(overlay);
-      Check(Inside(safe,both[0])&&Inside(safe,both[1]),"Split panels escaped safe area");Check(both[0].Right<=both[1].Left+.1f,"Split panels overlap");rows.SetValue(overlay,original);
+      var original=(MoveRow[][])rows.GetValue(overlay);typeof(Overlay).GetField("localSplit",BindingFlags.Instance|BindingFlags.NonPublic).SetValue(overlay,true);typeof(Overlay).GetField("localSplit",BindingFlags.Instance|BindingFlags.NonPublic).SetValue(overlay,true);typeof(Overlay).GetField("localSplit",BindingFlags.Instance|BindingFlags.NonPublic).SetValue(overlay,true);rows.SetValue(overlay,new[]{original[0],original[0]});draw.Invoke(overlay,new object[]{g});var both=(RectangleF[])field.GetValue(overlay);
+      Check(Inside(HudLayout.PlayerArea(size,aspect,PanelPlacement.Mode,0,true),both[0])&&Inside(HudLayout.PlayerArea(size,aspect,PanelPlacement.Mode,1,true),both[1]),"Split panels escaped player safe area");Check(both[0].Right<=both[1].Left+.1f,"Split panels overlap");rows.SetValue(overlay,original);typeof(Overlay).GetField("localSplit",BindingFlags.Instance|BindingFlags.NonPublic).SetValue(overlay,false);typeof(Overlay).GetField("localSplit",BindingFlags.Instance|BindingFlags.NonPublic).SetValue(overlay,false);typeof(Overlay).GetField("localSplit",BindingFlags.Instance|BindingFlags.NonPublic).SetValue(overlay,false);
      }
     }
    }

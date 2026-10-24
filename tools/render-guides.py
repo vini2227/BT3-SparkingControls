@@ -1,6 +1,6 @@
 from pathlib import Path
 import json,re
-R=Path(__file__).resolve().parents[1];base='https://github.com/vini2227/BT3-SparkingControls';release=base+'/releases/tag/v1.0.3-beta';download=base+'/releases/download/v1.0.3-beta/'
+R=Path(__file__).resolve().parents[1];base='https://github.com/vini2227/BT3-SparkingControls';release=base+'/releases/tag/v1.0.6-beta';download=base+'/releases/download/v1.0.6-beta/'
 langs=[('en','English'),('fr','Français'),('it','Italiano'),('de','Deutsch'),('es','Español (España)'),('ar','العربية'),('id','Bahasa Indonesia'),('es-419','Español (Latinoamérica)'),('pt','Português (Brasil)'),('pl','Polski'),('ru','Русский'),('zh-Hans','简体中文'),('zh-Hant','繁體中文'),('ja','日本語'),('ko','한국어'),('th','ไทย')]
 D=json.loads((R/'docs/i18n/guide-translations.json').read_text(encoding='utf-8'))
 buttons=['□','△','X','R2','L1','L2','R2 + L1','R2 + L2','R1','R2 + □','R2 + △','R2 + ○','R2 + D-pad ↑ / ↓','R2 + D-pad ← / →','○','R1 (combo)','R1 + LS (combo)','R1 + □','R1 + LS↓ + □','LS↑ + △','R3','L3','Select / View','D-pad ↑','D-pad ←','D-pad ↓ / → (no R2)']
@@ -15,26 +15,17 @@ def nav(local):
 def downloads(title):
  return f'''## {title}
 
-[**Windows x64 ZIP**]({download}BT3-SparkingControls-1.0.3-Beta-Windows.zip) · [**Linux x64 ZIP**]({download}BT3-SparkingControls-1.0.3-Beta-Linux-x64.zip) · [**1.0.3 Beta**]({release})
+[**Windows x64 ZIP**]({download}BT3-SparkingControls-1.0.6-Beta-Windows.zip) · [**Linux x64 ZIP**]({download}BT3-SparkingControls-1.0.6-Beta-Linux-x64.zip) · [**1.0.6 Beta**]({release})
 
 [▶ Gameplay demo (recorded for 1.0 Beta) — MP4, 167 MiB]({base}/releases/download/v1.0-beta/BT3-SparkingControls-1.0-Beta-Gameplay-Demo.mp4) · [TXT]({download}BT3-SparkingControls-Controls-and-Setup-Guide.txt) · [SHA256]({download}SHA256SUMS.txt)
 '''
-raw=(R/'docs/Controls-and-Setup-Guide.txt').read_text(encoding='utf-8'); changes=raw.split('WHAT CHANGED IN 1.0.3 BETA',1)[1].split('ABOUT',1)[0].strip(); raw=raw.split('WHAT CHANGED IN 1.0.3 BETA',1)[0]+'ABOUT'+raw.split('\nABOUT',1)[1]; blocks=raw.split('\n\n');english=[]
-known={'ABOUT':'About','WINDOWS INSTALLATION':'Windows installation','LINUX INSTALLATION (NATIVE LINUX GAME)':'Linux installation — native Linux game','BASIC CONTROLS':'Basic controls','SPECIAL ATTACKS AND SKILLS':'Special attacks and skills','COUNTERS, VANISHES AND GRABS':'Counters, vanishes and grabs','TRANSFORMATIONS, FUSION AND TEAMMATE SWITCHING':'Transformations, fusion and teammate switching','HUD AND CUSTOMIZATION':'HUD and customization','DEFAULT KEYBOARD SHORTCUTS':'Default keyboard shortcuts','COMPATIBILITY, ONLINE AND TIMING':'Compatibility, online and timing','SOURCE AND LICENSE':'Source and license'}
-for block in blocks[1:]:
- block=block.strip()
- if not block:continue
- if block in known:english.append('## '+known[block]);continue
- lines=block.splitlines()
- if re.match(r'^\d+\. ',lines[0]) or lines[0].startswith('- '):english.append(block);continue
- if len(lines)>1 and all(re.match(r'^(Square|Triangle|X:|R2|L1|L2|R1|L3|Select|F[678])',s) for s in lines):english.append('\n'.join('- '+s for s in lines));continue
- english.append(' '.join(lines))
+english=[(R/'docs/English-Guide.md').read_text(encoding='utf-8').strip()]; changes=(R/'docs/Release-1.0.6.md').read_text(encoding='utf-8').split('\n\n',1)[1].split('[Full changelog]',1)[0]; known={}
 hero='<img src="desenvolvimento/assets/dragon-ball-three-stars.png" alt="BT3 Sparking Controls" width="86">'
-(R/'README.md').write_text(nav(False)+'\n\n---\n\n'+hero+'\n\n# BT3 Sparking Controls\n\n**1.0.3 Beta — Controls and Setup Guide**\n\n'+'## 1.0.3 Beta — Changes\n\n'+changes+'\n\n[Full changelog](CHANGELOG.md)\n\n'+downloads('Downloads and demonstration')+'\n'+ '\n\n'.join(english)+'\n',encoding='utf-8')
+(R/'README.md').write_text(nav(False)+'\n\n---\n\n'+hero+'\n\n# BT3 Sparking Controls\n\n**1.0.6 Beta — Controls and Setup Guide**\n\n'+'## 1.0.6 Beta — Changes\n\n'+changes+'\n\n[Full changelog](CHANGELOG.md)\n\n'+downloads('Downloads and demonstration')+'\n'+ '\n\n'.join(english)+'\n',encoding='utf-8')
 for code,entry in D.items():
  h=entry['head'];a,b,dh=headers[code];desc=entry['rows'].split('|');desc[6:6]=[entry['vertical_up'],entry['vertical_down']];assert len(desc)==len(buttons),(code,len(desc))
  table=f'| {a} | {b} |\n| --- | --- |\n'+'\n'.join('| `'+key+'` | '+value+' |' for key,value in zip(buttons,desc))
- body=f'''# BT3 Sparking Controls — 1.0.3 Beta
+ body=f'''# BT3 Sparking Controls — 1.0.6 Beta
 
 ## {entry['title']}
 

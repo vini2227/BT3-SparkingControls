@@ -1,0 +1,141 @@
+## About
+
+A Sparking! ZERO-inspired control layout and battle HUD for Tenkaichi3Decomp. BT3's original animations, damage, Ki costs, range, character abilities and combat timing windows still apply. This does not reproduce every ZERO mechanic. The game and its assets are not included.
+
+## Automatic Windows variant detection
+
+Select the game EXE as usual. The original Decomp, the supplied Char Package 0.1.38.1 Windows build and Tag Team Beta Windows x64 build are detected from their native interfaces, without a variant dropdown. Custom package names, form labels and portraits come from the active game tables; Tag Team supports independent state and menu viewports for up to four local controllers. Custom characters remain disabled online by the Char Package itself.
+
+The original input payload and preferences are preserved. Reviewed address/timestamp changes are accepted; incompatible packet, battle or network interfaces remain blocked. This does not imply support for every fork or future update. Live variant gameplay and online rollback have not been verified. In four-view Tag Team, native boost icons are left visible; the helper does not guess which fighter owns the two shared native prompt rows.
+
+## Windows installation
+
+1. Extract BT3-SparkingControls-1.0.6-Beta-Windows.zip.
+2. Run BT3-SparkingControls.exe.
+3. Click Browse and select Tenkaichi3Decomp.exe in your game installation.
+4. Choose your language, panel placement and HUD preferences.
+5. Click Save and start. Always launch the game through the helper to use it.
+
+The Windows EXE includes its helper resources. For normal use, you may share just BT3-SparkingControls.exe; the recipient still needs their own game. The full ZIP also provides source code, documentation and the AGPL-3.0 license. No modloader, game recompilation or replacement of game files is required.
+
+Settings are saved in: %LOCALAPPDATA%\BT3-SparkingControls Updating the helper does not reset saved preferences. If you move the game, select its new executable location in the launcher.
+
+## Linux installation — native Linux game
+
+1. Extract BT3-SparkingControls-1.0.6-Beta-Linux-x64.zip.
+2. Keep the entire extracted folder together, including the managed EXE,
+   libbt3sparking.so, profiles, compatibility files and assets.
+3. Install Mono with Windows Forms and System.Web.Extensions support,
+   libgdiplus and fonts for your selected language using your distribution's
+   package manager. Use an X11 session or working XWayland with compositing.
+4. Open a terminal in the extracted folder and run:
+   bash start.sh
+5. Click Browse and choose the native Linux Tenkaichi3Decomp executable,
+   not the Windows .exe.
+6. Choose your settings and click Save and start.
+
+This package is for Linux x86-64. Its managed .exe runs through Mono; Wine or Proton is not required. Native Wayland overlays are not implemented. The native library was cross-compiled with a glibc 2.35 target. Rebuilding may be necessary on a different system; source and build.sh are included.
+
+Settings are saved in: $XDG_DATA_HOME/BT3-SparkingControls/linux Default: ~/.local/share/BT3-SparkingControls/linux
+
+To check the game/library without starting gameplay: bash start.sh --check /path/to/Tenkaichi3Decomp
+
+Official Linux v0.1.37 and v0.1.38.1 executables passed compatibility checks. Real Linux Mono/X11 rendering, LD_PRELOAD execution and gameplay have not been tested here. Read README.md and VALIDATION.json in the Linux package.
+
+## Basic controls
+
+- Square: Rush attacks.
+- Triangle: Ki blasts.
+- X: Native movement and dash actions. Original double-tap X grabs remain.
+- R2: Charge Ki.
+- L1: Ascend.
+- L2: Descend.
+- R2 + L1: Vertical Z Dash upward (hold).
+- R2 + L2: Vertical Z Dash downward (hold).
+- R1: Guard outside your own supported attack combos.
+- L3: BT3's original search/lock-on action.
+- Select / View: Change camera.
+
+These labels use PlayStation-style button names. Ordinary menu navigation keeps the original game layout.
+
+## Special attacks and skills
+
+- R2 + Square: Super Attack 1.
+- R2 + Triangle: Super Attack 2.
+- R2 + Circle: Ultimate Attack, subject to native requirements.
+- R2 + D-pad Up or Down: Skill 1.
+- R2 + D-pad Left or Right: Skill 2.
+
+Special selection works while R2 is already held. These skill shortcuts are this helper's layout, not a claim of exact ZERO controls.
+
+For a chargeable special, keep holding its assigned face button to continue charging. Releasing R2 alone does not release that attack button.
+
+When the game requests a boost input, use Square together with the requested direction. The overlay replaces the old Triangle glyph while preserving the hand graphic.
+
+## Counters, vanishes and grabs
+
+Circle: Requests BT3's native counter stance, inspired by ZERO's Perception. During supported Rush/Ki combos, it takes priority over held attack buttons. It does not add ZERO's full Perception or Super Perception systems. Release Circle while retaining R1 to request the end of the counter stance and return to guard, without another R1 press. This waits for BT3's actual stance exit and respects the native animation window, for short or long holds.
+
+R1 during your own supported combos: Requests BT3's native forward vanish. It may move forward slightly. It is not a stationary teleport and does not guarantee appearing behind the opponent.
+
+R1 + left-stick direction during those combos: Requests the corresponding native directional vanish. Native Ki requirements and cancel windows apply.
+
+R1 + Square: Requests a regular grab, with priority over vanish/counter routes. The helper generates the original X-release-X sequence. Native range and action windows still apply; it cannot force an unavailable grab.
+
+R1 + left stick Down + Square: Alternate ground-grab shortcut. Use the left analog stick, not D-pad Down. The original Triangle + left stick Up command also remains available. Circle + left stick Up no longer requests the ground grab.
+
+Original double-tap X grabs remain intentionally available. D-pad Down and Right without R2 are blocked during battle to prevent accidental native commands.
+
+R3: Requests BT3's Emergency Blaster Wave through its native input sequence when eligible. It uses BT3's health cost and requirements, not ZERO's Skill Count-based Revenge Counter system. Original physical R3 transformation/fusion shortcuts are consumed during battle; the card menus generate the required native inputs internally.
+
+## Transformations, fusion and teammate switching
+
+Hold D-pad Up: Open transformation/fusion cards. Press Square, Triangle, X or Circle to select the matching card. Release D-pad Up to close the panel.
+
+L1 / R1: Switch between transformations and fusion when both are available. Empty categories are skipped. Fusion-only characters open directly on fusion.
+
+Hold D-pad Left: Open teammate-switching cards. Press the face button shown on the desired teammate card.
+
+Fusion, transformation and switching retain BT3's native partner, form, gauge, cooldown and battle-state requirements. A visible card does not bypass those requirements.
+
+All three menus use consistent card positions. Switching cards show reserve health bars; missing characters remain as empty card placeholders. Online local panels appear on the left HUD side even when you join as Player 2. This visual placement does not change the logical input side.
+
+## HUD and customization
+
+Hold R2: Display the active character's attack list, commands and costs. Available HD game button artwork is preferred; original assets are the fallback. No game artwork or HD texture pack is bundled.
+
+Panel placement options: - Centered: A balance between the center and edges. - Expanded: More space between the panels. - Classic (4:3): Original positioning within a 4:3 region.
+
+Native 4:3 positioning is preserved. Ultrawide layouts use safe regions rather than putting controls at the extreme screen edges.
+
+All four battle menus fade in over 100 ms and out over 80 ms. Closing retains only the last visual snapshot until it becomes transparent. Reopening reverses smoothly. No command waits for the fade. Losing game focus clears immediately.
+
+Show attack panel: Enable or hide the attack list. Attack panel outer frame: Optional; off by default for fresh settings. Existing saved choices are preserved during updates.
+
+## Default keyboard shortcuts
+
+- F6: Show or hide the attack panel.
+- F7: Toggle the attack panel outer frame.
+- F8: Cycle panel placement.
+
+Click a shortcut button in the launcher to assign another key or combination, clear the binding or restore its default. Duplicate bindings are rejected. Shortcuts require game focus and do not repeat while the key is held. Enable Lock shortcuts during battle to prevent in-game changes.
+
+Game path, language, placement, attack visibility, frame, shortcut bindings and shortcut lock are saved. HUD changes made during gameplay are also saved and restored the next time you open the app.
+
+The launcher includes 16 interface languages and Arabic right-to-left layout. Move and character names still come from your game's assets and language.
+
+## Compatibility, online and timing
+
+The helper translates the local 18-byte controller packet before network sampling. The peer receives native BT3 inputs. Remote controller input and combat decision functions are not patched by this integration.
+
+Windows checks reviewed native interfaces and symbolic references, with bounded input-boundary validation for compatible collection changes. It automatically selects reviewed original, Char Package and Tag Team profiles. Linux keeps its existing ELF resolver and reviewed official v0.1.37/v0.1.38.1 targets; the new Windows variant detection is not included. Missing symbols or incompatible native interfaces can still require an update. No guarantee covers every old or future build.
+
+Simple remaps do not add sleeps. Multi-step shortcuts require several native input samples. Grab and emergency sequences use two-sample press/release phases; the second press is about 33 ms later at 60 Hz. Range, native timing windows and rollback still affect whether the game accepts a command. Panel selections also follow native timing and acknowledgment.
+
+Windows validation: 4,036,239 emulated packet/ABI/native-command checks across the original game and two supplied variants, plus 696 focused four-controller checks. Existing visual regressions and 1,299 variant HUD/metadata checks passed. Linux retains 445,763 packet checks and 9 emulated loader checks for each reviewed game. Split-screen tests passed on both frontends: 1,056 card, 425 attack, 693 responsive and 180 fade checks each under Windows .NET. These are not native Mono/X11 or live online tests.
+
+These tests do not establish real-world online behavior. Live online matches, actual ping/rollback, physical-controller timing and native Linux gameplay remain unverified for this beta. Desync-free operation is not guaranteed.
+
+## Source and license
+
+Both ZIPs include source code and the AGPL-3.0 license. Windows build instructions: source/desenvolvimento/BUILD.md. Linux build instructions: README.md and build.sh. No game executable, personal settings or game texture pack is included.

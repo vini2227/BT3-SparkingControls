@@ -25,8 +25,10 @@ version=hashlib.sha256((out/'SparkingControls.payload').read_bytes()).hexdigest(
 
 if not (out/'assets').is_dir():raise FileNotFoundError('Missing desenvolvimento/assets')
 shutil.copy2(r/'LICENSE-AGPL-3.0.txt',out/'LICENSE-AGPL-3.0.txt')
-files=['AssemblyInfo.cs','SparkingControls.cs','GameButtonIcons.cs','Transformations.cs','UiLanguage.cs','OnlineSingleFile.cs','GameSession.cs','AdaptiveCompatibility.cs']
+files=['AssemblyInfo.cs','SparkingControls.cs','GameButtonIcons.cs','Transformations.cs','UiLanguage.cs','OnlineSingleFile.cs','GameSession.cs','AdaptiveCompatibility.cs','VariantSupport.cs']
 resources={n:out/n for n in ['profile.json','SparkingControls.payload','LICENSE-AGPL-3.0.txt','compatibility.json','compatibility-legacy.json']}
+for p in (out/'variants').rglob('*'):
+ if p.is_file():resources[p.relative_to(out).as_posix()]=p
 for p in (out/'assets').iterdir():
  if p.is_file():resources['assets/'+p.name]=p
 for p in src.iterdir():

@@ -5,7 +5,7 @@ import pefile
 from capstone import Cs,CS_ARCH_X86,CS_MODE_64
 from unicorn import Uc,UC_ARCH_X86,UC_MODE_64,UC_HOOK_CODE,UC_HOOK_MEM_WRITE
 from unicorn.x86_const import *
-R=Path(__file__).resolve().parents[1];p=json.loads((R/'profile.json').read_text());s=json.loads((R/'analysis/symbols.json').read_text());layout=json.loads((R/'analysis/layout.json').read_text());game=pefile.PE(layout['game']);base=p['image_base'];code=(R/'SparkingControls.payload').read_bytes();entry=layout['entry_offset']
+R=Path(__file__).resolve().parents[1];p=json.loads((R/'profile.json').read_text());s=json.loads((R/'analysis/symbols.json').read_text());layout=json.loads((R/'analysis/layout.json').read_text());layout['game']=sys.argv[sys.argv.index('--game')+1] if '--game' in sys.argv else layout['game'];game=pefile.PE(layout['game']);base=p['image_base'];code=(R/'SparkingControls.payload').read_bytes();entry=layout['entry_offset']
 if '--resolved-root' in sys.argv:
  root=Path(sys.argv[sys.argv.index('--resolved-root')+1]);p=json.loads((root/'resolved-test-profile.json').read_text(encoding='utf-8-sig'));code=(root/'resolved-test.payload').read_bytes()
  data=bytes(game.__data__);at=game.FILE_HEADER.PointerToSymbolTable;count=game.FILE_HEADER.NumberOfSymbols;strings=at+count*18;i=0;resolved={}

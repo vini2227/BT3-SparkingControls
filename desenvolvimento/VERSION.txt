@@ -1,4 +1,4 @@
 BT3 Sparking Controls
-1.0.3 Beta
-Counter release acknowledged before returning to guard
-Build date: 2026-10-22
+1.0.6 Beta - Windows
+Automatic Decomp variant detection
+Build date: 2026-10-24

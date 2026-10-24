@@ -12,39 +12,41 @@
 
 # BT3 Sparking Controls
 
-**1.0.3 Beta — Controls and Setup Guide**
+**1.0.6 Beta — Controls and Setup Guide**
 
-## 1.0.3 Beta — Changes
+## 1.0.6 Beta — Changes
 
-- Hold R2 + L1 for upward vertical Z Dash; R2 + L2 for downward vertical
-  Z Dash. L1/L2 alone still ascend/descend normally. Their original double-tap
-  fast-movement route is disabled. A rapid second ordinary press may wait for
-  BT3's seven-frame double-tap window to expire before normal movement resumes.
-- Release Circle while continuing to hold R1 to request exit from the counter
-  stance and resume guard without another R1 press. Short and long holds work;
-  the helper waits for the game's actual exit rather than a fixed release pulse.
-  It still respects BT3's native animation exit window, without forced cancels.
-- Attack, transformation, fusion and switching menus now fade in over 100 ms
-  and out over 80 ms. Quick reopening reverses the fade smoothly. This is a
-  visual effect only; it adds no input wait. Loss of focus clears immediately.
-- Linux HUD presentation updates changed/animated frames immediately.
-- Current tests and all 16 language guides were updated. Settings are preserved.
+- **Both platforms: local split-screen HUD.** Attacks, transformations, fusion and teammate-switch menus sit on the left inside each player’s viewport. Their scale and position stay stable when another menu opens. Decorative bars are excluded; 4:3, 16:9, 16:10 and ultrawide layouts are handled.
+- **Windows: adaptive compatibility checks.** Compatible address/timestamp changes and reviewed input-collection changes can be accepted automatically. Native packet, battle and network interfaces are still checked; arbitrary future versions are not guaranteed.
+- **Windows: automatic variant selection.** Select the game EXE normally. The helper recognizes the original Decomp, the supplied Char Package 0.1.38.1 and Tag Team Beta x64 builds without a manual variant selector.
+- **Windows: variant-aware HUD.** Char Package names, forms and portraits use active package data. Tag Team uses up to four local controller state banks and keeps menus inside each player’s quarter. Original input payload and existing settings are preserved.
+- **Linux 1.0.6:** updated split-screen HUD, with the existing native library and resolver. Reviewed official Linux v0.1.37/v0.1.38.1 remain the tested targets; Windows variant support is not included.
+
+**Known limits:** Tag Team’s four-view mode leaves native boost hints visible instead of drawing the extra Square/Circle replacement. Char Package itself disables custom characters online. Automated checks do not establish live gameplay or rollback compatibility; native Linux Mono/X11 gameplay remains unverified.
+
+
 
 [Full changelog](CHANGELOG.md)
 
 ## Downloads and demonstration
 
-[**Windows x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.3-beta/BT3-SparkingControls-1.0.3-Beta-Windows.zip) · [**Linux x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.3-beta/BT3-SparkingControls-1.0.3-Beta-Linux-x64.zip) · [**1.0.3 Beta**](https://github.com/vini2227/BT3-SparkingControls/releases/tag/v1.0.3-beta)
+[**Windows x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.6-beta/BT3-SparkingControls-1.0.6-Beta-Windows.zip) · [**Linux x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.6-beta/BT3-SparkingControls-1.0.6-Beta-Linux-x64.zip) · [**1.0.6 Beta**](https://github.com/vini2227/BT3-SparkingControls/releases/tag/v1.0.6-beta)
 
-[▶ Gameplay demo (recorded for 1.0 Beta) — MP4, 167 MiB](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-1.0-Beta-Gameplay-Demo.mp4) · [TXT](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.3-beta/BT3-SparkingControls-Controls-and-Setup-Guide.txt) · [SHA256](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.3-beta/SHA256SUMS.txt)
+[▶ Gameplay demo (recorded for 1.0 Beta) — MP4, 167 MiB](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-1.0-Beta-Gameplay-Demo.mp4) · [TXT](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.6-beta/BT3-SparkingControls-Controls-and-Setup-Guide.txt) · [SHA256](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.6-beta/SHA256SUMS.txt)
 
 ## About
 
 A Sparking! ZERO-inspired control layout and battle HUD for Tenkaichi3Decomp. BT3's original animations, damage, Ki costs, range, character abilities and combat timing windows still apply. This does not reproduce every ZERO mechanic. The game and its assets are not included.
 
+## Automatic Windows variant detection
+
+Select the game EXE as usual. The original Decomp, the supplied Char Package 0.1.38.1 Windows build and Tag Team Beta Windows x64 build are detected from their native interfaces, without a variant dropdown. Custom package names, form labels and portraits come from the active game tables; Tag Team supports independent state and menu viewports for up to four local controllers. Custom characters remain disabled online by the Char Package itself.
+
+The original input payload and preferences are preserved. Reviewed address/timestamp changes are accepted; incompatible packet, battle or network interfaces remain blocked. This does not imply support for every fork or future update. Live variant gameplay and online rollback have not been verified. In four-view Tag Team, native boost icons are left visible; the helper does not guess which fighter owns the two shared native prompt rows.
+
 ## Windows installation
 
-1. Extract BT3-SparkingControls-1.0.3-Beta-Windows.zip.
+1. Extract BT3-SparkingControls-1.0.6-Beta-Windows.zip.
 2. Run BT3-SparkingControls.exe.
 3. Click Browse and select Tenkaichi3Decomp.exe in your game installation.
 4. Choose your language, panel placement and HUD preferences.
@@ -56,7 +58,7 @@ Settings are saved in: %LOCALAPPDATA%\BT3-SparkingControls Updating the helper d
 
 ## Linux installation — native Linux game
 
-1. Extract BT3-SparkingControls-1.0.3-Beta-Linux-x64.zip.
+1. Extract BT3-SparkingControls-1.0.6-Beta-Linux-x64.zip.
 2. Keep the entire extracted folder together, including the managed EXE,
    libbt3sparking.so, profiles, compatibility files and assets.
 3. Install Mono with Windows Forms and System.Web.Extensions support,
@@ -162,11 +164,11 @@ The launcher includes 16 interface languages and Arabic right-to-left layout. Mo
 
 The helper translates the local 18-byte controller packet before network sampling. The peer receives native BT3 inputs. Remote controller input and combat decision functions are not patched by this integration.
 
-Compatible game address changes can be resolved automatically from symbols and reviewed signatures. Windows PE/COFF and Linux ELF resolvers check 61 complete functions and their symbolic/data references. Structural changes or missing symbols may still require an updated, reviewed helper. Compatibility is not guaranteed for every older or future game version.
+Windows checks reviewed native interfaces and symbolic references, with bounded input-boundary validation for compatible collection changes. It automatically selects reviewed original, Char Package and Tag Team profiles. Linux keeps its existing ELF resolver and reviewed official v0.1.37/v0.1.38.1 targets; the new Windows variant detection is not included. Missing symbols or incompatible native interfaces can still require an update. No guarantee covers every old or future build.
 
 Simple remaps do not add sleeps. Multi-step shortcuts require several native input samples. Grab and emergency sequences use two-sample press/release phases; the second press is about 33 ms later at 60 Hz. Range, native timing windows and rollback still affect whether the game accepts a command. Panel selections also follow native timing and acknowledgment.
 
-Automated validation passed: 1,337,289 Windows packet/ABI/native-command checks; 445,763 Linux packet checks and 9 emulated loader checks for EACH of two game versions; 2,250 launcher, 93 shortcut and 693 responsive checks per frontend, plus 180 fade checks per frontend and 12 preview states. Counter regressions execute the actual compiled counter handler with varied Circle hold durations, animation timing and delayed acknowledgment. Linux managed UI tests ran under Windows .NET. Linux presentation now updates changed/animated frames immediately.
+Windows validation: 4,036,239 emulated packet/ABI/native-command checks across the original game and two supplied variants, plus 696 focused four-controller checks. Existing visual regressions and 1,299 variant HUD/metadata checks passed. Linux retains 445,763 packet checks and 9 emulated loader checks for each reviewed game. Split-screen tests passed on both frontends: 1,056 card, 425 attack, 693 responsive and 180 fade checks each under Windows .NET. These are not native Mono/X11 or live online tests.
 
 These tests do not establish real-world online behavior. Live online matches, actual ping/rollback, physical-controller timing and native Linux gameplay remain unverified for this beta. Desync-free operation is not guaranteed.
 

@@ -1,5 +1,5 @@
 from pathlib import Path
-import shutil,json,hashlib,subprocess,sys
+import shutil,json,hashlib,subprocess,sys,re
 r=Path(__file__).resolve().parents[2];out=r/'desenvolvimento';src=out/'src'
 bundle='''using System;
 using System.IO;
@@ -21,7 +21,7 @@ static class OnlineSingleFile {
     }
 }
 '''
-version=hashlib.sha256((out/'SparkingControls.payload').read_bytes()).hexdigest()[:12];(src/'OnlineSingleFile.cs').write_text(bundle.replace('@VERSION@',version),encoding='utf-8-sig')
+version=hashlib.sha256((out/'SparkingControls.payload').read_bytes()).hexdigest()[:12]+'-'+re.search(r'AssemblyInformationalVersion\("([^"]+)"\)',(src/'AssemblyInfo.cs').read_text(encoding='utf-8-sig')).group(1);(src/'OnlineSingleFile.cs').write_text(bundle.replace('@VERSION@',version),encoding='utf-8-sig')
 
 if not (out/'assets').is_dir():raise FileNotFoundError('Missing desenvolvimento/assets')
 shutil.copy2(r/'LICENSE-AGPL-3.0.txt',out/'LICENSE-AGPL-3.0.txt')

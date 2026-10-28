@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Text;
 using System.Linq;
@@ -12,6 +12,9 @@ sealed class PeImage {
     public readonly List<PeSection> Sections=new List<PeSection>();
     readonly Dictionary<string,List<PeSymbol>> candidates=new Dictionary<string,List<PeSymbol>>(StringComparer.Ordinal);
     readonly Dictionary<string,PeSymbol> symbols=new Dictionary<string,PeSymbol>(StringComparer.Ordinal);
+    readonly Dictionary<string,int> functionLengths=new Dictionary<string,int>(StringComparer.Ordinal);
+    string digest;
+    public string Sha256 {get{return digest??(digest=Digest(Bytes));}}
     public static string Digest(byte[] b) { using(var sha=SHA256.Create())return Program.Hex(sha.ComputeHash(b)); }
     void Check(long offset,long size) { if(offset<0 || size<0 || offset+size>Bytes.LongLength)throw new IOException(UiLanguage.Text("Executavel PE truncado ou invalido.")); }
     int I32(int offset) { Check(offset,4);return BitConverter.ToInt32(Bytes,offset); }
@@ -94,11 +97,12 @@ sealed class PeImage {
     }
     public byte[] Read(int rva,int count) { int raw=RawOffset(rva,count);byte[] result=new byte[count];Buffer.BlockCopy(Bytes,raw,result,0,count);return result; }
     public int FunctionLength(string name) {
+        int cached;if(functionLengths.TryGetValue(name,out cached))return cached;
         PeSymbol s;Symbol(name);s=symbols[name];
         if(s.Type!=32 || (Sections[s.Section-1].Flags&0x20000000)==0)throw new IOException(UiLanguage.Text("O simbolo ")+name+UiLanguage.Text(" nao aponta para uma funcao executavel."));
         int end=Sections[s.Section-1].Rva+Sections[s.Section-1].RawSize;
         foreach(var other in symbols.Values)if(other.Section==s.Section && other.Type==32 && other.Rva>s.Rva && other.Rva<end)end=other.Rva;
-        return end-s.Rva;
+        return functionLengths[name]=end-s.Rva;
     }
 }
 public sealed class OnlineReference { public int offset,width,addend,bias; public string symbol,kind,data_expected,symbol_scope; }
@@ -116,7 +120,9 @@ static class OnlineCompatibility {
     static long Number(byte[] bytes,int offset,int width){if(offset<0||offset+width>bytes.Length)throw Changed("reference bounds");if(width==8)return BitConverter.ToInt64(bytes,offset);if(width==4)return BitConverter.ToInt32(bytes,offset);throw Changed("reference width");}
     static void Put(byte[] bytes,int offset,int width,long value){if(offset<0||offset+width>bytes.Length)throw Changed("payload bounds");byte[] b=width==8?BitConverter.GetBytes(value):width==4?BitConverter.GetBytes(checked((int)value)):null;if(b==null)throw Changed("payload width");Buffer.BlockCopy(b,0,bytes,offset,width);}
     public static void Resolve(string exe,Profile profile){
-        var image=new PeImage(File.ReadAllBytes(exe));
+        Resolve(new PeImage(File.ReadAllBytes(exe)),profile);
+    }
+    public static void Resolve(PeImage image,Profile profile){
         string report;
         if(VariantSupport.Resolve(image,profile,out report)){File.WriteAllText(Path.Combine(Program.Root,"compatibility-report.txt"),report);return;}
         try{report=ResolveImage(image,profile,Metadata());}
@@ -124,7 +130,7 @@ static class OnlineCompatibility {
 
         File.WriteAllText(Path.Combine(Program.Root,"compatibility-report.txt"),report);
     }
-    static void CheckSignature(PeImage image,OnlineSignature signature) {
+    internal static void CheckSignature(PeImage image,OnlineSignature signature) {
         int rva=image.Symbol(signature.name);byte[] expected=Program.Unhex(signature.expected),mask=Program.Unhex(signature.mask);
         if(signature.length!=expected.Length||mask.Length!=expected.Length||signature.length<5||image.FunctionLength(signature.name)!=signature.length)throw Changed(signature.name+" length");
         byte[] actual=image.Read(rva,signature.length);
@@ -137,6 +143,41 @@ static class OnlineCompatibility {
                 if(location<0||location>int.MaxValue||!image.Sections.Any(section=>location>=section.Rva&&location+content.Length<=section.Rva+(long)section.RawSize&&(section.Flags&0xa0000000)==0)||!image.Read((int)location,content.Length).SequenceEqual(content))throw Changed(signature.name+" literal bytes");
             }else if(!image.MatchesSymbol(reference.symbol,target-image.ImageBase-reference.addend,signature.name,reference.symbol_scope))throw Changed(signature.name+" target "+reference.symbol);
         }
+    }
+    // Only the public cached-state ABI is an add-on dependency. The native
+    // initializer remains native and may add connection types/options. Decode a
+    // bounded, explicit x64 fast path; never execute or scan arbitrary game code.
+    internal static void CheckNetActiveContract(PeImage image,OnlineMetadata metadata) {
+        if(metadata.online_symbol!="sMode"||metadata.online_addend!=0)throw Changed("online state contract metadata");
+        int rva=image.Symbol("Port_NetActive"),length=image.FunctionLength("Port_NetActive");
+        if(length<64||length>32768)throw Changed("online state contract bounds");
+        byte[] code=image.Read(rva,Math.Min(length,128));int at=0;var pushes=new List<int>();
+        while(at<16){
+            int reg=-1,used=0;
+            if(code[at]>=0x50&&code[at]<=0x57){reg=code[at]-0x50;used=1;}
+            else if(code[at]==0x41&&code[at+1]>=0x50&&code[at+1]<=0x57){reg=8+code[at+1]-0x50;used=2;}
+            if(reg<0)break;
+            if(!(reg==3||reg==5||reg==6||reg==7||reg>=12)||pushes.Contains(reg))throw Changed("online state saved registers");
+            pushes.Add(reg);at+=used;
+        }
+        if(code[at++]!=0x48||code[at++]!=0x83||code[at++]!=0xec)throw Changed("online state stack ABI");
+        int stack=code[at++];if(stack<32||stack>120||((8-pushes.Count*8-stack)&15)!=0)throw Changed("online state stack alignment");
+        bool high=code[at]==0x44;if(high)at++;
+        if(code[at++]!=0x8b)throw Changed("online state load opcode");
+        int modrm=code[at++],regIndex=((modrm>>3)&7)+(high?8:0);
+        if((modrm&0xc7)!=5)throw Changed("online state load addressing");
+        long target=(long)rva+at+4+BitConverter.ToInt32(code,at);at+=4;
+        if(!image.MatchesSymbol("sMode",target,"Port_NetActive")||!image.Sections.Any(s=>target>=s.Rva&&target+4<=s.Rva+(long)s.VirtualSize&&(s.Flags&0x80000000)!=0))throw Changed("online state load target");
+        if(high&&code[at++]!=0x45)throw Changed("online state test register prefix");
+        if(code[at++]!=0x85||code[at++]!=(0xc0|((regIndex&7)<<3)|(regIndex&7)))throw Changed("online state test register");
+        long initializer;
+        if(code[at]==0x78){at++;initializer=at+1+(sbyte)code[at];at++;}
+        else if(code[at]==0x0f&&code[at+1]==0x88){at+=2;initializer=(long)at+4+BitConverter.ToInt32(code,at);at+=4;}
+        else throw Changed("online state signed branch");
+        byte[] result={0x0f,0x9f,0xc0,0x0f,0xb6,0xc0,0x48,0x83,0xc4,(byte)stack};
+        foreach(byte value in result)if(code[at++]!=value)throw Changed("online state boolean return");
+        for(int i=pushes.Count-1;i>=0;i--){int reg=pushes[i];if(reg>=8&&code[at++]!=0x41)throw Changed("online state restore prefix");if(code[at++]!=0x58+(reg&7))throw Changed("online state restore register");}
+        if(code[at++]!=0xc3||initializer<at||initializer>=length)throw Changed("online state return boundary");
     }
     // The original reader still executes normally. Only its returned local packet is
     // translated. Its device/keyboard collection body is not an auxiliary dependency.
@@ -160,19 +201,24 @@ static class OnlineCompatibility {
     }
     public static string ResolveImage(PeImage image,Profile profile,OnlineMetadata metadata,string resourceRoot=null){
         byte[] template=File.ReadAllBytes(Path.Combine(resourceRoot??Program.Root,"SparkingControls.payload"));
-        if(metadata.format!=2||metadata.payload_sha256!=profile.payload_sha256||PeImage.Digest(template)!=metadata.payload_sha256||metadata.functions==null||metadata.functions.Length<50||metadata.game_references==null||(resourceRoot==null?metadata.game_references.Length!=24:metadata.game_references.Length<24||metadata.game_references.Length>64)||metadata.entry_offset<0x1000||metadata.entry_offset>=0xe000||metadata.trampoline_length!=6||image.ImageBase!=profile.image_base)throw Changed("compatibility metadata");
-        var report=new StringBuilder();report.AppendLine("Automatic resolution: COFF symbols, native interface signatures, bounded input ABI contract and symbolic reference targets.");report.AppendLine("Game SHA256: "+PeImage.Digest(image.Bytes));
+        if(metadata.format!=2||metadata.payload_sha256!=profile.payload_sha256||PeImage.Digest(template)!=metadata.payload_sha256||metadata.functions==null||metadata.functions.Length<50||metadata.game_references==null||(resourceRoot==null?metadata.game_references.Length!=28:metadata.game_references.Length<24||metadata.game_references.Length>64)||metadata.entry_offset<0x1000||metadata.entry_offset>=0xe000||metadata.trampoline_length!=6||image.ImageBase!=profile.image_base)throw Changed("compatibility metadata");
+        var report=new StringBuilder();report.AppendLine("Automatic resolution: COFF symbols, native interface signatures, bounded input/state ABI contracts and symbolic reference targets.");report.AppendLine("Game SHA256: "+image.Sha256);
         // Preserve exact historical executables accepted by the previous release.
         // A full-file cryptographic match is required here. Unknown hashes still
         // pass every instruction, address-target and literal-content check below.
-        bool approvedHistory=metadata.approved_history_sha256!=null&&metadata.approved_history_sha256.Contains(PeImage.Digest(image.Bytes));
+        bool approvedHistory=metadata.approved_history_sha256!=null&&metadata.approved_history_sha256.Contains(image.Sha256);
         foreach(var signature in metadata.functions){
             if(approvedHistory){report.AppendLine("PASS exact historical executable: "+signature.name);continue;}
             try { CheckSignature(image,signature); }
             catch(IOException) {
-                if(signature.name!="Port_PadRead" || metadata.packet_contract==null)throw;
-                CheckPacketContract(image,metadata.packet_contract);
-                report.AppendLine("PASS input boundary contract: packet ABI, buffer layout, return path and online sampling caller; input collection implementation may differ.");
+                if(signature.name=="Port_NetActive"){
+                    CheckNetActiveContract(image,metadata);
+                    report.AppendLine("PASS online-state boundary contract: signed sMode cache, boolean return, Windows x64 stack/register preservation; native initializer may differ.");
+                }else{
+                    if(signature.name!="Port_PadRead" || metadata.packet_contract==null)throw;
+                    CheckPacketContract(image,metadata.packet_contract);
+                    report.AppendLine("PASS input boundary contract: packet ABI, buffer layout, return path and online sampling caller; input collection implementation may differ.");
+                }
             }
             report.AppendLine("PASS "+signature.name+" @ 0x"+image.Symbol(signature.name).ToString("X"));
         }
@@ -187,7 +233,7 @@ static class OnlineCompatibility {
         var globals=new Dictionary<string,int>();foreach(string name in metadata.globals)globals[name]=image.Symbol(name);
         globals["online_mode"]=checked(image.Symbol(metadata.online_symbol)+metadata.online_addend);
         profile.patches=new[]{new Patch {rva=site,expected=Program.Hex(prologue),replacement=Program.Hex(jump)}};
-        profile.symbols=globals;profile.resolved_payload=payload;profile.game_sha256=PeImage.Digest(image.Bytes);
+        profile.symbols=globals;profile.resolved_payload=payload;profile.game_sha256=image.Sha256;
         report.AppendLine("PASS: one local packet hook, rebased payload references, all HUD globals and the native online status.");
         report.AppendLine("No game file changed. Resolution occurs at launch/relaunch, never in the input loop. Structural compatibility is not an online gameplay test.");return report.ToString();
     }
@@ -237,8 +283,8 @@ static class OnlineCompatibilityTests {
                 long wrongRva=image.Symbol(duplicate.symbol)+duplicate.addend;
                 long wrongDisp=wrongRva-(image.Symbol("Port_NetActive")+duplicate.offset+duplicate.bias);
                 Buffer.BlockCopy(BitConverter.GetBytes(checked((int)wrongDisp)),0,wrong,fieldAt,4);
-                bool duplicateRefused=false;try{OnlineCompatibility.ResolveImage(new PeImage(wrong),Program.LoadProfile(),metadata);}catch(IOException){duplicateRefused=true;}Assert(duplicateRefused,"same-named local from another function rejected");
-                log.AppendLine("PASS: duplicate COFF names resolve in the owner group; redirect to unrelated same-named local rejected.");
+                bool duplicateRefused=false;try{OnlineCompatibility.CheckSignature(new PeImage(wrong),metadata.functions.First(f=>f.name=="Port_NetActive"));}catch(IOException){duplicateRefused=true;}Assert(duplicateRefused,"same-named local from another function rejected");
+                log.AppendLine("PASS: strict signature reference checks resolve duplicate COFF names in their owner group. Native initializer-only changes may use the bounded online-state contract instead.");
                 log.AppendLine("PASS: input-reader alignment changes accepted; packet format, return and online sampling changes rejected.");
             }
             var redirect=(byte[])bytes.Clone();var owner=metadata.functions.First(f=>f.references.Length>0);var field=owner.references[0];redirect[image.RawOffset(image.Symbol(owner.name)+field.offset,1)]^=1;bool rejected=false;try{OnlineCompatibility.ResolveImage(new PeImage(redirect),Program.LoadProfile(),metadata);}catch(IOException){rejected=true;}Assert(rejected,"changed masked target rejected");
@@ -251,3 +297,4 @@ static class OnlineCompatibilityTests {
         }catch(Exception ex){log.AppendLine(ex.ToString());File.WriteAllText(Path.Combine(Program.Root,"compatibility-test-results.txt"),log.ToString());return 2;}
     }
 }
+

@@ -12,27 +12,45 @@
 
 # BT3 Sparking Controls
 
-**1.0.6 Beta — Controls and Setup Guide**
+**1.1 Beta — Windows Controls and Setup Guide**
 
-## 1.0.6 Beta — Changes
+## 1.1 Beta — Changes
 
-- **Both platforms: local split-screen HUD.** Attacks, transformations, fusion and teammate-switch menus sit on the left inside each player’s viewport. Their scale and position stay stable when another menu opens. Decorative bars are excluded; 4:3, 16:9, 16:10 and ultrawide layouts are handled.
-- **Windows: adaptive compatibility checks.** Compatible address/timestamp changes and reviewed input-collection changes can be accepted automatically. Native packet, battle and network interfaces are still checked; arbitrary future versions are not guaranteed.
-- **Windows: automatic variant selection.** Select the game EXE normally. The helper recognizes the original Decomp, the supplied Char Package 0.1.38.1 and Tag Team Beta x64 builds without a manual variant selector.
-- **Windows: variant-aware HUD.** Char Package names, forms and portraits use active package data. Tag Team uses up to four local controller state banks and keeps menus inside each player’s quarter. Original input payload and existing settings are preserved.
-- **Linux 1.0.6:** updated split-screen HUD, with the existing native library and resolver. Reviewed official Linux v0.1.37/v0.1.38.1 remain the tested targets; Windows variant support is not included.
+Windows release collecting the improvements developed after 1.0.6 Beta. Linux remains at 1.0.6; the Windows changes below are not included in that package.
 
-**Known limits:** Tag Team’s four-view mode leaves native boost hints visible instead of drawing the extra Square/Circle replacement. Char Package itself disables custom characters online. Automated checks do not establish live gameplay or rollback compatibility; native Linux Mono/X11 gameplay remains unverified.
+## Controls and HUD
+- Corrected fight detection in the original Decomp's Story / Mission 100 paths when the usual running flag is absent. Remapping still requires native fight state and live battle subsystems; menus, CPU input and non-fight states retain their protections. Char Package / Tag Team native payloads remain at their reviewed 1.0.6 versions.
+- Tightened native prompt handling to avoid inappropriate stick/R3 hints during story gameplay.
+- Added **Screen edges**, a fourth panel placement option for players who want menus at the outer edges of a solo ultrawide picture. Existing Centered, Expanded and Classic (4:3) layouts remain available.
+- Improved restoration and live reload of saved panel preferences; language, game path, placement, visibility, frame and shortcuts remain persistent across helper updates.
 
+## Rendering and startup
+- Reuse a cropped native HUD surface, skip unchanged presentations and hide the window when there is no HUD content.
+- Crop CPU composition and menu snapshots too, instead of clearing two full-screen bitmaps. At 5120×1440 the old two CPU canvases alone occupied about 56 MiB; the new canvas sizes follow actual panel bounds. A one-pixel surface measures menu geometry. Fade timing and panel anchors are preserved.
+- Cache boost-icon ink bounds instead of repeatedly scanning the same HD artwork.
+- Keep helper allocation outside the game's preferred memory arena and retain normal Windows heap behavior during tracked launches.
+- Normal launches skip periodic diagnostic collection, extra diagnostic reads and verbose renderer recording. Optional diagnostics remain available; no diagnostic test scripts are enabled by default.
 
+## Compatibility
+- Resolve compatible executable address changes and validated online-state initialization changes at launch/relaunch, outside the controller loop. Reuse parsed image data during validation.
+- Preserve normal tracking of game restarts and the local native-input approach. The offline-only debugger-detach experiment is not the default launch mode and must not be used online.
+- The updated local game passed structural compatibility checks. This does not guarantee every future build or every updater/restart path; incompatible interfaces still require review.
+
+## Validation and known issue
+Local checks passed for cropped pixel composition (197), fade behavior (180), card menus (1,408), responsive layout (693), split-screen attacks (565), recovery (9), shortcuts (93) and saved settings. Earlier native input/ABI, arena and compatibility reports are retained as prior checks, not represented as newly repeated live matches.
+
+**The reported Mission 100 slowdown is still under investigation.** With a texture pack and ×8 resolution enabled from startup, Aero's PC recorded long native frame-submission stalls. These changes reduce confirmed helper work and allocations, but the affected-PC slowdown has not been confirmed fixed. Automated checks do not establish live rollback, universal updater compatibility or sustained GPU performance. Graphics quality is not reduced automatically.
+
+## Thanks
+Special thanks to **Aero** for the extensive testing, detailed reproduction steps and diagnostic logs that helped identify and investigate these issues.
 
 [Full changelog](CHANGELOG.md)
 
 ## Downloads and demonstration
 
-[**Windows x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.6-beta/BT3-SparkingControls-1.0.6-Beta-Windows.zip) · [**Linux x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.6-beta/BT3-SparkingControls-1.0.6-Beta-Linux-x64.zip) · [**1.0.6 Beta**](https://github.com/vini2227/BT3-SparkingControls/releases/tag/v1.0.6-beta)
+[**Windows x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1-beta/BT3-SparkingControls-1.1-Beta-Windows.zip) · [**Linux x64 ZIP (1.0.6)**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.6-beta/BT3-SparkingControls-1.0.6-Beta-Linux-x64.zip) · [**1.1 Beta**](https://github.com/vini2227/BT3-SparkingControls/releases/tag/v1.1-beta)
 
-[▶ Gameplay demo (recorded for 1.0 Beta) — MP4, 167 MiB](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-1.0-Beta-Gameplay-Demo.mp4) · [TXT](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.6-beta/BT3-SparkingControls-Controls-and-Setup-Guide.txt) · [SHA256](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.6-beta/SHA256SUMS.txt)
+[▶ Gameplay demo (recorded for 1.0 Beta) — MP4, 167 MiB](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-1.0-Beta-Gameplay-Demo.mp4) · [TXT](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1-beta/BT3-SparkingControls-Controls-and-Setup-Guide.txt) · [SHA256](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1-beta/SHA256SUMS.txt)
 
 ## About
 
@@ -46,7 +64,7 @@ The original input payload and preferences are preserved. Reviewed address/times
 
 ## Windows installation
 
-1. Extract BT3-SparkingControls-1.0.6-Beta-Windows.zip.
+1. Extract BT3-SparkingControls-1.1-Beta-Windows.zip.
 2. Run BT3-SparkingControls.exe.
 3. Click Browse and select Tenkaichi3Decomp.exe in your game installation.
 4. Choose your language, panel placement and HUD preferences.
@@ -140,9 +158,9 @@ All three menus use consistent card positions. Switching cards show reserve heal
 
 Hold R2: Display the active character's attack list, commands and costs. Available HD game button artwork is preferred; original assets are the fallback. No game artwork or HD texture pack is bundled.
 
-Panel placement options: - Centered: A balance between the center and edges. - Expanded: More space between the panels. - Classic (4:3): Original positioning within a 4:3 region.
+Panel placement options: - Centered: A balance between the center and edges. - Expanded: More space between the panels. - Classic (4:3): Original positioning within a 4:3 region. - Screen edges (Windows 1.1): Position menus near the outer picture edges, including solo ultrawide.
 
-Native 4:3 positioning is preserved. Ultrawide layouts use safe regions rather than putting controls at the extreme screen edges.
+Native 4:3 positioning is preserved. Centered, Expanded and Classic use their established safe regions. Screen edges is an optional Windows layout for outer-edge positioning.
 
 All four battle menus fade in over 100 ms and out over 80 ms. Closing retains only the last visual snapshot until it becomes transparent. Reopening reverses smoothly. No command waits for the fade. Losing game focus clears immediately.
 

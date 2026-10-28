@@ -244,7 +244,7 @@ def run_suite(allocated):
    assert (held(got)==6) == (attempt<3);checks+=1
   assert struct.unpack('<I',u.mem_read(allocated+0xf628+localSide*64,4))[0]==8;checks+=1
   portinvoke(0,roster=[(0,10000,1)])
-
+ 
 
  # Shoulder tabs only toggle once per press and only for a fighter with fusions.
  invoke(0,net=1,active=1,flags=0,side=0,action=0,fusions=[21,22,255])

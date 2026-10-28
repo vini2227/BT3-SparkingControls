@@ -41,7 +41,7 @@ def run_suite(allocated):
   fmt='<q' if fix['width']==8 else '<i';v=struct.unpack_from(fmt,relocated,fix['offset'])[0]+delta*fix['sign'];struct.pack_into(fmt,relocated,fix['offset'],v)
  u.mem_write(allocated,bytes(relocated));chr=0x4000000;obj=chr+0x4000;row=chr+0x5000;mask=chr+0x6000;buf=0x50002000;stack=0x70000000;stop=0x50000000
  for a,n in [(chr,0x10000),(0x50000000,0x10000),(stack,0x10000)]:u.mem_map(a,n)
- current={'net':1,'side':0,'active':1,'flags':0,'action':0,'stage':0,'owner':0,'ids':[4,5,6,255],'result':18,'rowdir':0,'roster':[(0,10000,1)],'member':0,'candidate':1,'switchable':1,'fusions':[255,255,255],'fuseable':1,'inputHeld':0,'emergency':0,'fusionAge':0,'switchUp':30,'recordHeld':0,'ascendAge':100,'descendAge':100,'nativeCommand':0};calls=[];packet=b'';trace=[]
+ current={'net':1,'side':0,'active':1,'flags':0,'action':0,'stage':0,'owner':0,'ids':[4,5,6,255],'result':18,'rowdir':0,'roster':[(0,10000,1)],'member':0,'candidate':1,'switchable':1,'fusions':[255,255,255],'fuseable':1,'inputHeld':0,'emergency':0,'fusionAge':0,'switchUp':30,'recordHeld':0,'ascendAge':100,'descendAge':100,'nativeCommand':0,'story':0,'storyState':3,'injected':0,'cue':-1};calls=[];packet=b'';trace=[]
  def adr(name):return base+s[name]['rva']
  def regargs():return [u.reg_read(v) for v in [UC_X86_REG_RCX,UC_X86_REG_RDX,UC_X86_REG_R8,UC_X86_REG_R9]]
  handlers={
@@ -75,6 +75,7 @@ def run_suite(allocated):
   global checks
   current.update(opts);packet=packet_for(raw,lx,ly);calls.clear();u.mem_write(chr,b'\0'*0x2000);set32(chr, current['side']);set32(chr+0x948,current['action']);set32(chr+0x1594,current['stage']);u.mem_write(row+2,bytes([current['rowdir']]))
   u.mem_write(chr+0x923,bytes([64 if current['emergency'] else 0]))
+  set32(adr('gHudPrompt'),chr+0x8000 if current['cue']>=0 else 0);set32(chr+0x8290,max(0,current['cue']));set32(chr+0x1278,current['injected']);set32(adr('gBtlChars'),chr+0x7000 if current['story'] else 0);set32(adr('gBtlSeq'),chr+0x7100 if current['story'] else 0);set32(chr+0x7000,2);set32(chr+0x7004,chr);set32(chr+0x7100,current['storyState']);
   set32(chr+0x73c,current['inputHeld']);set32(chr+0x74c,current['nativeCommand'])
   set32(chr+0x940,current['recordHeld']);u.mem_write(chr+0x687,bytes([current['ascendAge'],current['descendAge']]))
   u.mem_write(chr+0x7af,bytes([current['switchUp']]))
@@ -94,6 +95,25 @@ def run_suite(allocated):
   for i in range(6,16):assert u.reg_read(UC_X86_REG_XMM0+i)==0x123456789abcdef123456789abcdef
   got=bytes(u.mem_read(buf,18));assert got[6:]==packet[6:];checks+=22;return got
  def held(packet):return (~struct.unpack_from('<H',packet)[0])&65535
+ # Story fight uses no Battle_Main running flag. Every non-fight state bypasses remapping.
+ for net in [0,1]:
+  for side in [0,1]:
+   port=0 if net else side
+   assert held(invoke(0x8200,net=net,side=side,socket=port,active=0,story=1,storyState=3,flags=0,injected=0))==0x1100;checks+=1
+   for state in [0,1,2,4,5,6,99]:
+    assert invoke(0x8200,socket=port,storyState=state)==packet;checks+=1
+   for flag in [0x200,0x400,0x800,0x1000,0x2000,0x8000,0x4100]:
+    assert invoke(0x8200,socket=port,storyState=3,flags=flag,owner=side)==packet;checks+=1
+   assert invoke(0x8200,socket=port,flags=0,injected=1)==packet;checks+=1
+ invoke(0,net=1,side=0,active=1,story=0,flags=0,injected=0)
+ # Pending story event owns physical R3; online and normal fights must not leak it.
+ for cue in [0,1,2]:
+  assert held(invoke(4,net=0,side=0,active=0,story=1,storyState=3,cue=cue,emergency=1))==4;checks+=1
+  assert held(invoke(0))==0;checks+=1
+ for cue in [3,4]:
+  assert held(invoke(4,cue=cue,emergency=0))==0;checks+=1
+  invoke(0)
+ invoke(0,net=1,side=0,active=1,story=0,cue=-1,emergency=0)
  for opt in [{'net':0,'active':0},{'net':1,'active':0},{'active':1,'flags':0x400},{'flags':0x4100,'owner':0}]:
   got=invoke(0xa300,lx=201,ly=40,**opt);assert got==packet;checks+=1
  invoke(net=1,active=1,flags=0,owner=0)
@@ -792,6 +812,6 @@ def run_suite(allocated):
  finally:allow_native[0]=False
  return 'PASS allocation '+hex(allocated)
 
-lines=[run_suite(a) for a in [0x14000000,0x13000000,0x60000000]]
+lines=[run_suite(a) for a in [0x60000000,0x60100000,0x7e000000]]
 lines+=['PASS: '+str(checks)+' packet/ABI/native-command checks; new controls offline on both ports; menus preserved; online local side only, relocation, held techniques/skills, transform packets, switch panel and native teammate navigation/acknowledgment, cancellation and timeout, native swap acknowledgment/release and bounded retries online and on both offline ports, fusion tabs and native long-hold packets on host/guest and both offline ports, native R1+Square priority without attack/guard/counter leaks, R3 emergency shortcut in native eligibility window and no original R3 leakage, native boost chord, vertical Z Dash and disabled legacy double taps, guard return after Circle release with actual native counter animation/exit tests and varied hold durations/delayed input acknowledgment, no writes to fighter or game globals.','NOT TESTED: a live online match, actual ping/rollback behavior, physical-controller timing or opponent compatibility end-to-end.']
 print('\n'.join(lines));(R/'analysis/packet-test-results.txt').write_text('\n'.join(lines)+'\n',encoding='utf-8')

@@ -32,7 +32,8 @@ static class LauncherFixture {
     UiLanguage.Set(lang,false);using(var window=new GameLocationWindow("",Path.Combine(folder,"unused-game-path.txt"))){
      window.Show();Application.DoEvents();var combo=window.Controls.Find("panelPlacement",true).OfType<ComboBox>().Single();
      Check((string)combo.Items[0]==UiLanguage.Text("Centralizada"),"Centered label not translated");Check((string)combo.Items[1]==UiLanguage.Text("Expandida"),"Expanded label not translated");
-     Check(combo.Items.Count==3&&(string)combo.Items[2]==UiLanguage.Text("Clássica (4:3)"),"Classic option not translated");
+     Check(combo.Items.Count==4&&(string)combo.Items[2]==UiLanguage.Text("Clássica (4:3)"),"Classic option not translated");
+     combo.SelectedIndex=3;Check(PanelPlacement.Mode==PanelLayoutMode.ScreenEdges&&File.ReadAllText(file)=="edges"&&(string)combo.Items[3]==UiLanguage.Text("Bordas da tela"),"Screen edges UI selection must persist and translate");
      combo.SelectedIndex=2;Check(PanelPlacement.Mode==PanelLayoutMode.Classic&&File.ReadAllText(file)=="classic","Classic UI selection must persist");
      Check(window.RightToLeftLayout==(lang=="ar"),"Arabic RTL mismatch");
      combo.SelectedIndex=1;Check(PanelPlacement.Expanded&&File.ReadAllText(file)=="expanded","UI selection must persist");combo.SelectedIndex=0;Check(!PanelPlacement.Expanded&&File.ReadAllText(file)=="centered","UI centered selection must persist");
@@ -52,7 +53,7 @@ static class LauncherFixture {
      window.Close();
     }
    }
-   string result="PASS: "+checks+" launcher checks: all three persisted modes, default, 4:3 invariance, 16:9/ultrawide placement, 16 translated layouts, complete catalog strings, RTL, no clipped controls, rounded buttons, dark theme and language-switch preservation.";Console.WriteLine(result);File.WriteAllText(Path.Combine(folder,"launcher-test-results.txt"),result);
+   string result="PASS: "+checks+" launcher checks: all four persisted modes, default, 4:3 invariance, 16:9/ultrawide placement, 16 translated layouts, complete catalog strings, RTL, no clipped controls, rounded buttons, dark theme and language-switch preservation.";Console.WriteLine(result);File.WriteAllText(Path.Combine(folder,"launcher-test-results.txt"),result);
   }finally{
    if(originalFrame==null){if(File.Exists(frameFile))File.Delete(frameFile);}else File.WriteAllBytes(frameFile,originalFrame);AttackAppearance.Load();
    if(legacyData==null){if(File.Exists(legacyLayout))File.Delete(legacyLayout);}else File.WriteAllBytes(legacyLayout,legacyData);

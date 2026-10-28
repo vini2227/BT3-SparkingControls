@@ -9,7 +9,7 @@ if '--reviewed' not in sys.argv:raise SystemExit('Review native structure compat
 r=Path(__file__).resolve().parents[2];dev=r/'desenvolvimento';sys.path.insert(0,str(dev/'build_tools'))
 import pefile
 from capstone import Cs,CS_ARCH_X86,CS_MODE_64
-game=Path(sys.argv[sys.argv.index('--game')+1]) if '--game' in sys.argv else Path(r'Tenkaichi3Decomp.exe')
+game=Path(sys.argv[sys.argv.index('--game')+1]) if '--game' in sys.argv else Path(r'C:\Users\vinis\OneDrive\Desktop\Tenkaichi3Decomp\Tenkaichi3Decomp.exe')
 pe=pefile.PE(str(game));d=game.read_bytes();symbols={};at=pe.FILE_HEADER.PointerToSymbolTable;count=pe.FILE_HEADER.NumberOfSymbols;strings=at+count*18;i=0
 while i<count:
  name,value,section,typ,storage,aux=struct.unpack_from('<8sIhHBB',d,at+i*18)
@@ -64,7 +64,7 @@ for sec in dll.sections:
    if base<=v<base+0x4000000:
     n=min(needed,key=lambda n:abs(base+needed[n]['rva']-v));add=v-base-needed[n]['rva'];assert add==0 or (n=='gBattleWork' and add in [0x19f0,0x19f8]),(n,add)
     references.append(dict(offset=ins.address-0x14000000+pos,width=width,symbol=n,addend=add))
-assert len(references)==24
+assert 24<=len(references)<=32
 # NetActive's status load is deliberately discovered from its instruction, not a stale static RVA.
 net=pe.get_data(symbols['Port_NetActive']['rva'],flen('Port_NetActive'));netrefs=[]
 for ins in cs.disasm(net,base+symbols['Port_NetActive']['rva']):

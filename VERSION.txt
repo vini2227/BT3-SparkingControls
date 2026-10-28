@@ -1,2 +1,2 @@
-BT3 Sparking Controls 1.0.6 Beta
-Windows and Linux — see CHANGELOG.md for platform differences.
+Windows: 1.1 Beta
+Linux: 1.0.6 Beta (unchanged)

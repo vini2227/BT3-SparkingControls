@@ -36,6 +36,6 @@ static class SplitCardsFixture {
     }
    }
   }
-  string text="PASS: "+checks+" card-menu checks: transformations/fusion/switch, eight resolution/aspect cases, three placements, both/solo/empty cards, fixed positions and unchanged online/single-screen anchors. Offscreen .NET rendering; live split and Linux native runtime unverified.";File.WriteAllText(Path.Combine(dest,"split-cards-results.txt"),text);Console.WriteLine(text);
+  string text="PASS: "+checks+" card-menu checks: transformations/fusion/switch, eight resolution/aspect cases, four placements, both/solo/empty cards, fixed positions and unchanged online/single-screen anchors. Offscreen .NET rendering; live split and Linux native runtime unverified.";File.WriteAllText(Path.Combine(dest,"split-cards-results.txt"),text);Console.WriteLine(text);
  }
 }

@@ -5,7 +5,7 @@ sys.path.insert(0,str(out/'build_tools'))
 import pefile
 from capstone import Cs,CS_ARCH_X86,CS_MODE_64
 from keystone import Ks,KS_ARCH_X86,KS_MODE_64
-game=Path(os.environ.get('BT3_GAME',r'Tenkaichi3Decomp.exe'));d=game.read_bytes();pe=pefile.PE(data=d);image=pe.OPTIONAL_HEADER.ImageBase;assert image==0x20000000
+game=Path(os.environ.get('BT3_GAME',r'C:\Users\vinis\OneDrive\Desktop\Tenkaichi3Decomp\Tenkaichi3Decomp.exe'));d=game.read_bytes();pe=pefile.PE(data=d);image=pe.OPTIONAL_HEADER.ImageBase;assert image==0x20000000
 at=pe.FILE_HEADER.PointerToSymbolTable;count=pe.FILE_HEADER.NumberOfSymbols;strings=at+count*18;i=0;symbols={}
 while i<count:
  name,value,section,typ,storage,aux=struct.unpack_from('<8sIhHBB',d,at+i*18)

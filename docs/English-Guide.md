@@ -1,3 +1,35 @@
+# 1.1 Beta — Changes
+
+Windows release collecting the improvements developed after 1.0.6 Beta. Linux remains at 1.0.6; the Windows changes below are not included in that package.
+
+## Controls and HUD
+- Corrected fight detection in the original Decomp's Story / Mission 100 paths when the usual running flag is absent. Remapping still requires native fight state and live battle subsystems; menus, CPU input and non-fight states retain their protections. Char Package / Tag Team native payloads remain at their reviewed 1.0.6 versions.
+- Tightened native prompt handling to avoid inappropriate stick/R3 hints during story gameplay.
+- Added **Screen edges**, a fourth panel placement option for players who want menus at the outer edges of a solo ultrawide picture. Existing Centered, Expanded and Classic (4:3) layouts remain available.
+- Improved restoration and live reload of saved panel preferences; language, game path, placement, visibility, frame and shortcuts remain persistent across helper updates.
+
+## Rendering and startup
+- Reuse a cropped native HUD surface, skip unchanged presentations and hide the window when there is no HUD content.
+- Crop CPU composition and menu snapshots too, instead of clearing two full-screen bitmaps. At 5120×1440 the old two CPU canvases alone occupied about 56 MiB; the new canvas sizes follow actual panel bounds. A one-pixel surface measures menu geometry. Fade timing and panel anchors are preserved.
+- Cache boost-icon ink bounds instead of repeatedly scanning the same HD artwork.
+- Keep helper allocation outside the game's preferred memory arena and retain normal Windows heap behavior during tracked launches.
+- Normal launches skip periodic diagnostic collection, extra diagnostic reads and verbose renderer recording. Optional diagnostics remain available; no diagnostic test scripts are enabled by default.
+
+## Compatibility
+- Resolve compatible executable address changes and validated online-state initialization changes at launch/relaunch, outside the controller loop. Reuse parsed image data during validation.
+- Preserve normal tracking of game restarts and the local native-input approach. The offline-only debugger-detach experiment is not the default launch mode and must not be used online.
+- The updated local game passed structural compatibility checks. This does not guarantee every future build or every updater/restart path; incompatible interfaces still require review.
+
+## Validation and known issue
+Local checks passed for cropped pixel composition (197), fade behavior (180), card menus (1,408), responsive layout (693), split-screen attacks (565), recovery (9), shortcuts (93) and saved settings. Earlier native input/ABI, arena and compatibility reports are retained as prior checks, not represented as newly repeated live matches.
+
+**The reported Mission 100 slowdown is still under investigation.** With a texture pack and ×8 resolution enabled from startup, Aero's PC recorded long native frame-submission stalls. These changes reduce confirmed helper work and allocations, but the affected-PC slowdown has not been confirmed fixed. Automated checks do not establish live rollback, universal updater compatibility or sustained GPU performance. Graphics quality is not reduced automatically.
+
+## Thanks
+Special thanks to **Aero** for the extensive testing, detailed reproduction steps and diagnostic logs that helped identify and investigate these issues.
+
+---
+
 ## About
 
 A Sparking! ZERO-inspired control layout and battle HUD for Tenkaichi3Decomp. BT3's original animations, damage, Ki costs, range, character abilities and combat timing windows still apply. This does not reproduce every ZERO mechanic. The game and its assets are not included.
@@ -10,7 +42,7 @@ The original input payload and preferences are preserved. Reviewed address/times
 
 ## Windows installation
 
-1. Extract BT3-SparkingControls-1.0.6-Beta-Windows.zip.
+1. Extract BT3-SparkingControls-1.1-Beta-Windows.zip.
 2. Run BT3-SparkingControls.exe.
 3. Click Browse and select Tenkaichi3Decomp.exe in your game installation.
 4. Choose your language, panel placement and HUD preferences.
@@ -104,9 +136,9 @@ All three menus use consistent card positions. Switching cards show reserve heal
 
 Hold R2: Display the active character's attack list, commands and costs. Available HD game button artwork is preferred; original assets are the fallback. No game artwork or HD texture pack is bundled.
 
-Panel placement options: - Centered: A balance between the center and edges. - Expanded: More space between the panels. - Classic (4:3): Original positioning within a 4:3 region.
+Panel placement options: - Centered: A balance between the center and edges. - Expanded: More space between the panels. - Classic (4:3): Original positioning within a 4:3 region. - Screen edges (Windows 1.1): Position menus near the outer picture edges, including solo ultrawide.
 
-Native 4:3 positioning is preserved. Ultrawide layouts use safe regions rather than putting controls at the extreme screen edges.
+Native 4:3 positioning is preserved. Centered, Expanded and Classic use their established safe regions. Screen edges is an optional Windows layout for outer-edge positioning.
 
 All four battle menus fade in over 100 ms and out over 80 ms. Closing retains only the last visual snapshot until it becomes transparent. Reopening reverses smoothly. No command waits for the fade. Losing game focus clears immediately.
 

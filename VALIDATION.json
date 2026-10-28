@@ -1,26 +1,22 @@
 {
-  "version": "1.0.6 Beta",
+  "version": "1.1 Beta",
   "platform": "Windows x64",
-  "original_native_payload_sha256": "6c68aa4b82aee0cac2151aac5b595c452c2454c6e20e6044bcf8d67585bbb6c0",
-  "tagteam_native_payload_sha256": "20bc94d94e1b9b44f43dea7e18dad93a00f8e4ee91feee4e1c0e0a93d8e9b8a4",
-  "packet_checks": {
-    "original": 1337289,
-    "characters": 1337289,
-    "tagteam": 1361661
-  },
-  "quad_focused_checks": 696,
-  "visual_checks": {
-    "cards": 1056,
-    "split_attacks": 425,
-    "responsive": 693,
+  "payload_sha256": "c77c984a6dad914cff9bb2ef4a6da68342049f25c81023c3899a56ace9c6f86c",
+  "local_checks": {
+    "cropped_pixels": 197,
     "fade": 180,
-    "variants": 1299
+    "split_cards": 1408,
+    "responsive": 693,
+    "split_attacks": 565,
+    "recovery": 9,
+    "shortcuts": 93,
+    "settings": "passed"
   },
-  "live_online_tested": false,
-  "live_local_variant_tested": false,
-  "linux_updated": false,
-  "windows_exe_sha256": "e1a52f3ab4084121e2cd732b1abf914cdb8017339960f578a231a2f276284542",
-  "release": "v1.0.6-beta",
-  "linux_release": "v1.0.6-beta",
-  "linux_scope": "Split-screen HUD only; native library and resolver unchanged"
+  "retained_prior_native_checks": {
+    "test6": 1343073,
+    "rerun_for_this_release": false
+  },
+  "live_gpu_slowdown_resolved": false,
+  "linux": "1.0.6 unchanged",
+  "limitations": "Affected-PC Mission 100 texture-pack plus 8x startup stalls remain under investigation; no universal future-update or desync-free guarantee."
 }

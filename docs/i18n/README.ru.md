@@ -8,7 +8,14 @@
 
 ---
 
-# BT3 Sparking Controls — 1.0.6 Beta
+# BT3 Sparking Controls — 1.1 Beta (Windows)
+
+## 1.1 Beta — Windows
+
+Windows 1.1 Beta: исправлено определение боя в сюжетном режиме исходного Decomp, области отрисовки HUD уменьшены до размеров панелей, улучшены запуск и проверка совместимости, добавлено размещение у краёв экрана; настройки сохраняются. Linux остаётся на 1.0.6. Замедление Mission 100 с текстурами и ×8 с момента запуска ещё исследуется; исправление не подтверждено. Спасибо Aero за подробные тесты и журналы.
+
+[1.1 — Changes / English](../Release-1.1.md)
+
 
 ## Управление и установка
 
@@ -22,9 +29,9 @@
 
 ## Загрузка и демонстрация
 
-[**Windows x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.6-beta/BT3-SparkingControls-1.0.6-Beta-Windows.zip) · [**Linux x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.6-beta/BT3-SparkingControls-1.0.6-Beta-Linux-x64.zip) · [**1.0.6 Beta**](https://github.com/vini2227/BT3-SparkingControls/releases/tag/v1.0.6-beta)
+[**Windows x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1-beta/BT3-SparkingControls-1.1-Beta-Windows.zip) · [**Linux x64 ZIP (1.0.6)**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.6-beta/BT3-SparkingControls-1.0.6-Beta-Linux-x64.zip) · [**1.1 Beta**](https://github.com/vini2227/BT3-SparkingControls/releases/tag/v1.1-beta)
 
-[▶ Gameplay demo (recorded for 1.0 Beta) — MP4, 167 MiB](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-1.0-Beta-Gameplay-Demo.mp4) · [TXT](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.6-beta/BT3-SparkingControls-Controls-and-Setup-Guide.txt) · [SHA256](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.6-beta/SHA256SUMS.txt)
+[▶ Gameplay demo (recorded for 1.0 Beta) — MP4, 167 MiB](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-1.0-Beta-Gameplay-Demo.mp4) · [TXT](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1-beta/BT3-SparkingControls-Controls-and-Setup-Guide.txt) · [SHA256](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1-beta/SHA256SUMS.txt)
 
 ## Установка
 

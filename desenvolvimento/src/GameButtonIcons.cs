@@ -8,6 +8,8 @@ using System.Collections.Generic;
 // Artwork is read from the user's game installation at runtime, never bundled.
 sealed class GameButtonIcons : IDisposable {
     public readonly List<string> HdLoaded=new List<string>();
+    readonly Dictionary<string,RectangleF> triangleInkCache=new Dictionary<string,RectangleF>();
+    internal int TriangleInkScans;
     readonly Dictionary<int,Size> promptTriangleSizes=new Dictionary<int,Size>();
     readonly Dictionary<int,Bitmap> promptTriangles=new Dictionary<int,Bitmap>();
     readonly Dictionary<string,Rectangle> symbolBounds=new Dictionary<string,Rectangle>();
@@ -101,15 +103,24 @@ sealed class GameButtonIcons : IDisposable {
         Bitmap native;
         if(uv.Width<=0||uv.Height<=0||!promptTriangles.TryGetValue(texture,out native))
             return new RectangleF(box.X+box.Width*.18f,box.Y+box.Height*.34f,box.Width*.64f,box.Height*.42f);
-        Size original=promptTriangleSizes[texture];
-        uv=Rectangle.FromLTRB(uv.Left*native.Width/original.Width,uv.Top*native.Height/original.Height,uv.Right*native.Width/original.Width,uv.Bottom*native.Height/original.Height);
-        int left=native.Width,top=native.Height,right=-1,bottom=-1;
-        for(int y=Math.Max(0,uv.Top);y<Math.Min(native.Height,uv.Bottom);y++)for(int x=Math.Max(0,uv.Left);x<Math.Min(native.Width,uv.Right);x++) {
-            Color c=native.GetPixel(x,y);if(c.A>16&&c.G>60&&c.G>c.R*1.3f&&c.G>c.B*1.15f){left=Math.Min(left,x);top=Math.Min(top,y);right=Math.Max(right,x);bottom=Math.Max(bottom,y);}
+        string key=texture+":"+uv.X+":"+uv.Y+":"+uv.Width+":"+uv.Height;
+        RectangleF normalized;
+        if(!triangleInkCache.TryGetValue(key,out normalized)) {
+            Size original=promptTriangleSizes[texture];
+            uv=Rectangle.FromLTRB(uv.Left*native.Width/original.Width,uv.Top*native.Height/original.Height,uv.Right*native.Width/original.Width,uv.Bottom*native.Height/original.Height);
+            int left=native.Width,top=native.Height,right=-1,bottom=-1;
+            TriangleInkScans++;
+            for(int y=Math.Max(0,uv.Top);y<Math.Min(native.Height,uv.Bottom);y++)for(int x=Math.Max(0,uv.Left);x<Math.Min(native.Width,uv.Right);x++) {
+                Color c=native.GetPixel(x,y);if(c.A>16&&c.G>60&&c.G>c.R*1.3f&&c.G>c.B*1.15f){left=Math.Min(left,x);top=Math.Min(top,y);right=Math.Max(right,x);bottom=Math.Max(bottom,y);}
+            }
+            normalized=right<left||uv.Width<=0||uv.Height<=0?new RectangleF(.18f,.34f,.64f,.42f):new RectangleF((float)(left-uv.Left)/uv.Width,(float)(top-uv.Top)/uv.Height,(float)(right-left+1)/uv.Width,(float)(bottom-top+1)/uv.Height);
+            // Native animation cells are finite. Bound unexpected/corrupt UV sequences too.
+            if(triangleInkCache.Count>=256)triangleInkCache.Clear();
+            triangleInkCache[key]=normalized;
         }
-        if(right<left)return new RectangleF(box.X+box.Width*.18f,box.Y+box.Height*.34f,box.Width*.64f,box.Height*.42f);
-        return new RectangleF(box.X+(left-uv.Left)*box.Width/uv.Width,box.Y+(top-uv.Top)*box.Height/uv.Height,(right-left+1)*box.Width/uv.Width,(bottom-top+1)*box.Height/uv.Height);
+        return new RectangleF(box.X+normalized.X*box.Width,box.Y+normalized.Y*box.Height,normalized.Width*box.Width,normalized.Height*box.Height);
     }
+
     public bool DrawFaceSymbol(Graphics g,string token,RectangleF box) {
         Bitmap icon;if(!icons.TryGetValue(token,out icon))return false;
         Rectangle source;
@@ -124,7 +135,7 @@ sealed class GameButtonIcons : IDisposable {
         // icons contains the HD replacement when installed, otherwise the native fallback.
         g.DrawImage(icon,box,source,GraphicsUnit.Pixel);return true;
     }
-    public void Dispose() { foreach(var icon in icons.Values)icon.Dispose();icons.Clear();singleBounds.Clear();symbolBounds.Clear();foreach(var image in promptTriangles.Values)image.Dispose();promptTriangles.Clear(); }
+    public void Dispose() { foreach(var icon in icons.Values)icon.Dispose();icons.Clear();triangleInkCache.Clear();singleBounds.Clear();symbolBounds.Clear();foreach(var image in promptTriangles.Values)image.Dispose();promptTriangles.Clear(); }
 }
 
 
@@ -250,13 +261,49 @@ static class AlphaHud {
     [System.Runtime.InteropServices.DllImport("gdi32.dll")] static extern bool DeleteDC(IntPtr dc);
     [System.Runtime.InteropServices.DllImport("gdi32.dll")] static extern IntPtr SelectObject(IntPtr dc,IntPtr obj);
     [System.Runtime.InteropServices.DllImport("gdi32.dll")] static extern bool DeleteObject(IntPtr obj);
-    public static void Present(System.Windows.Forms.Form window,Bitmap bitmap) {
-        IntPtr screen=GetDC(IntPtr.Zero),dc=IntPtr.Zero,image=IntPtr.Zero,previous=IntPtr.Zero;
-        try {
-            dc=CreateCompatibleDC(screen);image=bitmap.GetHbitmap(Color.FromArgb(0));previous=SelectObject(dc,image);
-            var pos=new P(window.Left,window.Top);var origin=new P(0,0);var size=new S(bitmap.Width,bitmap.Height);var blend=new Blend {alpha=255,format=1};
-            if(!UpdateLayeredWindow(window.Handle,screen,ref pos,ref size,dc,ref origin,0,ref blend,2))throw new System.ComponentModel.Win32Exception(System.Runtime.InteropServices.Marshal.GetLastWin32Error());
-        }finally {if(previous!=IntPtr.Zero)SelectObject(dc,previous);if(image!=IntPtr.Zero)DeleteObject(image);if(dc!=IntPtr.Zero)DeleteDC(dc);if(screen!=IntPtr.Zero)ReleaseDC(IntPtr.Zero,screen);}
+    [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)] struct BitmapInfo {
+        public uint headerSize;public int width,height;public ushort planes,bits;public uint compression,imageSize;public int xppm,yppm;public uint colors,important,color;
+    }
+    [System.Runtime.InteropServices.DllImport("gdi32.dll",SetLastError=true)] static extern IntPtr CreateDIBSection(IntPtr dc,ref BitmapInfo info,uint usage,out IntPtr bits,IntPtr section,uint offset);
+    [System.Runtime.InteropServices.DllImport("kernel32.dll",EntryPoint="RtlMoveMemory")] static extern void CopyMemory(IntPtr destination,IntPtr source,UIntPtr count);
+    sealed class Surface : IDisposable {
+        public IntPtr Dc,Bits;IntPtr image,previous;public Size Size;
+        public void Ensure(Size size){
+            if(Size==size&&image!=IntPtr.Zero)return;
+            Dispose();
+            try{
+                Dc=CreateCompatibleDC(IntPtr.Zero);if(Dc==IntPtr.Zero)throw new System.ComponentModel.Win32Exception(System.Runtime.InteropServices.Marshal.GetLastWin32Error());
+                var info=new BitmapInfo {headerSize=40,width=size.Width,height=-size.Height,planes=1,bits=32};
+                image=CreateDIBSection(Dc,ref info,0,out Bits,IntPtr.Zero,0);
+                if(image==IntPtr.Zero)throw new System.ComponentModel.Win32Exception(System.Runtime.InteropServices.Marshal.GetLastWin32Error());
+                previous=SelectObject(Dc,image);if(previous==IntPtr.Zero||previous==new IntPtr(-1))throw new System.ComponentModel.Win32Exception(System.Runtime.InteropServices.Marshal.GetLastWin32Error());
+                Size=size;SurfaceCreates++;
+            }catch{Dispose();throw;}
+        }
+        public void Dispose(){
+            if(previous!=IntPtr.Zero&&previous!=new IntPtr(-1)&&Dc!=IntPtr.Zero)SelectObject(Dc,previous);
+            if(image!=IntPtr.Zero)DeleteObject(image);if(Dc!=IntPtr.Zero)DeleteDC(Dc);
+            image=previous=Dc=Bits=IntPtr.Zero;Size=System.Drawing.Size.Empty;
+        }
+    }
+    static readonly Dictionary<System.Windows.Forms.Form,Surface> surfaces=new Dictionary<System.Windows.Forms.Form,Surface>();
+    public static long SurfaceCreates {get;private set;}public static long Presents {get;private set;}public static long CopiedBytes {get;private set;}
+    public static void Release(System.Windows.Forms.Form window){Surface surface;if(surfaces.TryGetValue(window,out surface)){surfaces.Remove(window);surface.Dispose();}}
+    public static void Present(System.Windows.Forms.Form window,Bitmap bitmap){Present(window,bitmap,new Rectangle(Point.Empty,bitmap.Size),window.Location);}
+    public static void Present(System.Windows.Forms.Form window,Bitmap bitmap,Rectangle region,Point screenPosition) {
+        region=Rectangle.Intersect(region,new Rectangle(Point.Empty,bitmap.Size));if(region.Width<1||region.Height<1)return;
+        Surface surface;
+        if(!surfaces.TryGetValue(window,out surface)){surface=new Surface();surfaces.Add(window,surface);window.Disposed+=(o,e)=>Release(window);}
+        surface.Ensure(region.Size);
+        var pixels=bitmap.LockBits(region,ImageLockMode.ReadOnly,PixelFormat.Format32bppPArgb);
+        try{
+            int stride=checked(region.Width*4);
+            for(int y=0;y<region.Height;y++)CopyMemory(IntPtr.Add(surface.Bits,y*stride),IntPtr.Add(pixels.Scan0,y*pixels.Stride),new UIntPtr((uint)stride));
+        }finally{bitmap.UnlockBits(pixels);}
+        var pos=new P(screenPosition.X,screenPosition.Y);var origin=new P(0,0);var size=new S(region.Width,region.Height);var blend=new Blend {alpha=255,format=1};
+        var bounds=new Rectangle(screenPosition,region.Size);if(window.Bounds!=bounds)window.Bounds=bounds;
+        if(!UpdateLayeredWindow(window.Handle,IntPtr.Zero,ref pos,ref size,surface.Dc,ref origin,0,ref blend,2))throw new System.ComponentModel.Win32Exception(System.Runtime.InteropServices.Marshal.GetLastWin32Error());
+        Presents++;CopiedBytes+=(long)region.Width*region.Height*4;
     }
     sealed class ProbeWindow : System.Windows.Forms.Form {
         protected override System.Windows.Forms.CreateParams CreateParams {get {var p=base.CreateParams;p.ExStyle|=0x80000|0x80;return p;}}

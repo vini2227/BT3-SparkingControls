@@ -136,7 +136,9 @@
       "Atalhos funcionam durante a luta.": "Shortcuts work during battle.",
       "Restaurar padrão": "Restore default",
       "Atalho": "Shortcut",
-      "Bloquear atalhos durante a luta": "Lock shortcuts during battle"
+      "Bloquear atalhos durante a luta": "Lock shortcuts during battle",
+      "Bordas da tela": "Screen edges",
+      "Painéis nas bordas da imagem, inclusive em ultrawide.": "Panels at the picture edges, including ultrawide."
     },
     "es": {
       "Local do BT3 Decomp": "Ubicación de BT3 Decomp",
@@ -206,7 +208,9 @@
       "Atalhos funcionam durante a luta.": "Los atajos funcionan durante el combate.",
       "Restaurar padrão": "Restaurar valor predeterminado",
       "Atalho": "Atajo",
-      "Bloquear atalhos durante a luta": "Bloquear atajos durante el combate"
+      "Bloquear atalhos durante a luta": "Bloquear atajos durante el combate",
+      "Bordas da tela": "Bordes de la pantalla",
+      "Painéis nas bordas da imagem, inclusive em ultrawide.": "Paneles en los bordes de la imagen, incluso en ultrapanorámico."
     },
     "pt": {
       "Local do BT3 Decomp": "Local do BT3 Decomp",
@@ -276,7 +280,9 @@
       "Atalhos funcionam durante a luta.": "Atalhos funcionam durante a luta.",
       "Restaurar padrão": "Restaurar padrão",
       "Atalho": "Atalho",
-      "Bloquear atalhos durante a luta": "Bloquear atalhos durante a luta"
+      "Bloquear atalhos durante a luta": "Bloquear atalhos durante a luta",
+      "Bordas da tela": "Bordas da tela",
+      "Painéis nas bordas da imagem, inclusive em ultrawide.": "Painéis nas bordas da imagem, inclusive em ultrawide."
     },
     "es-419": {
       "Local do BT3 Decomp": "Ubicación de BT3 Decomp",
@@ -346,7 +352,9 @@
       "Atalhos funcionam durante a luta.": "Los atajos funcionan durante el combate.",
       "Restaurar padrão": "Restaurar valor predeterminado",
       "Atalho": "Atajo",
-      "Bloquear atalhos durante a luta": "Bloquear atajos durante el combate"
+      "Bloquear atalhos durante a luta": "Bloquear atajos durante el combate",
+      "Bordas da tela": "Bordes de la pantalla",
+      "Painéis nas bordas da imagem, inclusive em ultrawide.": "Paneles en los bordes de la imagen, incluso en ultrapanorámico."
     },
     "fr": {
       "Local do BT3 Decomp": "Emplacement de BT3 Decomp",
@@ -416,7 +424,9 @@
       "Atalhos funcionam durante a luta.": "Les raccourcis fonctionnent en combat.",
       "Restaurar padrão": "Rétablir par défaut",
       "Atalho": "Raccourci",
-      "Bloquear atalhos durante a luta": "Verrouiller les raccourcis en combat"
+      "Bloquear atalhos durante a luta": "Verrouiller les raccourcis en combat",
+      "Bordas da tela": "Bords de l’écran",
+      "Painéis nas bordas da imagem, inclusive em ultrawide.": "Panneaux aux bords de l’image, même en ultralarge."
     },
     "it": {
       "Local do BT3 Decomp": "Posizione di BT3 Decomp",
@@ -486,7 +496,9 @@
       "Atalhos funcionam durante a luta.": "Le scorciatoie funzionano in battaglia.",
       "Restaurar padrão": "Ripristina predefinito",
       "Atalho": "Scorciatoia",
-      "Bloquear atalhos durante a luta": "Blocca scorciatoie in battaglia"
+      "Bloquear atalhos durante a luta": "Blocca scorciatoie in battaglia",
+      "Bordas da tela": "Bordi dello schermo",
+      "Painéis nas bordas da imagem, inclusive em ultrawide.": "Pannelli ai bordi dell’immagine, anche in ultrawide."
     },
     "de": {
       "Local do BT3 Decomp": "Speicherort von BT3 Decomp",
@@ -556,7 +568,9 @@
       "Atalhos funcionam durante a luta.": "Tastenkürzel funktionieren im Kampf.",
       "Restaurar padrão": "Standard wiederherstellen",
       "Atalho": "Tastenkürzel",
-      "Bloquear atalhos durante a luta": "Tastenkürzel im Kampf sperren"
+      "Bloquear atalhos durante a luta": "Tastenkürzel im Kampf sperren",
+      "Bordas da tela": "Bildschirmränder",
+      "Painéis nas bordas da imagem, inclusive em ultrawide.": "Anzeigen an den Bildrändern, auch in Ultrawide."
     },
     "ar": {
       "Local do BT3 Decomp": "موقع BT3 Decomp",
@@ -626,7 +640,9 @@
       "Atalhos funcionam durante a luta.": "تعمل الاختصارات أثناء القتال.",
       "Restaurar padrão": "استعادة الافتراضي",
       "Atalho": "اختصار",
-      "Bloquear atalhos durante a luta": "قفل الاختصارات أثناء المعركة"
+      "Bloquear atalhos durante a luta": "قفل الاختصارات أثناء المعركة",
+      "Bordas da tela": "حواف الشاشة",
+      "Painéis nas bordas da imagem, inclusive em ultrawide.": "اللوحات عند حواف الصورة، حتى على الشاشات فائقة العرض."
     },
     "id": {
       "Local do BT3 Decomp": "Lokasi BT3 Decomp",
@@ -696,7 +712,9 @@
       "Atalhos funcionam durante a luta.": "Pintasan berfungsi saat bertarung.",
       "Restaurar padrão": "Pulihkan default",
       "Atalho": "Pintasan",
-      "Bloquear atalhos durante a luta": "Kunci pintasan selama pertempuran"
+      "Bloquear atalhos durante a luta": "Kunci pintasan selama pertempuran",
+      "Bordas da tela": "Tepi layar",
+      "Painéis nas bordas da imagem, inclusive em ultrawide.": "Panel di tepi gambar, termasuk layar ultrawide."
     },
     "pl": {
       "Local do BT3 Decomp": "Lokalizacja BT3 Decomp",
@@ -766,7 +784,9 @@
       "Atalhos funcionam durante a luta.": "Skróty działają podczas walki.",
       "Restaurar padrão": "Przywróć domyślne",
       "Atalho": "Skrót",
-      "Bloquear atalhos durante a luta": "Zablokuj skróty podczas walki"
+      "Bloquear atalhos durante a luta": "Zablokuj skróty podczas walki",
+      "Bordas da tela": "Krawędzie ekranu",
+      "Painéis nas bordas da imagem, inclusive em ultrawide.": "Panele przy krawędziach obrazu, także na ekranach ultraszerokich."
     },
     "ru": {
       "Local do BT3 Decomp": "Расположение BT3 Decomp",
@@ -836,7 +856,9 @@
       "Atalhos funcionam durante a luta.": "Сочетания работают во время боя.",
       "Restaurar padrão": "По умолчанию",
       "Atalho": "Клавиша",
-      "Bloquear atalhos durante a luta": "Блокировать клавиши в бою"
+      "Bloquear atalhos durante a luta": "Блокировать клавиши в бою",
+      "Bordas da tela": "Края экрана",
+      "Painéis nas bordas da imagem, inclusive em ultrawide.": "Панели по краям изображения, в том числе на сверхшироких экранах."
     },
     "zh-Hans": {
       "Local do BT3 Decomp": "BT3 Decomp 位置",
@@ -906,7 +928,9 @@
       "Atalhos funcionam durante a luta.": "快捷键在战斗中生效。",
       "Restaurar padrão": "恢复默认",
       "Atalho": "快捷键",
-      "Bloquear atalhos durante a luta": "战斗期间锁定快捷键"
+      "Bloquear atalhos durante a luta": "战斗期间锁定快捷键",
+      "Bordas da tela": "屏幕边缘",
+      "Painéis nas bordas da imagem, inclusive em ultrawide.": "面板位于画面边缘，支持超宽屏。"
     },
     "zh-Hant": {
       "Local do BT3 Decomp": "BT3 Decomp 位置",
@@ -976,7 +1000,9 @@
       "Atalhos funcionam durante a luta.": "快捷鍵在戰鬥中生效。",
       "Restaurar padrão": "恢復預設",
       "Atalho": "快捷鍵",
-      "Bloquear atalhos durante a luta": "戰鬥期間鎖定快捷鍵"
+      "Bloquear atalhos durante a luta": "戰鬥期間鎖定快捷鍵",
+      "Bordas da tela": "螢幕邊緣",
+      "Painéis nas bordas da imagem, inclusive em ultrawide.": "面板位於畫面邊緣，支援超寬螢幕。"
     },
     "ja": {
       "Local do BT3 Decomp": "BT3 Decomp の場所",
@@ -1046,7 +1072,9 @@
       "Atalhos funcionam durante a luta.": "ショートカットはバトル中に使えます。",
       "Restaurar padrão": "初期設定に戻す",
       "Atalho": "ショートカット",
-      "Bloquear atalhos durante a luta": "バトル中のショートカットをロック"
+      "Bloquear atalhos durante a luta": "バトル中のショートカットをロック",
+      "Bordas da tela": "画面の端",
+      "Painéis nas bordas da imagem, inclusive em ultrawide.": "ウルトラワイドでも画面の端にパネルを配置。"
     },
     "ko": {
       "Local do BT3 Decomp": "BT3 Decomp 위치",
@@ -1116,7 +1144,9 @@
       "Atalhos funcionam durante a luta.": "단축키는 전투 중에 작동합니다.",
       "Restaurar padrão": "기본값 복원",
       "Atalho": "단축키",
-      "Bloquear atalhos durante a luta": "전투 중 단축키 잠금"
+      "Bloquear atalhos durante a luta": "전투 중 단축키 잠금",
+      "Bordas da tela": "화면 가장자리",
+      "Painéis nas bordas da imagem, inclusive em ultrawide.": "울트라와이드에서도 화면 가장자리에 패널을 배치합니다."
     },
     "th": {
       "Local do BT3 Decomp": "ตำแหน่ง BT3 Decomp",
@@ -1186,7 +1216,9 @@
       "Atalhos funcionam durante a luta.": "ปุ่มลัดใช้งานได้ระหว่างต่อสู้",
       "Restaurar padrão": "คืนค่าเริ่มต้น",
       "Atalho": "ปุ่มลัด",
-      "Bloquear atalhos durante a luta": "ล็อกปุ่มลัดระหว่างการต่อสู้"
+      "Bloquear atalhos durante a luta": "ล็อกปุ่มลัดระหว่างการต่อสู้",
+      "Bordas da tela": "ขอบหน้าจอ",
+      "Painéis nas bordas da imagem, inclusive em ultrawide.": "วางแผงที่ขอบภาพ รวมถึงจออัลตร้าไวด์"
     }
   }
 }

@@ -66,7 +66,15 @@ __declspec(dllexport) int PadFilter(int socket,u8 *data){
     if(result!=18||socket<0||socket>1)return result;
     int online=CALL(Port_NetActive,int,(void))();if(online&&socket!=0)return result;
     unsigned flags=U32((void *)ADDR_gBattleWork,0x19f0);
-    if(!U32((void *)ADDR_gBattleWork,0x19f8)||(flags&0xbe00u)){ui_hidden();return result;}
+    /* Story scripts can run a fight without Battle_Main's running flag.
+       Require live battle subsystems and the native FIGHT state in that path.
+       Intro/dialogue/results, loading, AI and pause guards remain unchanged. */
+    int running=U32((void *)ADDR_gBattleWork,0x19f8)!=0;
+    if(!running){
+        u32 mgr=U32((void *)ADDR_gBtlChars,0),seq=U32((void *)ADDR_gBtlSeq,0);
+        running=mgr&&seq&&I32((void *)(unsigned long long)mgr,0)==2&&U32((void *)(unsigned long long)mgr,4)&&I32((void *)(unsigned long long)seq,0)==3;
+    }
+    if(!running||(flags&0xbe00u)){ui_hidden();return result;}
     int side=online?CALL(Port_NetMe,int,(void))():socket;if(side<0||side>1)return result;
     if(flags&0x4100u){int owner=CALL(BtlPause_GetMenuPad,int,(void))();if(owner<0||owner==side){ui_hidden();return result;}}
     void *chr=CALL(BtlChar_FindBySide,void *,(int))(side);
@@ -344,7 +352,11 @@ __declspec(dllexport) int PadFilter(int socket,u8 *data){
        The query flag is read-only: the game still checks health and permissions. */
     u8 *emergency=(u8 *)MAIL+0x7c0+side*32;
     int r3=(raw&4)!=0,previousR3=(int)U32(emergency,0);U32(emergency,0)=(u32)r3;
-    int emergencyEligible=!charge&&!active&&!skill&&!open&&!switching&&!U32(tab,8)&&!U32(sw,0);
+    /* Story confirmation is native R3 while the script's cue is pending.
+       Do not turn a story confirmation into an emergency attack. */
+    u32 cue=U32((void *)ADDR_gHudPrompt,0);
+    int storyCue=!online&&side==0&&!U32((void *)ADDR_gBattleWork,0x19f8)&&cue&&U32((void *)(unsigned long long)cue,0x290)<=2;
+    int emergencyEligible=!storyCue&&!charge&&!active&&!skill&&!open&&!switching&&!U32(tab,8)&&!U32(sw,0);
     if(r3&&!previousR3&&emergencyEligible&&(U8(chr,0x923)&0x40u)){
         U32(emergency,4)=6;U32(emergency,8)=U32(chr,12);U32(grab,4)=0;
     }
@@ -355,6 +367,7 @@ __declspec(dllexport) int PadFilter(int socket,u8 *data){
             neutral_stick(data);data[2]=data[3]=128;U32(emergency,4)--;
         }
     }
+    if(storyCue&&(raw&4)&&!open&&!switching&&!U32(tab,8)&&!U32(sw,0))mapped|=4u;
     U32(selection,0)=mapped;
     data[0]=(u8)~mapped;data[1]=(u8)~(mapped>>8);
     /* Diagnostic only: original and transmitted local packet words, no tags in the game input word. */

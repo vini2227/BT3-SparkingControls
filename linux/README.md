@@ -1,8 +1,8 @@
-# BT3 Sparking Controls 1.1 Beta — Linux x64
+# BT3 Sparking Controls 1.1 — Linux x64
 
-A Sparking! ZERO-inspired control layout and HUD for the native Linux version of Tenkaichi3Decomp. This is a beta port. Read FEATURES-EN.md for controls, differences and limitations.
+A Sparking! ZERO-inspired control layout and HUD for the native Linux version of Tenkaichi3Decomp. This is the Linux port. Read FEATURES-EN.md for controls, differences and limitations.
 
-## Linux 1.1 Beta — Changes
+## Linux 1.1 — Changes
 
 - Ported Story / Mission 100 fight detection for the reviewed original Linux Decomp, including native R3 story confirmation handling.
 - Cropped CPU composition and menu snapshots; reused the X11 image and transfer buffer instead of allocating/destroying them per frame. Idle HUD is unmapped; unchanged frames are not uploaded again. Game viewport coordinates and fade timings are retained.

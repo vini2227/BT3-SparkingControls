@@ -1,6 +1,6 @@
 {
-  "version": "1.1 Beta",
-  "frontend_sha256": "363621a678d7ef4822e3f18542cb150671dc7e839dbbf3e418a4d07e6f69e875",
+  "version": "1.1",
+  "frontend_sha256": "1c7aee70841b4c8f9d2ba77df6280b579b253156a7dd1c797ca5fc3842810625",
   "native_sha256": "d5bcaaa03af2405b6686e4a8a2f19f4e4205f562ce76f4e3368bef622f539271",
   "build": "ELF cross-compiled with Zig 0.13.0 clang target x86_64-linux-gnu.2.35. Managed frontend built with .NET Framework csc; build.sh supports native Linux mcs.",
   "scope": "Cropped HUD/X11 resource reuse, Story fight detection, Screen edges, quiet logging. ELF compatibility resolver unchanged; no Windows variant support."

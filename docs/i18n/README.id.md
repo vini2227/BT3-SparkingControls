@@ -8,11 +8,11 @@
 
 ---
 
-# BT3 Sparking Controls — 1.1 Beta
+# BT3 Sparking Controls — 1.1
 
-## 1.1 Beta — Windows / Linux
+## 1.1 — Windows / Linux
 
-Windows 1.1 Beta: perbaikan deteksi pertarungan Story pada Decomp asli, area gambar HUD dipangkas sesuai panel, peningkatan startup dan kompatibilitas, posisi di tepi layar serta pengaturan tetap tersimpan. Linux 1.1 juga tersedia: HUD dipangkas, gambar X11 digunakan ulang, deteksi pertarungan Story dan posisi tepi layar. Varian Windows tidak didukung; permainan Linux/X11 nyata belum diverifikasi. Perlambatan Mission 100 dengan tekstur dan ×8 sejak startup masih diselidiki; belum dipastikan selesai. Terima kasih kepada Aero atas pengujian terperinci dan log.
+Windows 1.1: perbaikan deteksi pertarungan Story pada Decomp asli, area gambar HUD dipangkas sesuai panel, peningkatan startup dan kompatibilitas, posisi di tepi layar serta pengaturan tetap tersimpan. Linux 1.1 juga tersedia: HUD dipangkas, gambar X11 digunakan ulang, deteksi pertarungan Story dan posisi tepi layar. Varian Windows tidak didukung; permainan Linux/X11 nyata belum diverifikasi. Perlambatan Mission 100 dengan tekstur dan ×8 sejak startup masih diselidiki; belum dipastikan selesai. Terima kasih kepada Aero atas pengujian terperinci dan log.
 
 [1.1 — Changes / English](../Release-1.1.md)
 
@@ -29,9 +29,9 @@ Tata letak kontrol dan HUD pertarungan terinspirasi Sparking! ZERO untuk Tenkaic
 
 ## Unduhan dan demonstrasi
 
-[**Windows x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1-beta/BT3-SparkingControls-1.1-Beta-Windows.zip) · [**Linux x64 ZIP (1.1)**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1-beta/BT3-SparkingControls-1.1-Beta-Linux-x64.zip) · [**1.1 Beta**](https://github.com/vini2227/BT3-SparkingControls/releases/tag/v1.1-beta)
+[**Windows x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1/BT3-SparkingControls-1.1-Windows.zip) · [**Linux x64 ZIP (1.1)**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1/BT3-SparkingControls-1.1-Linux-x64.zip) · [**1.1**](https://github.com/vini2227/BT3-SparkingControls/releases/tag/v1.1)
 
-[▶ Gameplay demo (recorded for 1.0 Beta) — MP4, 167 MiB](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-1.0-Beta-Gameplay-Demo.mp4) · [TXT](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1-beta/BT3-SparkingControls-Controls-and-Setup-Guide.txt) · [SHA256](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1-beta/SHA256SUMS.txt)
+[▶ Gameplay demo (recorded for 1.0 Beta) — MP4, 167 MiB](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-1.0-Beta-Gameplay-Demo.mp4) · [TXT](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1/BT3-SparkingControls-Controls-and-Setup-Guide.txt) · [SHA256](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1/SHA256SUMS.txt)
 
 ## Pemasangan
 

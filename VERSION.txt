@@ -1,2 +1,2 @@
-Windows: 1.1 Beta
-Linux: 1.1 Beta
+Windows: 1.1
+Linux: 1.1

@@ -1,5 +1,5 @@
 {
-  "version": "1.1 Beta",
+  "version": "1.1",
   "platform": "Windows x64",
   "payload_sha256": "c77c984a6dad914cff9bb2ef4a6da68342049f25c81023c3899a56ace9c6f86c",
   "local_checks": {
@@ -17,6 +17,6 @@
     "rerun_for_this_release": false
   },
   "live_gpu_slowdown_resolved": false,
-  "linux": "1.1 Beta; see linux/VALIDATION.json for platform-specific checks and limits",
+  "linux": "1.1; see linux/VALIDATION.json for platform-specific checks and limits",
   "limitations": "Affected-PC Mission 100 texture-pack plus 8x startup stalls remain under investigation; no universal future-update or desync-free guarantee."
 }

@@ -8,11 +8,11 @@
 
 ---
 
-# BT3 Sparking Controls — 1.1 Beta
+# BT3 Sparking Controls — 1.1
 
-## 1.1 Beta — Windows / Linux
+## 1.1 — Windows / Linux
 
-Windows 1.1 Beta: 원본 Decomp의 스토리 전투 감지를 수정하고 HUD 그리기 영역을 패널 크기로 줄였습니다. 시작 및 호환성 검사를 개선하고 화면 가장자리 배치를 추가했으며 설정은 유지됩니다. Linux 1.1도 제공됩니다. HUD 영역 축소, X11 이미지 재사용, 스토리 전투 감지 및 화면 가장자리 배치를 포함합니다. Windows 변형 버전은 지원하지 않으며 실제 Linux/X11 플레이는 검증되지 않았습니다. 시작부터 텍스처와 ×8을 켠 Mission 100의 성능 저하는 조사 중이며 해결이 확인되지 않았습니다. 자세한 테스트와 로그를 제공한 Aero에게 감사드립니다.
+Windows 1.1: 원본 Decomp의 스토리 전투 감지를 수정하고 HUD 그리기 영역을 패널 크기로 줄였습니다. 시작 및 호환성 검사를 개선하고 화면 가장자리 배치를 추가했으며 설정은 유지됩니다. Linux 1.1도 제공됩니다. HUD 영역 축소, X11 이미지 재사용, 스토리 전투 감지 및 화면 가장자리 배치를 포함합니다. Windows 변형 버전은 지원하지 않으며 실제 Linux/X11 플레이는 검증되지 않았습니다. 시작부터 텍스처와 ×8을 켠 Mission 100의 성능 저하는 조사 중이며 해결이 확인되지 않았습니다. 자세한 테스트와 로그를 제공한 Aero에게 감사드립니다.
 
 [1.1 — Changes / English](../Release-1.1.md)
 
@@ -29,9 +29,9 @@ Tenkaichi3Decomp용 Sparking! ZERO 스타일 조작 배치와 전투 HUD입니�
 
 ## 다운로드 및 시연
 
-[**Windows x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1-beta/BT3-SparkingControls-1.1-Beta-Windows.zip) · [**Linux x64 ZIP (1.1)**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1-beta/BT3-SparkingControls-1.1-Beta-Linux-x64.zip) · [**1.1 Beta**](https://github.com/vini2227/BT3-SparkingControls/releases/tag/v1.1-beta)
+[**Windows x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1/BT3-SparkingControls-1.1-Windows.zip) · [**Linux x64 ZIP (1.1)**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1/BT3-SparkingControls-1.1-Linux-x64.zip) · [**1.1**](https://github.com/vini2227/BT3-SparkingControls/releases/tag/v1.1)
 
-[▶ Gameplay demo (recorded for 1.0 Beta) — MP4, 167 MiB](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-1.0-Beta-Gameplay-Demo.mp4) · [TXT](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1-beta/BT3-SparkingControls-Controls-and-Setup-Guide.txt) · [SHA256](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1-beta/SHA256SUMS.txt)
+[▶ Gameplay demo (recorded for 1.0 Beta) — MP4, 167 MiB](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-1.0-Beta-Gameplay-Demo.mp4) · [TXT](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1/BT3-SparkingControls-Controls-and-Setup-Guide.txt) · [SHA256](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1/SHA256SUMS.txt)
 
 ## 설치
 

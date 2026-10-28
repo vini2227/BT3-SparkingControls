@@ -8,11 +8,11 @@
 
 ---
 
-# BT3 Sparking Controls — 1.1 Beta
+# BT3 Sparking Controls — 1.1
 
-## 1.1 Beta — Windows / Linux
+## 1.1 — Windows / Linux
 
-Windows 1.1 Beta : détection des combats du mode Histoire corrigée pour le Decomp original, rendu du HUD limité aux panneaux, démarrage et compatibilité améliorés, placement aux bords de l’écran et réglages conservés. Linux 1.1 est également disponible : HUD recadré, image X11 réutilisée, détection des combats Histoire et placement aux bords. Les variantes Windows ne sont pas prises en charge ; les parties Linux/X11 réelles ne sont pas vérifiées. Le ralentissement de Mission 100 avec textures et ×8 dès le démarrage reste à l’étude, sans correction confirmée. Merci à Aero pour ses tests détaillés et ses journaux.
+Windows 1.1 : détection des combats du mode Histoire corrigée pour le Decomp original, rendu du HUD limité aux panneaux, démarrage et compatibilité améliorés, placement aux bords de l’écran et réglages conservés. Linux 1.1 est également disponible : HUD recadré, image X11 réutilisée, détection des combats Histoire et placement aux bords. Les variantes Windows ne sont pas prises en charge ; les parties Linux/X11 réelles ne sont pas vérifiées. Le ralentissement de Mission 100 avec textures et ×8 dès le démarrage reste à l’étude, sans correction confirmée. Merci à Aero pour ses tests détaillés et ses journaux.
 
 [1.1 — Changes / English](../Release-1.1.md)
 
@@ -29,9 +29,9 @@ Des commandes et un HUD inspirés de Sparking! ZERO pour Tenkaichi3Decomp. Les a
 
 ## Téléchargements et démonstration
 
-[**Windows x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1-beta/BT3-SparkingControls-1.1-Beta-Windows.zip) · [**Linux x64 ZIP (1.1)**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1-beta/BT3-SparkingControls-1.1-Beta-Linux-x64.zip) · [**1.1 Beta**](https://github.com/vini2227/BT3-SparkingControls/releases/tag/v1.1-beta)
+[**Windows x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1/BT3-SparkingControls-1.1-Windows.zip) · [**Linux x64 ZIP (1.1)**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1/BT3-SparkingControls-1.1-Linux-x64.zip) · [**1.1**](https://github.com/vini2227/BT3-SparkingControls/releases/tag/v1.1)
 
-[▶ Gameplay demo (recorded for 1.0 Beta) — MP4, 167 MiB](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-1.0-Beta-Gameplay-Demo.mp4) · [TXT](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1-beta/BT3-SparkingControls-Controls-and-Setup-Guide.txt) · [SHA256](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1-beta/SHA256SUMS.txt)
+[▶ Gameplay demo (recorded for 1.0 Beta) — MP4, 167 MiB](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-1.0-Beta-Gameplay-Demo.mp4) · [TXT](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1/BT3-SparkingControls-Controls-and-Setup-Guide.txt) · [SHA256](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1/SHA256SUMS.txt)
 
 ## Installation
 

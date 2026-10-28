@@ -1260,7 +1260,7 @@ static class Program {
     }
     static void Launch(string exe,Profile p,bool hud,bool probe=false,bool diagnostics=false) {
         if(!probe) {
-            SessionLog("Diagnostic 1.1 Beta: HUD="+hud+"; offline_detach="+OfflineDetachTest+"; port arena excluded from add-on allocation; normal Windows heap; cropped persistent DIB");
+            SessionLog("Diagnostic 1.1: HUD="+hud+"; offline_detach="+OfflineDetachTest+"; port arena excluded from add-on allocation; normal Windows heap; cropped persistent DIB");
             using(var session=new GameSession(exe,null,diagnostics,!diagnostics,OfflineDetachTest)) {
                 session.Start();var state=session.Latest;
                 if(state==null)throw new IOException("The game ended before the local controls could be prepared.");

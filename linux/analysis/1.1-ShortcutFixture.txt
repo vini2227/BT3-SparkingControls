@@ -1,0 +1,1 @@
+PASS: 93 shortcut checks, persistence, conflicts, disabled bindings, focus, held keys, capture and restore-default controls in all 16 languages.

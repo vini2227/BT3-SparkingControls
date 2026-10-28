@@ -1,0 +1,1 @@
+PASS: 693 responsive layout/typography checks; real rendering at eight viewport/aspect combinations; transformations/fusion/switch and split panels fit.

@@ -8,11 +8,11 @@
 
 ---
 
-# BT3 Sparking Controls — 1.1 Beta (Windows)
+# BT3 Sparking Controls — 1.1 Beta
 
-## 1.1 Beta — Windows
+## 1.1 Beta — Windows / Linux
 
-Windows 1.1 Beta：修正原版 Decomp 剧情战斗识别，按面板范围裁剪 HUD 绘制区域，改进启动和兼容性检查，新增屏幕边缘布局并保留设置。Linux 仍为 1.0.6。从启动时就启用纹理包和 ×8 的 Mission 100 卡顿仍在调查中，尚未确认修复。特别感谢 Aero 提供详细测试和日志。
+Windows 1.1 Beta：修正原版 Decomp 剧情战斗识别，按面板范围裁剪 HUD 绘制区域，改进启动和兼容性检查，新增屏幕边缘布局并保留设置。Linux 1.1 也已提供：裁剪 HUD、复用 X11 图像、剧情战斗识别及屏幕边缘布局。不包含 Windows 分支支持；实际 Linux/X11 游戏尚未验证。从启动时就启用纹理包和 ×8 的 Mission 100 卡顿仍在调查中，尚未确认修复。特别感谢 Aero 提供详细测试和日志。
 
 [1.1 — Changes / English](../Release-1.1.md)
 
@@ -29,7 +29,7 @@ Windows 1.1 Beta：修正原版 Decomp 剧情战斗识别，按面板范围裁�
 
 ## 下载与演示
 
-[**Windows x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1-beta/BT3-SparkingControls-1.1-Beta-Windows.zip) · [**Linux x64 ZIP (1.0.6)**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.6-beta/BT3-SparkingControls-1.0.6-Beta-Linux-x64.zip) · [**1.1 Beta**](https://github.com/vini2227/BT3-SparkingControls/releases/tag/v1.1-beta)
+[**Windows x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1-beta/BT3-SparkingControls-1.1-Beta-Windows.zip) · [**Linux x64 ZIP (1.1)**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1-beta/BT3-SparkingControls-1.1-Beta-Linux-x64.zip) · [**1.1 Beta**](https://github.com/vini2227/BT3-SparkingControls/releases/tag/v1.1-beta)
 
 [▶ Gameplay demo (recorded for 1.0 Beta) — MP4, 167 MiB](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-1.0-Beta-Gameplay-Demo.mp4) · [TXT](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1-beta/BT3-SparkingControls-Controls-and-Setup-Guide.txt) · [SHA256](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1-beta/SHA256SUMS.txt)
 

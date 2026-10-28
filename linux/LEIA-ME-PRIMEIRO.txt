@@ -1,3 +1,4 @@
-BT3 Sparking Controls 1.0.3 Beta - Linux x64
-Run: bash start.sh
-Keep the complete extracted folder. Read README.md and FEATURES-EN.md.
+BT3 Sparking Controls 1.1 Beta — Linux x64
+Extract the entire ZIP. Keep all files together. Run bash start.sh; choose the native Linux game. Requires Mono, libgdiplus, fonts and a composited X11/XWayland session. Read README.md and Controls-and-Setup-Guide.txt.
+Settings are retained in the existing XDG directory. Native Linux gameplay has not been tested here.
+Thanks to Aero for testing and diagnostics.

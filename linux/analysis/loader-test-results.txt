@@ -1,0 +1,2 @@
+PASS: 9 Linux loader checks: valid constructor, one pad detour/trampoline, RX/RW boundaries, disabled preload passthrough, incompatible signature rejected before patching.
+OS calls were emulator stubs; real dlopen/LD_PRELOAD execution is NOT verified.

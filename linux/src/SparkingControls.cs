@@ -125,6 +125,11 @@ sealed class Reader {
     readonly Dictionary<long,List<string>> nameCache=new Dictionary<long,List<string>>();
     public Reader(Memory memory,Profile profile) { m=memory;p=profile;m.Reopened+=()=>{nameCache.Clear();Array.Clear(oldSeq,0,oldSeq.Length);Array.Clear(freshAt,0,freshAt.Length);}; }
     long Sym(string n) { return p.image_base+p.symbols[n]; }
+    bool BattleActive {get{
+        if(m.I32(Sym("gBattleWork")+0x19f8)!=0)return true;
+        long manager=m.Pointer32(Sym("gBtlChars")),sequence=m.Pointer32(Sym("gBtlSeq"));
+        return manager!=0&&sequence!=0&&m.I32(manager)==2&&m.Pointer32(manager+4)!=0&&m.I32(sequence)==3;
+    }}
     public int AspectMilli { get { return m.I32(Sym("sAspectMilli")); } }
     // BattleSetup.rule.screenMode is at gBattleWork + 0x08 + 0x1c. Online presents one local view.
     public bool LocalSplit {get{return HudLayout.IsLocalSplit(m.I32(Sym("online_mode")),m.I32(Sym("gBattleWork")+0x24));}}
@@ -132,7 +137,7 @@ sealed class Reader {
     static int I(byte[] b,int off) { return BitConverter.ToInt32(b,off); }
     public TransformationPanel[] SampleTransformations() {
         var panels=new List<TransformationPanel>();
-        if(m.I32(Sym("gBattleWork")+0x19f8)==0 || (m.U32(Sym("gBattleWork")+0x19f0)&0xff00)!=0)return panels.ToArray();
+        if(!BattleActive || (m.U32(Sym("gBattleWork")+0x19f0)&0xff00)!=0)return panels.ToArray();
         bool online=m.I32(Sym("online_mode"))>0;int localSide=online?m.I32(p.allocation+0xf40c):-1;
         for(int side=0;side<2;side++) {
             if(online&&side!=localSide)continue;
@@ -164,7 +169,7 @@ sealed class Reader {
     }
     public TechniquePrompt[] SamplePrompts() {
         var result=new List<TechniquePrompt>();
-        if(m.I32(Sym("gBattleWork")+0x19f8)==0 || (m.U32(Sym("gBattleWork")+0x19f0)&0xf900)!=0)return result.ToArray();
+        if(!BattleActive || (m.U32(Sym("gBattleWork")+0x19f0)&0xf900)!=0)return result.ToArray();
         long hud=m.Pointer32(Sym("gHud"));if(hud==0 || (m.U32(hud+0x30)&0x10)==0)return result.ToArray();
         long prompt=m.Pointer32(Sym("gHudPrompt"));if(prompt==0)return result.ToArray();
         byte[] data=m.Read(prompt,0x2d0);bool online=m.I32(Sym("online_mode"))>0;
@@ -208,7 +213,7 @@ sealed class Reader {
     }
     public MoveRow[][] Sample() {
         MoveRow[][] result=new MoveRow[2][];MenuStatus="waiting for fresh charge input";
-        if(m.I32(Sym("gBattleWork")+0x19f8)==0) { MenuStatus="battle inactive";nameCache.Clear(); return result; }
+        if(!BattleActive) { MenuStatus="battle inactive";nameCache.Clear(); return result; }
         uint flags=m.U32(Sym("gBattleWork")+0x19f0);
         if((flags&0xe700)!=0){MenuStatus="battle flags="+flags.ToString("X");return result;} // pause, demo, ready, loading, restart
         if(m.Pointer32(Sym("gBtlChars"))==0 || m.Pointer32(Sym("gBtlSeq"))==0){MenuStatus="battle pointers unavailable";return result;}
@@ -284,7 +289,7 @@ sealed class Reader {
 
 // Overlay panels follow the rendered picture, not decorative bars around it.
 // Choose a centered 3:2, expanded 16:9 or classic 4:3 control-safe region.
-enum PanelLayoutMode { Centered,Expanded,Classic }
+enum PanelLayoutMode { Centered,Expanded,Classic,ScreenEdges }
 static class SavedSettings {
     internal static string OverrideDirectory {get;set;}
     public static string CommonRoot {get{return OverrideDirectory??LinuxPlatform.SettingsRoot;}}
@@ -309,13 +314,13 @@ static class PanelPlacement {
     public static string FilePath {get {return Path.Combine(SavedSettings.CommonRoot,"panel-layout.txt");}}
     public static void Load() {
         Mode=PanelLayoutMode.Centered;
-        try {string file=File.Exists(FilePath)?FilePath:Path.Combine(SavedSettings.LegacyRoot,"panel-layout.txt");if(File.Exists(file)){string value=File.ReadAllText(file).Trim();Mode=value=="classic"?PanelLayoutMode.Classic:value=="expanded"?PanelLayoutMode.Expanded:PanelLayoutMode.Centered;}}
+        try {string file=File.Exists(FilePath)?FilePath:Path.Combine(SavedSettings.LegacyRoot,"panel-layout.txt");if(File.Exists(file)){string value=File.ReadAllText(file).Trim();Mode=value=="edges"?PanelLayoutMode.ScreenEdges:value=="classic"?PanelLayoutMode.Classic:value=="expanded"?PanelLayoutMode.Expanded:PanelLayoutMode.Centered;}}
         catch(IOException){}catch(UnauthorizedAccessException){}
     }
     public static void Set(bool expanded,bool persist){Set(expanded?PanelLayoutMode.Expanded:PanelLayoutMode.Centered,persist);}
     public static void Set(PanelLayoutMode mode,bool persist){
-        if(mode<PanelLayoutMode.Centered||mode>PanelLayoutMode.Classic)mode=PanelLayoutMode.Centered;
-        if(persist)File.WriteAllText(FilePath,mode==PanelLayoutMode.Classic?"classic":mode==PanelLayoutMode.Expanded?"expanded":"centered");Mode=mode;
+        if(mode<PanelLayoutMode.Centered||mode>PanelLayoutMode.ScreenEdges)mode=PanelLayoutMode.Centered;
+        if(persist){Directory.CreateDirectory(SavedSettings.CommonRoot);File.WriteAllText(FilePath,mode==PanelLayoutMode.ScreenEdges?"edges":mode==PanelLayoutMode.Classic?"classic":mode==PanelLayoutMode.Expanded?"expanded":"centered");}Mode=mode;
     }
 }
 
@@ -368,7 +373,7 @@ sealed class KeyCaptureDialog : Form {
 
 sealed class LayoutShortcut {
     bool held;
-    public bool Update(bool down,bool gameFocused){bool pressed=down&&!held;held=down;if(!pressed||!gameFocused||ShortcutBindings.Locked)return false;PanelPlacement.Set((PanelLayoutMode)(((int)PanelPlacement.Mode+1)%3),true);return true;}
+    public bool Update(bool down,bool gameFocused){bool pressed=down&&!held;held=down;if(!pressed||!gameFocused||ShortcutBindings.Locked)return false;PanelPlacement.Set((PanelLayoutMode)(((int)PanelPlacement.Mode+1)%4),true);return true;}
 }
 
 static class HudPreferences {
@@ -395,7 +400,7 @@ static class HudLayout {
     }
     public static RectangleF Controls(Size size,int aspectMilli,bool expanded=false){return Controls(size,aspectMilli,expanded?PanelLayoutMode.Expanded:PanelLayoutMode.Centered);}
     public static RectangleF Controls(Size size,int aspectMilli,PanelLayoutMode mode) {
-        RectangleF picture=Picture(size,aspectMilli);float limit=mode==PanelLayoutMode.Classic?4f/3f:mode==PanelLayoutMode.Expanded?16f/9f:3f/2f;float width=Math.Min(picture.Width,picture.Height*limit);
+        RectangleF picture=Picture(size,aspectMilli);float limit=mode==PanelLayoutMode.ScreenEdges?float.MaxValue:mode==PanelLayoutMode.Classic?4f/3f:mode==PanelLayoutMode.Expanded?16f/9f:3f/2f;float width=Math.Min(picture.Width,picture.Height*limit);
         return new RectangleF(picture.X+(picture.Width-width)/2,picture.Y,width,picture.Height);
     }
     public static bool IsLocalSplit(int onlineMode,int screenMode){return onlineMode==0&&screenMode==1;}
@@ -403,7 +408,7 @@ static class HudLayout {
         if(!localSplit)return Controls(size,aspectMilli,mode);
         RectangleF picture=Picture(size,aspectMilli);
         var view=new RectangleF(picture.Left+(side==0?0:picture.Width/2),picture.Top,picture.Width/2,picture.Height);
-        float limit=mode==PanelLayoutMode.Classic?4f/3f:mode==PanelLayoutMode.Expanded?16f/9f:3f/2f;
+        float limit=mode==PanelLayoutMode.ScreenEdges?float.MaxValue:mode==PanelLayoutMode.Classic?4f/3f:mode==PanelLayoutMode.Expanded?16f/9f:3f/2f;
         float width=Math.Min(view.Width,view.Height*limit);
         return new RectangleF(view.Left+(view.Width-width)/2,view.Top,width,view.Height);
     }
@@ -451,7 +456,7 @@ sealed class Overlay : Form {
     readonly FontFamily battleFamily; readonly FontFamily menuFamily;
     readonly PrivateFontCollection menuFonts=new PrivateFontCollection();
     readonly GameMenuSkin menuSkin; readonly NativeMenuMetrics menuMetrics; Bitmap alphaCanvas;string lastVisualKey;
-    Bitmap menuScratch;bool updateMenuSnapshots;
+    Bitmap menuScratch;bool updateMenuSnapshots,measureMenuOnly;Rectangle alphaBounds;
     readonly HudMenuFade[] attackFades={new HudMenuFade(),new HudMenuFade()},cardFades={new HudMenuFade(),new HudMenuFade()};
     DateTime nextPresentation=DateTime.MinValue,nextPreferenceRead=DateTime.MinValue,nextHudError=DateTime.MinValue,nextHudNotice=DateTime.MinValue;string lastHudNotice;
     readonly GameButtonIcons buttonIcons; readonly TransformationArt transformationArt;
@@ -508,24 +513,21 @@ sealed class Overlay : Form {
         catch(InvalidOperationException ex) { HudReadError("window",ex);Clear(); }
         catch(System.ComponentModel.Win32Exception ex){lastVisualKey=null;HudReadError("presentation",ex);}
     }
-    void HudNotice(string message){if(message==lastHudNotice||DateTime.UtcNow<nextHudNotice)return;nextHudNotice=DateTime.UtcNow.AddSeconds(2);lastHudNotice=message;try{Program.SessionLog("HUD state: "+message);}catch(IOException){}catch(UnauthorizedAccessException){}}
-    void HudReadError(string component,Exception error){if(DateTime.UtcNow<nextHudError)return;nextHudError=DateTime.UtcNow.AddSeconds(5);try{Program.SessionLog("HUD "+component+"; mode="+PanelPlacement.Mode+"; aspect="+aspectMilli+"; bounds="+Bounds+"; "+error.Message);}catch(IOException){}catch(UnauthorizedAccessException){}}
+    void HudNotice(string message){if(!Program.DiagnosticTelemetry)return;if(message==lastHudNotice||DateTime.UtcNow<nextHudNotice)return;nextHudNotice=DateTime.UtcNow.AddSeconds(2);lastHudNotice=message;try{Program.SessionLog("HUD state: "+message);}catch(IOException){}catch(UnauthorizedAccessException){}}
+    void HudReadError(string component,Exception error){if(!Program.DiagnosticTelemetry)return;if(DateTime.UtcNow<nextHudError)return;nextHudError=DateTime.UtcNow.AddSeconds(5);try{Program.SessionLog("HUD "+component+"; mode="+PanelPlacement.Mode+"; aspect="+aspectMilli+"; bounds="+Bounds+"; "+error.Message);}catch(IOException){}catch(UnauthorizedAccessException){}}
     void RefreshSavedHudPreferences(){
-        if(DateTime.UtcNow<nextPreferenceRead)return;nextPreferenceRead=DateTime.UtcNow.AddMilliseconds(500);
+        if(DateTime.UtcNow<nextPreferenceRead)return;nextPreferenceRead=DateTime.UtcNow.AddSeconds(2);
         ShortcutBindings.Load();
         var mode=PanelPlacement.Mode;bool attacks=HudPreferences.ShowAttacks,frame=AttackAppearance.OuterFrame;
         try{
-            if(File.Exists(PanelPlacement.FilePath)){string value=File.ReadAllText(PanelPlacement.FilePath).Trim();if(value=="classic"||value=="centered"||value=="expanded")PanelPlacement.Set(value=="classic"?PanelLayoutMode.Classic:value=="expanded"?PanelLayoutMode.Expanded:PanelLayoutMode.Centered,false);}
+            if(File.Exists(PanelPlacement.FilePath)){string value=File.ReadAllText(PanelPlacement.FilePath).Trim();if(value=="edges"||value=="classic"||value=="centered"||value=="expanded")PanelPlacement.Set(value=="edges"?PanelLayoutMode.ScreenEdges:value=="classic"?PanelLayoutMode.Classic:value=="expanded"?PanelLayoutMode.Expanded:PanelLayoutMode.Centered,false);}
             if(File.Exists(HudPreferences.FilePath)){string value=File.ReadAllText(HudPreferences.FilePath).Trim();if(value=="shown"||value=="hidden")HudPreferences.SetShowAttacks(value=="shown",false);}
             if(File.Exists(AttackAppearance.FilePath)){string value=File.ReadAllText(AttackAppearance.FilePath).Trim();if(value=="framed"||value=="cards")AttackAppearance.SetOuterFrame(value=="framed",false);}
         }catch(IOException){}catch(UnauthorizedAccessException){}
         if(mode!=PanelPlacement.Mode||attacks!=HudPreferences.ShowAttacks||frame!=AttackAppearance.OuterFrame){lastVisualKey=null;Program.SessionLog("HUD preferences reapplied: "+PanelPlacement.Mode+"; attacks="+HudPreferences.ShowAttacks);}
     }
-    void PresentCachedHud(){
-        // Reassert the no-activation overlay after full-screen/monitor transitions.
-        AlphaHud.Present(this,alphaCanvas);nextPresentation=DateTime.UtcNow.AddSeconds(1);
-    }
-    void Clear() { if(rows[0]!=null || rows[1]!=null || prompts.Length>0 || transformations.Length>0 || attackFades.Any(f=>f.Opacity>0)||cardFades.Any(f=>f.Opacity>0)) { rows=new MoveRow[2][];prompts=new TechniquePrompt[0];transformations=new TransformationPanel[0];ResetMenuFades();lastVisualKey=null;if(preview)Invalidate();else PresentAlphaHud(); } }
+    void PresentCachedHud(){LinuxDesktop.Present(new Rectangle(Left+alphaBounds.Left,Top+alphaBounds.Top,alphaBounds.Width,alphaBounds.Height),alphaCanvas);}
+    void Clear() { if(!preview)LinuxDesktop.Hide();if(rows[0]!=null || rows[1]!=null || prompts.Length>0 || transformations.Length>0 || attackFades.Any(f=>f.Opacity>0)||cardFades.Any(f=>f.Opacity>0)) { rows=new MoveRow[2][];prompts=new TechniquePrompt[0];transformations=new TransformationPanel[0];ResetMenuFades();lastVisualKey=null;if(preview)Invalidate();else PresentAlphaHud(); } }
     protected override void OnPaint(PaintEventArgs e) {
         if(!preview)return;
         base.OnPaint(e); Graphics g=e.Graphics;g.SmoothingMode=SmoothingMode.AntiAlias;
@@ -568,31 +570,57 @@ sealed class Overlay : Form {
     void DrawFadedMenu(Graphics g,HudMenuFade fade,Action<Graphics> render,int side){
         if(fade.Opacity<=0)return;
         if(fade.Target&&render!=null&&(updateMenuSnapshots||fade.Image==null)){
-            if(menuScratch==null||menuScratch.Size!=ClientSize){if(menuScratch!=null)menuScratch.Dispose();menuScratch=new Bitmap(ClientSize.Width,ClientSize.Height,System.Drawing.Imaging.PixelFormat.Format32bppPArgb);}
-            using(var canvas=Graphics.FromImage(menuScratch)){
-                canvas.Clear(Color.Transparent);canvas.SmoothingMode=SmoothingMode.AntiAlias;canvas.InterpolationMode=InterpolationMode.HighQualityBicubic;render(canvas);
+            // Measure geometry without allocating or rasterizing a viewport-sized bitmap.
+            if(menuScratch==null)menuScratch=new Bitmap(1,1,System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
+            using(var measure=Graphics.FromImage(menuScratch)){
+                measureMenuOnly=true;try{render(measure);}finally{measureMenuOnly=false;}
             }
             Rectangle box=Rectangle.Intersect(new Rectangle(Point.Empty,ClientSize),Rectangle.Inflate(Rectangle.Ceiling(panelBounds[side]),3,3));
-            if(box.Width>0&&box.Height>0)fade.Cache(menuScratch.Clone(box,System.Drawing.Imaging.PixelFormat.Format32bppPArgb),box);
+            if(box.Width>0&&box.Height>0){
+                Bitmap image=new Bitmap(box.Width,box.Height,System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
+                try{using(var canvas=Graphics.FromImage(image)){
+                    canvas.Clear(Color.Transparent);canvas.SmoothingMode=SmoothingMode.AntiAlias;canvas.InterpolationMode=InterpolationMode.HighQualityBicubic;
+                    canvas.TranslateTransform(-box.Left,-box.Top);render(canvas);
+                }fade.Cache(image,box);image=null;}finally{if(image!=null)image.Dispose();}
+            }
         }
         fade.Draw(g);
     }
     void DrawLayoutNotice(Graphics g){
-        string mode=UiLanguage.Text(PanelPlacement.Mode==PanelLayoutMode.Classic?"Clássica (4:3)":PanelPlacement.Mode==PanelLayoutMode.Expanded?"Expandida":"Centralizada");
+        string mode=UiLanguage.Text(PanelPlacement.Mode==PanelLayoutMode.ScreenEdges?"Bordas da tela":PanelPlacement.Mode==PanelLayoutMode.Classic?"Clássica (4:3)":PanelPlacement.Mode==PanelLayoutMode.Expanded?"Expandida":"Centralizada");
         using(var font=new Font("Segoe UI",10f,FontStyle.Bold)){string text=attackShortcutNotice?ShortcutBindings.Label(ShortcutBindings.Attacks)+"  ·  "+UiLanguage.Text("Mostrar painel de ataques")+"  "+(HudPreferences.ShowAttacks?"✓":"—"):frameShortcutNotice?ShortcutBindings.Label(ShortcutBindings.Frame)+"  ·  "+UiLanguage.Text("Moldura externa dos ataques")+"  "+(AttackAppearance.OuterFrame?"✓":"—"):ShortcutBindings.Label(ShortcutBindings.Layout)+"  ·  "+mode;float width=Math.Min(ClientSize.Width-24,g.MeasureString(text,font).Width+32);var box=new RectangleF((ClientSize.Width-width)/2,Math.Max(20,ClientSize.Height*.19f),width,32);using(var bg=new SolidBrush(Color.FromArgb(225,20,26,34)))g.FillRectangle(bg,box);using(var line=new Pen(Color.FromArgb(170,220,175,88)))g.DrawRectangle(line,box.X,box.Y,box.Width,box.Height);using(var fg=new SolidBrush(Color.FromArgb(255,221,151)))using(var format=new StringFormat{Alignment=StringAlignment.Center,LineAlignment=StringAlignment.Center})g.DrawString(text,font,fg,box,format);}
+    }
+    Rectangle VisibleHudBounds(){
+        Rectangle visible=Rectangle.Empty;
+        Action<Rectangle> add=box=>{if(box.Width>0&&box.Height>0)visible=visible.IsEmpty?box:Rectangle.Union(visible,box);};
+        foreach(var fade in attackFades.Concat(cardFades))if(fade.Opacity>0&&fade.Image!=null)add(fade.Bounds);
+        foreach(var prompt in prompts)add(Rectangle.Inflate(Rectangle.Ceiling(prompt.Project(ClientSize)),4,4));
+        if(DateTime.UtcNow<layoutNoticeUntil)add(new Rectangle(0,(int)Math.Max(20,ClientSize.Height*.19f)-2,ClientSize.Width,36));
+        return Rectangle.Intersect(Rectangle.Inflate(visible,3,3),new Rectangle(Point.Empty,ClientSize));
     }
     void PresentAlphaHud() {
         if(preview || ClientSize.Width<1 || ClientSize.Height<1)return;
+        bool fading=UpdateMenuFades((double)Stopwatch.GetTimestamp()/Stopwatch.Frequency);
+        bool content=prompts.Length>0||attackFades.Any(f=>f.Opacity>0)||cardFades.Any(f=>f.Opacity>0)||DateTime.UtcNow<layoutNoticeUntil;
+        if(!content){LinuxDesktop.Hide();lastVisualKey=null;return;}
         var key=new StringBuilder();key.Append(Bounds.ToString()).Append(aspectMilli).Append(localSplit).Append(PanelPlacement.Mode).Append(HudPreferences.ShowAttacks).Append(AttackAppearance.OuterFrame).Append(DateTime.UtcNow<layoutNoticeUntil);
         foreach(var set in rows){key.Append('|');if(set!=null)foreach(var row in set)key.Append(row.Button).Append(row.Name).Append(row.Cost).Append(row.Available).Append(row.Selected);}
         foreach(var set in transformations){key.Append(set.Side).Append(set.OnlineLocal).Append(set.IsSwitch).Append(set.IsFusion).Append(set.HasFusion).Append(set.HasForms);foreach(var item in set.Options)key.Append(item.Character).Append(':').Append(item.Health).Append(':').Append(item.HealthMax).Append(':').Append(item.Cost).Append(':').Append(item.Available).Append(':').Append(transformationArt.Get(item.Character)!=null);}
-        foreach(var prompt in prompts)key.Append(prompt.Button).Append(prompt.Project(ClientSize).ToString());
+        foreach(var prompt in prompts)key.Append(prompt.Button).Append(prompt.Texture).Append(prompt.Uv).Append(prompt.Project(ClientSize).ToString());
         string state=key.ToString();updateMenuSnapshots=state!=lastVisualKey;
-        bool fading=UpdateMenuFades((double)Stopwatch.GetTimestamp()/Stopwatch.Frequency);
-        if(!updateMenuSnapshots&&!fading){if(alphaCanvas!=null&&DateTime.UtcNow>=nextPresentation)PresentCachedHud();return;}
-        if(alphaCanvas==null || alphaCanvas.Size!=ClientSize){if(alphaCanvas!=null)alphaCanvas.Dispose();alphaCanvas=new Bitmap(ClientSize.Width,ClientSize.Height,System.Drawing.Imaging.PixelFormat.Format32bppPArgb);}
-        using(var g=Graphics.FromImage(alphaCanvas)){g.Clear(Color.Transparent);DrawScene(g);}
+        if(!updateMenuSnapshots&&!fading)return;
+        ComposeHud();
         PresentCachedHud();lastVisualKey=state;
+    }
+    void ComposeHud(){
+        // Build menu snapshots first; their bounds define the actual composition surface.
+        if(menuScratch==null)menuScratch=new Bitmap(1,1,System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
+        using(var measure=Graphics.FromImage(menuScratch))DrawAnimatedMenus(measure);
+        updateMenuSnapshots=false;
+        alphaBounds=VisibleHudBounds();
+        if(alphaBounds.Width<1||alphaBounds.Height<1)return;
+        if(alphaCanvas==null || alphaCanvas.Size!=alphaBounds.Size){if(alphaCanvas!=null)alphaCanvas.Dispose();alphaCanvas=new Bitmap(alphaBounds.Width,alphaBounds.Height,System.Drawing.Imaging.PixelFormat.Format32bppPArgb);}
+        using(var g=Graphics.FromImage(alphaCanvas)){g.Clear(Color.Transparent);g.TranslateTransform(-alphaBounds.Left,-alphaBounds.Top);DrawScene(g);}
     }
     // Fill the portrait window with a centered crop, using identical X/Y scale.
     static RectangleF PortraitFillCrop(RectangleF source,RectangleF target) {
@@ -613,7 +641,7 @@ sealed class Overlay : Form {
         float width=3*cardW+2*gap+2*pad;
         float height=2*cardH+gap+2*pad+tabs;
         RectangleF dock=HudLayout.Dock(area,new SizeF(width,height),split?0:panel.DisplaySide,true);float x=dock.X,y=dock.Y;
-        panelBounds[panel.DisplaySide]=dock;
+        panelBounds[panel.DisplaySide]=dock;if(measureMenuOnly)return;
         // Cards are drawn directly over the game; no outer panel background or border.
         if(panel.HasForms&&panel.HasFusion&&!panel.IsSwitch) {
             using(var font=new Font(menuFamily,14*scale,FontStyle.Regular,GraphicsUnit.Pixel)) {
@@ -686,7 +714,7 @@ sealed class Overlay : Form {
         }
         float rh=48*scale,pad=12*scale;w=Math.Min(w,slotWidth-2*pad);float frameW=w+2*pad;
         panelBounds[side]=HudLayout.Dock(area,new SizeF(frameW,rh*moves.Length+2*pad),localSplit?0:side,false);
-        float frameX=panelBounds[side].X,frameY=panelBounds[side].Y;
+        if(measureMenuOnly)return;float frameX=panelBounds[side].X,frameY=panelBounds[side].Y;
         if(AttackAppearance.OuterFrame)menuSkin.Frame(g,panelBounds[side],scale);float x=frameX+pad,y=frameY+pad;
         for(int i=0;i<moves.Length;i++) {
             var row=moves[i];float yy=y+i*rh;var box=new RectangleF(x,yy,w,40*scale);
@@ -963,7 +991,7 @@ sealed class GameLocationWindow : Form {
         Action<int> changeKey=target=>{using(var capture=new KeyCaptureDialog(target==0?ShortcutBindings.Layout:target==1?ShortcutBindings.Frame:ShortcutBindings.Attacks,target==0?ShortcutBindings.DefaultLayout:target==1?ShortcutBindings.DefaultFrame:ShortcutBindings.DefaultAttacks)){if(capture.ShowDialog(this)==DialogResult.OK){try{ShortcutBindings.Set(target==0?capture.Selected:ShortcutBindings.Layout,target==1?capture.Selected:ShortcutBindings.Frame,target==2?capture.Selected:ShortcutBindings.Attacks,true);refreshKeys();}catch(Exception ex){MessageBox.Show(this,ex.Message,Text,MessageBoxButtons.OK,MessageBoxIcon.Warning);}}}};
         layoutKey.Click+=(o,e)=>changeKey(0);frameKey.Click+=(o,e)=>changeKey(1);attackKey.Click+=(o,e)=>changeKey(2);prefs.Controls.Add(grid);layout.Controls.Add(prefs,0,2);
         bool refreshingPlacement=false;
-        Action refreshPlacement=()=>{refreshingPlacement=true;placement.BeginUpdate();placement.Items.Clear();foreach(string key in new[]{"Centralizada","Expandida","Clássica (4:3)"})placement.Items.Add(UiLanguage.Text(key));placement.SelectedIndex=(int)PanelPlacement.Mode;placement.EndUpdate();preview.Mode=PanelPlacement.Mode;preview.Invalidate();description.Text=UiLanguage.Text(PanelPlacement.Mode==PanelLayoutMode.Classic?"Posição original em uma área 4:3.":PanelPlacement.Expanded?"Mais espaço entre os painéis.":"Equilíbrio entre centro e bordas.");refreshingPlacement=false;};refreshText.Add(refreshPlacement);refreshPlacement();
+        Action refreshPlacement=()=>{refreshingPlacement=true;placement.BeginUpdate();placement.Items.Clear();foreach(string key in new[]{"Centralizada","Expandida","Clássica (4:3)","Bordas da tela"})placement.Items.Add(UiLanguage.Text(key));placement.SelectedIndex=(int)PanelPlacement.Mode;placement.EndUpdate();preview.Mode=PanelPlacement.Mode;preview.Invalidate();description.Text=UiLanguage.Text(PanelPlacement.Mode==PanelLayoutMode.ScreenEdges?"Bordas da tela":PanelPlacement.Mode==PanelLayoutMode.Classic?"Posição original em uma área 4:3.":PanelPlacement.Expanded?"Mais espaço entre os painéis.":"Equilíbrio entre centro e bordas.");refreshingPlacement=false;};refreshText.Add(refreshPlacement);refreshPlacement();
         placement.SelectedIndexChanged+=(o,e)=>{if(refreshingPlacement)return;try{PanelPlacement.Set((PanelLayoutMode)placement.SelectedIndex,true);refreshPlacement();}catch(Exception ex){MessageBox.Show(this,UiLanguage.Text("Não foi possível salvar a posição dos painéis.")+Environment.NewLine+ex.Message,Text,MessageBoxButtons.OK,MessageBoxIcon.Warning);refreshPlacement();}};
         var footer=new TableLayoutPanel {Dock=DockStyle.Fill,ColumnCount=2,RowCount=1,Margin=new Padding(0,4,0,0)};footer.RowStyles.Add(new RowStyle(SizeType.Percent,100));footer.ColumnStyles.Add(new ColumnStyle(SizeType.Percent,100));footer.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
         footer.Controls.Add(Bind(new Label {AutoSize=true,MaximumSize=new Size(330,0),ForeColor=LauncherTheme.Muted,Font=new Font(Font.FontFamily,8.5f),Anchor=AnchorStyles.Left,Margin=new Padding(0)},"Idioma e posição salvos automaticamente."),0,0);
@@ -995,7 +1023,8 @@ sealed class GameLocationWindow : Form {
 
 static class Program {
     public static readonly string Root=LinuxPlatform.Prepare();
-    public static void SessionLog(string message){try{File.AppendAllText(Path.Combine(Root,"launcher.log"),DateTime.UtcNow.ToString("o")+" "+message+Environment.NewLine);}catch(IOException){}}
+    public static bool DiagnosticTelemetry;
+    public static void SessionLog(string message){if(!DiagnosticTelemetry)return;try{File.AppendAllText(Path.Combine(Root,"launcher.log"),DateTime.UtcNow.ToString("o")+" "+message+Environment.NewLine);}catch(IOException){}}
     public static string Hex(byte[] b){return BitConverter.ToString(b).Replace("-","").ToLowerInvariant();}
     public static byte[] Unhex(string s){return Enumerable.Range(0,s.Length/2).Select(i=>Convert.ToByte(s.Substring(i*2,2),16)).ToArray();}
     public static Profile LoadProfile(){return new JavaScriptSerializer().Deserialize<Profile>(File.ReadAllText(Path.Combine(Root,"profile-linux.json")));}
@@ -1006,6 +1035,7 @@ static class Program {
         string library=Path.Combine(Root,"libbt3sparking.so");using(var f=File.OpenRead(library))using(var sha=SHA256.Create())if(Hex(sha.ComputeHash(f))!=p.payload_sha256)throw new IOException(UiLanguage.Text("O payload nao corresponde ao perfil. Extraia o pacote novamente."));
     }
     [STAThread] public static int Main(string[] args){
+        DiagnosticTelemetry=args.Contains("--diagnostics");
         try {
             if(args.Contains("--check")){var profile=LoadProfile();Validate(args.Last(),profile);File.WriteAllText(Path.Combine(Root,"resolved-profile.json"),new JavaScriptSerializer().Serialize(profile));Console.WriteLine("PASS: Linux x64 executable and add-on validated");return 0;}
             Application.EnableVisualStyles();Application.SetCompatibleTextRenderingDefault(false);

@@ -1,3 +1,16 @@
+## Linux 1.1 Beta — Changes
+
+- Ported Story / Mission 100 fight detection for the reviewed original Linux Decomp, including native R3 story confirmation handling.
+- Cropped CPU composition and menu snapshots; reused the X11 image and transfer buffer instead of allocating/destroying them per frame. Idle HUD is unmapped; unchanged frames are not uploaded again. Game viewport coordinates and fade timings are retained.
+- Added Screen edges placement, persisted with the other three layouts and included in the F8 cycle and translated launcher.
+- Cached HD boost-icon ink bounds. Diagnostic launcher logging is off by default; use `bash start.sh --diagnostics` only when collecting a report. Settings stay in the existing XDG directory.
+- Rebuilt the native ELF library and Mono frontend. The ELF compatibility resolver still targets reviewed official v0.1.37/v0.1.38.1; automatic Windows variant detection and Windows-specific debugger/heap/arena changes are not included. No universal future-version or updater support is claimed.
+
+Validation: 446,473 emulated packet/ABI/native-command checks and 9 loader checks for EACH reviewed Linux executable; 192 cropped pixel/persistence checks; 180 fade, 693 responsive, 1,408 card, 565 split-screen, 93 shortcut and 2,282 launcher checks. UI tests ran on Windows .NET, not Mono. Real Linux LD_PRELOAD/X11 presentation, native Wayland, physical controllers and online rollback remain unverified. This is not a confirmed fix for the reported Windows Mission 100 ×8/texture-pack slowdown.
+
+Special thanks to **Aero** for extensive testing, reproduction details and diagnostic logs that guided the performance work.
+
+---
 # 1.0.6 Beta — Changes
 
 This release contains all changes since public 1.0.3 Beta. Windows and Linux packages are available; platform-specific differences are listed below.

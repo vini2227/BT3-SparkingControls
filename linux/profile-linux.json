@@ -1,7 +1,7 @@
 {
   "format": 2,
   "game_sha256": "b3408acf1d5392d56cee54fa709358c241e130c947bd1781467d82d6834adfaf",
-  "payload_sha256": "311455da989ed41848deeebdfe209e96b573d5d5b848c0b6aafb2162a757fda5",
+  "payload_sha256": "d5bcaaa03af2405b6686e4a8a2f19f4e4205f562ce76f4e3368bef622f539271",
   "image_base": 536870912,
   "allocation": 134217728,
   "allocation_size": 65536,
@@ -18,5 +18,5 @@
     "online_mode": 6323952
   },
   "relocations": [],
-  "control_source_sha256": "b5d8a1af0c7172a1516dcc21283018b0f1de64d7cec4e7275671f50d8810c25c"
+  "control_source_sha256": "56575f138c3b39dcce6b20e3b8be7977e774b2b8dbbc3f25771444a467ad98ed"
 }

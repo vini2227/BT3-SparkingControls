@@ -1,2 +1,1 @@
-BT3 Sparking Controls 1.0.6 Beta â€” Linux x64
-Split-screen HUD update; native resolver unchanged.
+BT3 Sparking Controls 1.1 Beta — Linux x64

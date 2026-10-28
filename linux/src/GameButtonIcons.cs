@@ -8,6 +8,8 @@ using System.Collections.Generic;
 // Artwork is read from the user's game installation at runtime, never bundled.
 sealed class GameButtonIcons : IDisposable {
     public readonly List<string> HdLoaded=new List<string>();
+    readonly Dictionary<string,RectangleF> triangleInkCache=new Dictionary<string,RectangleF>();
+    internal int TriangleInkScans;
     readonly Dictionary<int,Size> promptTriangleSizes=new Dictionary<int,Size>();
     readonly Dictionary<int,Bitmap> promptTriangles=new Dictionary<int,Bitmap>();
     readonly Dictionary<string,Rectangle> symbolBounds=new Dictionary<string,Rectangle>();
@@ -101,15 +103,24 @@ sealed class GameButtonIcons : IDisposable {
         Bitmap native;
         if(uv.Width<=0||uv.Height<=0||!promptTriangles.TryGetValue(texture,out native))
             return new RectangleF(box.X+box.Width*.18f,box.Y+box.Height*.34f,box.Width*.64f,box.Height*.42f);
-        Size original=promptTriangleSizes[texture];
-        uv=Rectangle.FromLTRB(uv.Left*native.Width/original.Width,uv.Top*native.Height/original.Height,uv.Right*native.Width/original.Width,uv.Bottom*native.Height/original.Height);
-        int left=native.Width,top=native.Height,right=-1,bottom=-1;
-        for(int y=Math.Max(0,uv.Top);y<Math.Min(native.Height,uv.Bottom);y++)for(int x=Math.Max(0,uv.Left);x<Math.Min(native.Width,uv.Right);x++) {
-            Color c=native.GetPixel(x,y);if(c.A>16&&c.G>60&&c.G>c.R*1.3f&&c.G>c.B*1.15f){left=Math.Min(left,x);top=Math.Min(top,y);right=Math.Max(right,x);bottom=Math.Max(bottom,y);}
+        string key=texture+":"+uv.X+":"+uv.Y+":"+uv.Width+":"+uv.Height;
+        RectangleF normalized;
+        if(!triangleInkCache.TryGetValue(key,out normalized)) {
+            Size original=promptTriangleSizes[texture];
+            uv=Rectangle.FromLTRB(uv.Left*native.Width/original.Width,uv.Top*native.Height/original.Height,uv.Right*native.Width/original.Width,uv.Bottom*native.Height/original.Height);
+            int left=native.Width,top=native.Height,right=-1,bottom=-1;
+            TriangleInkScans++;
+            for(int y=Math.Max(0,uv.Top);y<Math.Min(native.Height,uv.Bottom);y++)for(int x=Math.Max(0,uv.Left);x<Math.Min(native.Width,uv.Right);x++) {
+                Color c=native.GetPixel(x,y);if(c.A>16&&c.G>60&&c.G>c.R*1.3f&&c.G>c.B*1.15f){left=Math.Min(left,x);top=Math.Min(top,y);right=Math.Max(right,x);bottom=Math.Max(bottom,y);}
+            }
+            normalized=right<left||uv.Width<=0||uv.Height<=0?new RectangleF(.18f,.34f,.64f,.42f):new RectangleF((float)(left-uv.Left)/uv.Width,(float)(top-uv.Top)/uv.Height,(float)(right-left+1)/uv.Width,(float)(bottom-top+1)/uv.Height);
+            // Native animation cells are finite. Bound unexpected/corrupt UV sequences too.
+            if(triangleInkCache.Count>=256)triangleInkCache.Clear();
+            triangleInkCache[key]=normalized;
         }
-        if(right<left)return new RectangleF(box.X+box.Width*.18f,box.Y+box.Height*.34f,box.Width*.64f,box.Height*.42f);
-        return new RectangleF(box.X+(left-uv.Left)*box.Width/uv.Width,box.Y+(top-uv.Top)*box.Height/uv.Height,(right-left+1)*box.Width/uv.Width,(bottom-top+1)*box.Height/uv.Height);
+        return new RectangleF(box.X+normalized.X*box.Width,box.Y+normalized.Y*box.Height,normalized.Width*box.Width,normalized.Height*box.Height);
     }
+
     public bool DrawFaceSymbol(Graphics g,string token,RectangleF box) {
         Bitmap icon;if(!icons.TryGetValue(token,out icon))return false;
         Rectangle source;
@@ -124,7 +135,7 @@ sealed class GameButtonIcons : IDisposable {
         // icons contains the HD replacement when installed, otherwise the native fallback.
         g.DrawImage(icon,box,source,GraphicsUnit.Pixel);return true;
     }
-    public void Dispose() { foreach(var icon in icons.Values)icon.Dispose();icons.Clear();singleBounds.Clear();symbolBounds.Clear();foreach(var image in promptTriangles.Values)image.Dispose();promptTriangles.Clear(); }
+    public void Dispose() { foreach(var icon in icons.Values)icon.Dispose();icons.Clear();triangleInkCache.Clear();singleBounds.Clear();symbolBounds.Clear();foreach(var image in promptTriangles.Values)image.Dispose();promptTriangles.Clear(); }
 }
 
 

@@ -16,7 +16,19 @@
 
 ## 1.1 Beta — Changes
 
-Windows release collecting the improvements developed after 1.0.6 Beta. Linux remains at 1.0.6; the Windows changes below are not included in that package.
+Windows and Linux 1.1 Beta packages are available. The Windows changes below are followed by a separate Linux section describing platform differences.
+
+## Linux 1.1 Beta — Changes
+
+- Ported Story / Mission 100 fight detection for the reviewed original Linux Decomp, including native R3 story confirmation handling.
+- Cropped CPU composition and menu snapshots; reused the X11 image and transfer buffer instead of allocating/destroying them per frame. Idle HUD is unmapped; unchanged frames are not uploaded again. Game viewport coordinates and fade timings are retained.
+- Added Screen edges placement, persisted with the other three layouts and included in the F8 cycle and translated launcher.
+- Cached HD boost-icon ink bounds. Diagnostic launcher logging is off by default; use `bash start.sh --diagnostics` only when collecting a report. Settings stay in the existing XDG directory.
+- Rebuilt the native ELF library and Mono frontend. The ELF compatibility resolver still targets reviewed official v0.1.37/v0.1.38.1; automatic Windows variant detection and Windows-specific debugger/heap/arena changes are not included. No universal future-version or updater support is claimed.
+
+Validation: 446,473 emulated packet/ABI/native-command checks and 9 loader checks for EACH reviewed Linux executable; 192 cropped pixel/persistence checks; 180 fade, 693 responsive, 1,408 card, 565 split-screen, 93 shortcut and 2,282 launcher checks. UI tests ran on Windows .NET, not Mono. Real Linux LD_PRELOAD/X11 presentation, native Wayland, physical controllers and online rollback remain unverified. This is not a confirmed fix for the reported Windows Mission 100 ×8/texture-pack slowdown.
+
+Special thanks to **Aero** for extensive testing, reproduction details and diagnostic logs that guided the performance work.
 
 ## Controls and HUD
 - Corrected fight detection in the original Decomp's Story / Mission 100 paths when the usual running flag is absent. Remapping still requires native fight state and live battle subsystems; menus, CPU input and non-fight states retain their protections. Char Package / Tag Team native payloads remain at their reviewed 1.0.6 versions.
@@ -48,7 +60,7 @@ Special thanks to **Aero** for the extensive testing, detailed reproduction step
 
 ## Downloads and demonstration
 
-[**Windows x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1-beta/BT3-SparkingControls-1.1-Beta-Windows.zip) · [**Linux x64 ZIP (1.0.6)**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.6-beta/BT3-SparkingControls-1.0.6-Beta-Linux-x64.zip) · [**1.1 Beta**](https://github.com/vini2227/BT3-SparkingControls/releases/tag/v1.1-beta)
+[**Windows x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1-beta/BT3-SparkingControls-1.1-Beta-Windows.zip) · [**Linux x64 ZIP (1.1)**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1-beta/BT3-SparkingControls-1.1-Beta-Linux-x64.zip) · [**1.1 Beta**](https://github.com/vini2227/BT3-SparkingControls/releases/tag/v1.1-beta)
 
 [▶ Gameplay demo (recorded for 1.0 Beta) — MP4, 167 MiB](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-1.0-Beta-Gameplay-Demo.mp4) · [TXT](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1-beta/BT3-SparkingControls-Controls-and-Setup-Guide.txt) · [SHA256](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1-beta/SHA256SUMS.txt)
 
@@ -76,7 +88,7 @@ Settings are saved in: %LOCALAPPDATA%\BT3-SparkingControls Updating the helper d
 
 ## Linux installation — native Linux game
 
-1. Extract BT3-SparkingControls-1.0.6-Beta-Linux-x64.zip.
+1. Extract BT3-SparkingControls-1.1-Beta-Linux-x64.zip.
 2. Keep the entire extracted folder together, including the managed EXE,
    libbt3sparking.so, profiles, compatibility files and assets.
 3. Install Mono with Windows Forms and System.Web.Extensions support,
@@ -158,9 +170,9 @@ All three menus use consistent card positions. Switching cards show reserve heal
 
 Hold R2: Display the active character's attack list, commands and costs. Available HD game button artwork is preferred; original assets are the fallback. No game artwork or HD texture pack is bundled.
 
-Panel placement options: - Centered: A balance between the center and edges. - Expanded: More space between the panels. - Classic (4:3): Original positioning within a 4:3 region. - Screen edges (Windows 1.1): Position menus near the outer picture edges, including solo ultrawide.
+Panel placement options: - Centered: A balance between the center and edges. - Expanded: More space between the panels. - Classic (4:3): Original positioning within a 4:3 region. - Screen edges (1.1): Position menus near the outer picture edges, including solo ultrawide.
 
-Native 4:3 positioning is preserved. Centered, Expanded and Classic use their established safe regions. Screen edges is an optional Windows layout for outer-edge positioning.
+Native 4:3 positioning is preserved. Centered, Expanded and Classic use their established safe regions. Screen edges is an optional layout for outer-edge positioning.
 
 All four battle menus fade in over 100 ms and out over 80 ms. Closing retains only the last visual snapshot until it becomes transparent. Reopening reverses smoothly. No command waits for the fade. Losing game focus clears immediately.
 

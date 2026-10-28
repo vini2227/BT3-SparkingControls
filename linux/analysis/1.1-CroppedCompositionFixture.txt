@@ -1,0 +1,1 @@
+PASS: 192 Linux cropped composition/pixel/persistence checks; four layouts, four sizes, four menu types. No X11 calls.

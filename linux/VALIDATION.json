@@ -1,34 +1,22 @@
 {
-  "version": "1.0.6 Beta",
-  "build_date": "2026-10-24",
-  "status": "beta; CPU and managed tests passed; native Linux runtime unverified",
-  "native_sha256": "311455da989ed41848deeebdfe209e96b573d5d5b848c0b6aafb2162a757fda5",
-  "frontend_sha256": "de3e4cb7ad0ce3b69bca73f35552ef02983c1fa9d42cd39771e1fee60d1754fe",
-  "games": [
-    "v0.1.37 Linux x64",
-    "v0.1.38.1 Linux x64"
+  "version": "1.1 Beta",
+  "platform": "Linux x64",
+  "packet_checks_each_reviewed_game": 446473,
+  "loader_checks_each_reviewed_game": 9,
+  "reviewed_games": [
+    "v0.1.37",
+    "v0.1.38.1"
   ],
-  "packet_checks_per_game": 445763,
-  "loader_checks_per_game": 9,
-  "launcher_checks": 2250,
-  "shortcut_checks": 93,
-  "responsive_checks": 693,
-  "preview_states": 12,
-  "negative_checks": [
-    "Windows executable refused",
-    "Changed non-relocatable ELF opcode refused"
-  ],
-  "not_verified": [
-    "Native Mono/X11 rendering and fullscreen",
-    "Real LD_PRELOAD execution on Linux",
-    "Physical controller timing",
-    "Live offline/online gameplay and rollback"
-  ],
-  "menu_fade_checks": 180,
-  "menu_fade_runtime": "Managed offscreen tests under Windows .NET, not actual Mono/X11",
-  "counter_release_checks": "Real compiled counter handler, animation gate, varied hold duration, delayed input acknowledgment, host/guest and both offline ports",
-  "splitscreen_checks": 425,
-  "split_card_checks": 1056,
-  "release_ui_checks": "Recompiled final sources and reran SplitCards, SplitScreen, Responsive and MenuFade fixtures under Windows .NET; not Mono/X11",
-  "platform_scope": "Split-screen HUD update; native resolver and library unchanged; no Windows variant support"
+  "managed_ui_on_windows": {
+    "cropped": 192,
+    "fade": 180,
+    "responsive": 693,
+    "cards": 1408,
+    "split_attacks": 565,
+    "shortcuts": 93,
+    "launcher": 2282
+  },
+  "live_linux_x11_tested": false,
+  "live_online_tested": false,
+  "slowdown_fix_confirmed": false
 }

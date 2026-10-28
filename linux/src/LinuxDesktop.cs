@@ -117,7 +117,7 @@ static class LinuxDesktop {
         if(XGetGeometry(display,gameWindow,out rr,out x,out y,out width,out height,out border,out depth)==0){gameWindow=0;return false;}
         if(width<1 || height<1 || width>16384 || height>16384)return false;
         if(XTranslateCoordinates(display,gameWindow,root,0,0,out dx,out dy,out child)==0)return false;
-        bounds=new Rectangle(dx,dy,(int)width,(int)height);if(window!=0)XRaiseWindow(display,window);return true;
+        bounds=new Rectangle(dx,dy,(int)width,(int)height);return true;
     }
     static void Create(Rectangle bounds) {
         Open();if(window!=0)return;
@@ -127,22 +127,30 @@ static class LinuxDesktop {
         window=XCreateWindow(display,root,bounds.X,bounds.Y,(uint)bounds.Width,(uint)bounds.Height,0,32,1,visual.visual,2|8|512|8192,ref attrs);
         if(window==0)throw new IOException("Cannot create the X11 overlay.");
         XStoreName(display,window,"BT3 Sparking Controls HUD");gc=XCreateGC(display,window,0,IntPtr.Zero);
-        XShapeCombineRectangles(display,window,2,0,0,IntPtr.Zero,0,0,0);XMapRaised(display,window);
+        XShapeCombineRectangles(display,window,2,0,0,IntPtr.Zero,0,0,0);
     }
+    [DllImport(X)] static extern int XUnmapWindow(IntPtr display,ulong window);
+    static IntPtr cachedImage,cachedPixels;static Size imageSize;static byte[] imageRow;static Rectangle shownBounds;static bool mapped;
+    static void ReleaseImage(){if(cachedImage!=IntPtr.Zero)XDestroyImage(cachedImage);else if(cachedPixels!=IntPtr.Zero)free(cachedPixels);cachedImage=cachedPixels=IntPtr.Zero;imageSize=Size.Empty;imageRow=null;}
+    public static void Hide(){if(display!=IntPtr.Zero&&window!=0&&mapped){XUnmapWindow(display,window);XFlush(display);mapped=false;}}
     public static void Present(Rectangle bounds,Bitmap bitmap) {
-        Create(bounds);XMoveResizeWindow(display,window,bounds.X,bounds.Y,(uint)bitmap.Width,(uint)bitmap.Height);
-        var locked=bitmap.LockBits(new Rectangle(0,0,bitmap.Width,bitmap.Height),ImageLockMode.ReadOnly,PixelFormat.Format32bppPArgb);
-        IntPtr pixels=IntPtr.Zero,image=IntPtr.Zero;
-        try {
-            int stride=bitmap.Width*4;pixels=malloc((UIntPtr)(uint)(stride*bitmap.Height));if(pixels==IntPtr.Zero)throw new OutOfMemoryException();
-            byte[] row=new byte[stride];for(int y=0;y<bitmap.Height;y++){Marshal.Copy(IntPtr.Add(locked.Scan0,y*locked.Stride),row,0,stride);Marshal.Copy(row,0,IntPtr.Add(pixels,y*stride),stride);}
-            image=XCreateImage(display,visual.visual,32,2,0,pixels,(uint)bitmap.Width,(uint)bitmap.Height,32,stride);
-            if(image==IntPtr.Zero)throw new IOException("Cannot create X11 image.");
-            XPutImage(display,window,gc,image,0,0,0,0,(uint)bitmap.Width,(uint)bitmap.Height);XMapRaised(display,window);XFlush(display);
-        }finally{bitmap.UnlockBits(locked);if(image!=IntPtr.Zero)XDestroyImage(image);else if(pixels!=IntPtr.Zero)free(pixels);}
+        Create(bounds);
+        if(shownBounds!=bounds){XMoveResizeWindow(display,window,bounds.X,bounds.Y,(uint)bitmap.Width,(uint)bitmap.Height);shownBounds=bounds;}
+        if(cachedImage==IntPtr.Zero||imageSize!=bitmap.Size){
+            ReleaseImage();int stride=checked(bitmap.Width*4);cachedPixels=malloc((UIntPtr)(uint)checked(stride*bitmap.Height));if(cachedPixels==IntPtr.Zero)throw new OutOfMemoryException();
+            cachedImage=XCreateImage(display,visual.visual,32,2,0,cachedPixels,(uint)bitmap.Width,(uint)bitmap.Height,32,stride);
+            if(cachedImage==IntPtr.Zero){ReleaseImage();throw new IOException("Cannot create X11 image.");}
+            imageSize=bitmap.Size;imageRow=new byte[stride];
+        }
+        var locked=bitmap.LockBits(new Rectangle(Point.Empty,bitmap.Size),ImageLockMode.ReadOnly,PixelFormat.Format32bppPArgb);
+        try{for(int y=0;y<bitmap.Height;y++){Marshal.Copy(IntPtr.Add(locked.Scan0,y*locked.Stride),imageRow,0,imageRow.Length);Marshal.Copy(imageRow,0,IntPtr.Add(cachedPixels,y*imageRow.Length),imageRow.Length);}}
+        finally{bitmap.UnlockBits(locked);}
+        XPutImage(display,window,gc,cachedImage,0,0,0,0,(uint)bitmap.Width,(uint)bitmap.Height);
+        if(!mapped){XMapRaised(display,window);mapped=true;}XFlush(display);
     }
     public static void Close() {
         if(display==IntPtr.Zero)return;
+        ReleaseImage();mapped=false;shownBounds=Rectangle.Empty;
         if(gc!=IntPtr.Zero)XFreeGC(display,gc);if(window!=0)XDestroyWindow(display,window);if(colormap!=0)XFreeColormap(display,colormap);
         XSync(display,0);XCloseDisplay(display);display=gc=IntPtr.Zero;root=window=colormap=gameWindow=0;gamePid=0;
     }

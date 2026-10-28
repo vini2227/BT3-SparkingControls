@@ -17,6 +17,6 @@
     "rerun_for_this_release": false
   },
   "live_gpu_slowdown_resolved": false,
-  "linux": "1.0.6 unchanged",
+  "linux": "1.1 Beta; see linux/VALIDATION.json for platform-specific checks and limits",
   "limitations": "Affected-PC Mission 100 texture-pack plus 8x startup stalls remain under investigation; no universal future-update or desync-free guarantee."
 }

@@ -1,10 +1,18 @@
-# BT3 Sparking Controls 1.0.6 Beta — Linux x64
+# BT3 Sparking Controls 1.1 Beta — Linux x64
 
 A Sparking! ZERO-inspired control layout and HUD for the native Linux version of Tenkaichi3Decomp. This is a beta port. Read FEATURES-EN.md for controls, differences and limitations.
 
-## Changes in 1.0.6 Beta
+## Linux 1.1 Beta — Changes
 
-All four menu types are left-aligned within each local player viewport, with stable scale across supported aspect ratios. This Linux package includes the split-screen update; the adaptive Windows compatibility checks and automatic Char Package / Tag Team detection are not included. The native library and Linux resolver are unchanged.
+- Ported Story / Mission 100 fight detection for the reviewed original Linux Decomp, including native R3 story confirmation handling.
+- Cropped CPU composition and menu snapshots; reused the X11 image and transfer buffer instead of allocating/destroying them per frame. Idle HUD is unmapped; unchanged frames are not uploaded again. Game viewport coordinates and fade timings are retained.
+- Added Screen edges placement, persisted with the other three layouts and included in the F8 cycle and translated launcher.
+- Cached HD boost-icon ink bounds. Diagnostic launcher logging is off by default; use `bash start.sh --diagnostics` only when collecting a report. Settings stay in the existing XDG directory.
+- Rebuilt the native ELF library and Mono frontend. The ELF compatibility resolver still targets reviewed official v0.1.37/v0.1.38.1; automatic Windows variant detection and Windows-specific debugger/heap/arena changes are not included. No universal future-version or updater support is claimed.
+
+Validation: 446,473 emulated packet/ABI/native-command checks and 9 loader checks for EACH reviewed Linux executable; 192 cropped pixel/persistence checks; 180 fade, 693 responsive, 1,408 card, 565 split-screen, 93 shortcut and 2,282 launcher checks. UI tests ran on Windows .NET, not Mono. Real Linux LD_PRELOAD/X11 presentation, native Wayland, physical controllers and online rollback remain unverified. This is not a confirmed fix for the reported Windows Mission 100 ×8/texture-pack slowdown.
+
+Special thanks to **Aero** for extensive testing, reproduction details and diagnostic logs that guided the performance work.
 
 ## Retained features
 
@@ -32,6 +40,6 @@ Sources and AGPL-3.0 license are included. With a C compiler (clang recommended)
 
 ## Validation limits
 
-445,763 CPU-emulated packet/ABI/native-command checks and 9 emulated loader checks passed for EACH of v0.1.37 and v0.1.38.1. Managed UI checks: 2,250 launcher checks across 16 languages, 93 shortcut checks, 693 responsive checks and 12 preview states. Incompatible modified ELF code and Windows executables were refused.
+446,473 CPU-emulated packet/ABI/native-command checks and 9 emulated loader checks passed for EACH of v0.1.37 and v0.1.38.1. Managed UI checks: 2,282 launcher checks across 16 languages, 93 shortcut checks, 693 responsive checks and 12 preview states. Incompatible modified ELF code and Windows executables were refused.
 
 The UI fixtures ran under Windows .NET, not Mono. Real Linux LD_PRELOAD, X11 fullscreen/compositing, physical-controller timing, gameplay and online rollback have NOT been tested here. No universal no-desync guarantee is made. No game executable, game artwork or HD texture pack is bundled.

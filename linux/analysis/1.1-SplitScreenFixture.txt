@@ -1,0 +1,1 @@
+PASS: 565 splitscreen checks.

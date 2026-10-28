@@ -8,11 +8,11 @@
 
 ---
 
-# BT3 Sparking Controls — 1.1 Beta (Windows)
+# BT3 Sparking Controls — 1.1 Beta
 
-## 1.1 Beta — Windows
+## 1.1 Beta — Windows / Linux
 
-Windows 1.1 Beta：オリジナルDecompのストーリー戦闘検出を修正し、HUD描画領域をパネル範囲に縮小。起動と互換性チェックを改善し、画面端の配置を追加しました。設定は保持されます。Linuxは1.0.6のままです。起動時からテクスチャと×8を有効にしたMission 100の処理落ちは調査中で、解消は未確認です。詳細なテストとログを提供してくれたAeroに感謝します。
+Windows 1.1 Beta：オリジナルDecompのストーリー戦闘検出を修正し、HUD描画領域をパネル範囲に縮小。起動と互換性チェックを改善し、画面端の配置を追加しました。設定は保持されます。Linux 1.1も公開しました。HUDの描画範囲縮小、X11画像の再利用、ストーリー戦闘検出、画面端配置を追加。Windows派生版の対応は含まれず、実際のLinux/X11プレイは未検証です。起動時からテクスチャと×8を有効にしたMission 100の処理落ちは調査中で、解消は未確認です。詳細なテストとログを提供してくれたAeroに感謝します。
 
 [1.1 — Changes / English](../Release-1.1.md)
 
@@ -29,7 +29,7 @@ Tenkaichi3Decomp 向けの、Sparking! ZERO に着想を得た操作配置と戦
 
 ## ダウンロードと実演
 
-[**Windows x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1-beta/BT3-SparkingControls-1.1-Beta-Windows.zip) · [**Linux x64 ZIP (1.0.6)**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0.6-beta/BT3-SparkingControls-1.0.6-Beta-Linux-x64.zip) · [**1.1 Beta**](https://github.com/vini2227/BT3-SparkingControls/releases/tag/v1.1-beta)
+[**Windows x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1-beta/BT3-SparkingControls-1.1-Beta-Windows.zip) · [**Linux x64 ZIP (1.1)**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1-beta/BT3-SparkingControls-1.1-Beta-Linux-x64.zip) · [**1.1 Beta**](https://github.com/vini2227/BT3-SparkingControls/releases/tag/v1.1-beta)
 
 [▶ Gameplay demo (recorded for 1.0 Beta) — MP4, 167 MiB](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-1.0-Beta-Gameplay-Demo.mp4) · [TXT](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1-beta/BT3-SparkingControls-Controls-and-Setup-Guide.txt) · [SHA256](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1-beta/SHA256SUMS.txt)
 

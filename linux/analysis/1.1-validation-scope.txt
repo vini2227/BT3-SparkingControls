@@ -1,0 +1,1 @@
+Native packet tests: 446473 and loader tests: 9 for EACH v0.1.37 and v0.1.38.1. UI fixtures run on Windows .NET. X11/Mono/LD_PRELOAD real execution not available. Prior reports retained under original names as historical evidence.

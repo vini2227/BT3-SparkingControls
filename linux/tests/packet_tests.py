@@ -17,7 +17,7 @@ def run_suite(allocated):
  if p.get('runtime_addresses'):u.mem_write(libbase+library.syms['bt3_symbols'][0],b''.join(struct.pack('<Q',value) for value in p['runtime_addresses']))
  u.mem_map(allocated,0x10000);chr=0x4000000;obj=chr+0x4000;row=chr+0x5000;mask=chr+0x6000;buf=0x50002000;stack=0x70000000;stop=0x50000000
  for a,n in [(chr,0x10000),(0x50000000,0x10000),(stack,0x10000)]:u.mem_map(a,n)
- current={'net':1,'side':0,'active':1,'flags':0,'action':0,'stage':0,'owner':0,'ids':[4,5,6,255],'result':18,'rowdir':0,'roster':[(0,10000,1)],'member':0,'candidate':1,'switchable':1,'fusions':[255,255,255],'fuseable':1,'inputHeld':0,'emergency':0,'fusionAge':0,'switchUp':30,'recordHeld':0,'ascendAge':100,'descendAge':100,'nativeCommand':0};calls=[];packet=b'';trace=[]
+ current={'net':1,'side':0,'active':1,'flags':0,'action':0,'stage':0,'owner':0,'ids':[4,5,6,255],'result':18,'rowdir':0,'roster':[(0,10000,1)],'member':0,'candidate':1,'switchable':1,'fusions':[255,255,255],'fuseable':1,'inputHeld':0,'emergency':0,'fusionAge':0,'switchUp':30,'recordHeld':0,'ascendAge':100,'descendAge':100,'nativeCommand':0,'story':0,'storyState':3,'cue':-1};calls=[];packet=b'';trace=[]
  def adr(name):return base+s[name]['rva']
  def regargs():return [u.reg_read(v) for v in [UC_X86_REG_RDI,UC_X86_REG_RSI,UC_X86_REG_RDX,UC_X86_REG_RCX]]
  handlers={
@@ -58,6 +58,7 @@ def run_suite(allocated):
   set32(chr+0x998,len(current['roster']));set32(chr+0x994,current['member']);set32(chr+0x9a0,current['candidate'])
   for n,(id,hp,present) in enumerate(current['roster']):
    set32(chr+0x9a4+n*0xa4,id);set32(chr+0x9a4+n*0xa4+8,present);set32(chr+0x9a4+n*0xa4+0x40,hp)
+  set32(adr('gBtlChars'),chr+0x7000 if current['story'] else 0);set32(adr('gBtlSeq'),chr+0x7100 if current['story'] else 0);set32(chr+0x7000,2);set32(chr+0x7004,chr);set32(chr+0x7100,current['storyState']);set32(adr('gHudPrompt'),chr+0x8000 if current['cue']>=0 else 0);set32(chr+0x8290,max(0,current['cue']))
   set32(adr('gBattleWork')+0x19f8,current['active']);set32(adr('gBattleWork')+0x19f0,current['flags'])
   sp=stack+0xf008;u.mem_write(sp,struct.pack('<Q',stop));u.reg_write(UC_X86_REG_RSP,sp);u.reg_write(UC_X86_REG_RDI,socket);u.reg_write(UC_X86_REG_RSI,buf)
   for reg in [UC_X86_REG_RBX,UC_X86_REG_RBP,UC_X86_REG_R12,UC_X86_REG_R13,UC_X86_REG_R14,UC_X86_REG_R15]:u.reg_write(reg,0x12345678)
@@ -68,6 +69,14 @@ def run_suite(allocated):
   for reg in [UC_X86_REG_RBX,UC_X86_REG_RBP,UC_X86_REG_R12,UC_X86_REG_R13,UC_X86_REG_R14,UC_X86_REG_R15]:assert u.reg_read(reg)==0x12345678
   got=bytes(u.mem_read(buf,18));assert got[6:]==packet[6:];checks+=22;return got
  def held(packet):return (~struct.unpack_from('<H',packet)[0])&65535
+ # Story fight fallback, non-fight bypass and native confirmation ownership.
+ for net,side,port in [(0,0,0),(0,1,1),(1,0,0),(1,1,0)]:
+  assert held(invoke(0x8200,net=net,side=side,socket=port,active=0,story=1,storyState=3,flags=0))==0x1100;checks+=1
+  for state in [0,1,2,4,5]:
+   assert invoke(0x8200,socket=port,storyState=state)==packet;checks+=1
+ for cue in [0,1,2]:
+  assert held(invoke(4,net=0,side=0,active=0,story=1,storyState=3,cue=cue))==4;checks+=1
+ invoke(0,net=1,side=0,active=1,story=0,cue=-1)
  for opt in [{'net':0,'active':0},{'net':1,'active':0},{'active':1,'flags':0x400},{'flags':0x4100,'owner':0}]:
   got=invoke(0xa300,lx=201,ly=40,**opt);assert got==packet;checks+=1
  invoke(net=1,active=1,flags=0,owner=0)

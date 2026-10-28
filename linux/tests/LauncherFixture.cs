@@ -32,7 +32,7 @@ static class LauncherFixture {
     UiLanguage.Set(lang,false);using(var window=new GameLocationWindow("",Path.Combine(folder,"unused-game-path.txt"))){
      window.Show();Application.DoEvents();var combo=window.Controls.Find("panelPlacement",true).OfType<ComboBox>().Single();
      Check((string)combo.Items[0]==UiLanguage.Text("Centralizada"),"Centered label not translated");Check((string)combo.Items[1]==UiLanguage.Text("Expandida"),"Expanded label not translated");
-     Check(combo.Items.Count==3&&(string)combo.Items[2]==UiLanguage.Text("Clássica (4:3)"),"Classic option not translated");
+     Check(combo.Items.Count==4&&(string)combo.Items[2]==UiLanguage.Text("Clássica (4:3)"),"Classic option not translated");
      combo.SelectedIndex=2;Check(PanelPlacement.Mode==PanelLayoutMode.Classic&&File.ReadAllText(file)=="classic","Classic UI selection must persist");
      Check(window.RightToLeftLayout==(lang=="ar"),"Arabic RTL mismatch");
      combo.SelectedIndex=1;Check(PanelPlacement.Expanded&&File.ReadAllText(file)=="expanded","UI selection must persist");combo.SelectedIndex=0;Check(!PanelPlacement.Expanded&&File.ReadAllText(file)=="centered","UI centered selection must persist");

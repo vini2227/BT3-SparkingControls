@@ -1,0 +1,8 @@
+{
+  "packet_checks": 1372977,
+  "compatibility_suite": "passed against installed November 2 Decomp",
+  "windows_exe_sha256": "a9162111c55e92f25d9312f812f4c45452841516ff67d91b1d299febc0c7a0cc",
+  "live_gameplay_test": false,
+  "slowdown_fixed": false,
+  "lua_migration": false
+}

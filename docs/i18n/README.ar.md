@@ -6,6 +6,12 @@
 
 [繁體中文](README.zh-Hant.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [ไทย](README.th.md)
 
+
+## Latest update: 1.1.1 (Windows)
+
+Revised compatibility checks and added left-stick Down/Up native launched recovery shortcuts for the original Windows Decomp. Grounded recovery stays native. Linux remains at 1.1. Actual online recovery and the reported ×8/texture-pack slowdown remain unverified; Lua migration is not included. [1.1.1 changes and limitations](../Release-1.1.1.md).
+
+
 ---
 
 <div dir="rtl">

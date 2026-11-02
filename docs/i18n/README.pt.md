@@ -6,6 +6,12 @@
 
 [繁體中文](README.zh-Hant.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [ไทย](README.th.md)
 
+
+## Atualização: 1.1.1 (Windows)
+
+Compatibilidade revisada e recuperação nativa por analógico para cima/baixo no BT3 original Windows. Linux permanece na 1.1. Validação online em partida e a queda de desempenho com ×8/texturas continuam pendentes. Migração para Lua não incluída. [Mudanças e limitações (inglês)](../Release-1.1.1.md).
+
+
 ---
 
 # BT3 Sparking Controls — 1.1

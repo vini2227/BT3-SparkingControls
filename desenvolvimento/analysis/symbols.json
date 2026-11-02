@@ -1,92 +1,92 @@
 {
   "BtlParam_GetUnkB4": {
-    "rva": 482400
+    "rva": 484560
   },
   "BtlParam_GetCostAE": {
-    "rva": 482544
+    "rva": 484704
   },
   "BtlAct_CanFuse": {
-    "rva": 189072
+    "rva": 189184
   },
   "BtlAct_CanSwitch": {
-    "rva": 189856
+    "rva": 189968
   },
   "BtlMember_NextSwitchTarget": {
-    "rva": 365872
+    "rva": 367936
   },
   "BtlMember_GetGauge": {
-    "rva": 365296
+    "rva": 367360
   },
   "Port_PadRead": {
-    "rva": 2265440
+    "rva": 2314912
   },
   "Port_NetActive": {
-    "rva": 2479120
+    "rva": 2746688
   },
   "Port_NetMe": {
-    "rva": 2471376
+    "rva": 2735296
   },
   "BtlPause_GetMenuPad": {
-    "rva": 1263296
+    "rva": 1266032
   },
   "BtlChar_FindBySide": {
-    "rva": 351552
+    "rva": 353536
   },
   "BtlChar_GetObj": {
-    "rva": 351616
+    "rva": 353600
   },
   "BtlParam_GetSlotId": {
-    "rva": 481984
+    "rva": 484144
   },
   "BtlParam_GetSlotCost": {
-    "rva": 482032
+    "rva": 484192
   },
   "BtlAct_CanTransform": {
-    "rva": 188288
+    "rva": 188400
   },
   "BtlChar_TestFlag": {
-    "rva": 319104
+    "rva": 321088
   },
   "BtlSuper_GetPromptRow": {
-    "rva": 497152
+    "rva": 499312
   },
   "gBattleWork": {
-    "rva": 45290216
+    "rva": 52248392
   },
   "gBtlChars": {
-    "rva": 4382692
+    "rva": 4870580
   },
   "gBtlObjTbl": {
-    "rva": 45202272
+    "rva": 52160448
   },
   "gHud": {
-    "rva": 6271328
+    "rva": 6883744
   },
   "gBtlSeq": {
-    "rva": 4382728
+    "rva": 4870616
   },
   "gHudPrompt": {
-    "rva": 6271352
+    "rva": 6883768
   },
   "sAspectMilli": {
-    "rva": 4408176
+    "rva": 4899716
   },
   "sHudLayout": {
-    "rva": 13330216
+    "rva": 15277416
   },
   "BtlInput_RemapButtons": {
-    "rva": 413632
+    "rva": 415792
   },
   "BtlInput_BuildCommands": {
-    "rva": 414736
+    "rva": 416896
   },
   "BtlInput_TestSwitch": {
-    "rva": 414448
+    "rva": 416608
   },
   "BtlInput_TestAction": {
-    "rva": 421552
+    "rva": 423712
   },
   "BtlInput_MergeStick": {
-    "rva": 414608
+    "rva": 416768
   }
 }

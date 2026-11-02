@@ -1,8 +1,8 @@
 {
-  "game": "REPLACE_WITH_YOUR_REVIEWED_GAME_PATH",
-  "game_sha256": "7c8886cfcebf4763fffd55a0e8e17913e9ea0105f55920cb0ebb6906fdd4fc22",
+  "game": "C:\\Users\\vinis\\OneDrive\\Desktop\\Tenkaichi3Decomp\\Tenkaichi3Decomp.exe",
+  "game_sha256": "d4367b96ea20f2cf2765c59204b2f3d063e67d717c31b3f643b3734f4f52eb52",
   "entry_offset": 4096,
   "trampoline_length": 6,
-  "relocations": 361,
+  "relocations": 356,
   "imports": 0
 }

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using System.Text;
 using System.Linq;
@@ -105,8 +105,8 @@ sealed class PeImage {
         return functionLengths[name]=end-s.Rva;
     }
 }
-public sealed class OnlineReference { public int offset,width,addend,bias; public string symbol,kind,data_expected,symbol_scope; }
-public sealed class OnlineSignature { public string name,expected,mask; public int length; public OnlineReference[] references; }
+public sealed class OnlineReference { public int offset,width,addend,bias; public string symbol,kind,data_expected,symbol_scope; public int[] dispatch_offsets; }
+public sealed class OnlineSignature { public string name,expected,mask; public int length; public OnlineReference[] references; public OnlineSignature[] alternatives; }
 public sealed class PacketContract { public string entry,entry_call_symbol,packet;public int entry_call_offset,return_offset;public OnlineSignature caller; }
 public sealed class OnlineMetadata {
     public PacketContract packet_contract;
@@ -130,7 +130,17 @@ static class OnlineCompatibility {
 
         File.WriteAllText(Path.Combine(Program.Root,"compatibility-report.txt"),report);
     }
+    internal static OnlineSignature EffectiveSignature(PeImage image,OnlineSignature signature){
+        try{CheckSingleSignature(image,signature);return signature;}catch(IOException){if(signature.alternatives!=null)foreach(var alternate in signature.alternatives)try{CheckSingleSignature(image,alternate);return alternate;}catch(IOException){}throw;}
+    }
     internal static void CheckSignature(PeImage image,OnlineSignature signature) {
+        try{CheckSingleSignature(image,signature);return;}catch(IOException){
+            if(signature.alternatives==null)throw;
+            foreach(var alternate in signature.alternatives){if(alternate.name!=signature.name||alternate.alternatives!=null)throw Changed("invalid alternate contract");try{CheckSingleSignature(image,alternate);return;}catch(IOException){}}
+            throw;
+        }
+    }
+    static void CheckSingleSignature(PeImage image,OnlineSignature signature) {
         int rva=image.Symbol(signature.name);byte[] expected=Program.Unhex(signature.expected),mask=Program.Unhex(signature.mask);
         if(signature.length!=expected.Length||mask.Length!=expected.Length||signature.length<5||image.FunctionLength(signature.name)!=signature.length)throw Changed(signature.name+" length");
         byte[] actual=image.Read(rva,signature.length);
@@ -138,7 +148,12 @@ static class OnlineCompatibility {
         foreach(var reference in signature.references){
             long value=Number(actual,reference.offset,reference.width);
             long target=reference.kind=="relative"?image.ImageBase+rva+reference.offset+reference.bias+value:value;
-            if(!string.IsNullOrEmpty(reference.data_expected)){
+            if(reference.dispatch_offsets!=null){
+                int count=reference.dispatch_offsets.Length;long location=target-image.ImageBase;
+                if(count<1||count>256||location<0||location>int.MaxValue||!image.Sections.Any(section=>location>=section.Rva&&location+(long)count*8<=section.Rva+(long)section.RawSize&&(section.Flags&0xa0000000)==0))throw Changed(signature.name+" dispatch table bounds");
+                byte[] table=image.Read((int)location,count*8);
+                for(int i=0;i<count;i++)if(reference.dispatch_offsets[i]<0||reference.dispatch_offsets[i]>=signature.length||BitConverter.ToInt64(table,i*8)!=image.ImageBase+rva+reference.dispatch_offsets[i])throw Changed(signature.name+" dispatch target "+i);
+            }else if(!string.IsNullOrEmpty(reference.data_expected)){
                 byte[] content=Program.Unhex(reference.data_expected);long location=target-image.ImageBase;
                 if(location<0||location>int.MaxValue||!image.Sections.Any(section=>location>=section.Rva&&location+content.Length<=section.Rva+(long)section.RawSize&&(section.Flags&0xa0000000)==0)||!image.Read((int)location,content.Length).SequenceEqual(content))throw Changed(signature.name+" literal bytes");
             }else if(!image.MatchesSymbol(reference.symbol,target-image.ImageBase-reference.addend,signature.name,reference.symbol_scope))throw Changed(signature.name+" target "+reference.symbol);
@@ -250,10 +265,17 @@ static class OnlineCompatibilityTests {
             foreach(var section in image.Sections)Buffer.BlockCopy(BitConverter.GetBytes(section.Rva+delta),0,moved,section.Header+12,4);
             Buffer.BlockCopy(BitConverter.GetBytes(image.SizeOfImage+delta),0,moved,image.PeOffset+24+56,4);
             // Relative references move with their containing section. Absolute references need the same delta.
-            foreach(var f in metadata.functions.Where(f=>f.name!="Port_PadRead").Concat(metadata.packet_contract==null?new OnlineSignature[0]:new[]{metadata.packet_contract.caller}))foreach(var reference in f.references)if(reference.kind=="absolute"){
+            foreach(var f in metadata.functions.Select(f=>OnlineCompatibility.EffectiveSignature(image,f)).Where(f=>f.name!="Port_PadRead").Concat(metadata.packet_contract==null?new OnlineSignature[0]:new[]{metadata.packet_contract.caller}))foreach(var reference in f.references)if(reference.kind=="absolute"){
                 int off=image.RawOffset(image.Symbol(f.name)+reference.offset,reference.width);
                 if(reference.width==4)Buffer.BlockCopy(BitConverter.GetBytes(checked(BitConverter.ToInt32(moved,off)+delta)),0,moved,off,4);
                 else Buffer.BlockCopy(BitConverter.GetBytes(BitConverter.ToInt64(moved,off)+delta),0,moved,off,8);
+            }
+            var tableWrites=new System.Collections.Generic.HashSet<int>();
+            foreach(var signature in metadata.functions)foreach(var reference in signature.references)if(reference.dispatch_offsets!=null){
+                int site=image.Symbol(signature.name);byte[] function=image.Read(site,signature.length);
+                long value=reference.width==8?BitConverter.ToInt64(function,reference.offset):BitConverter.ToInt32(function,reference.offset);
+                long target=reference.kind=="relative"?image.ImageBase+site+reference.offset+reference.bias+value:value;
+                for(int i=0;i<reference.dispatch_offsets.Length;i++){int off=image.RawOffset(checked((int)(target-image.ImageBase+i*8)),8);if(tableWrites.Add(off))Buffer.BlockCopy(BitConverter.GetBytes(BitConverter.ToInt64(moved,off)+delta),0,moved,off,8);}
             }
             var shifted=Program.LoadProfile();OnlineCompatibility.ResolveImage(new PeImage(moved),shifted,metadata);
             Assert(shifted.patches.Length==1&&shifted.patches[0].rva==baseline.patches[0].rva+delta,"moved packet hook");

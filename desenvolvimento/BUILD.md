@@ -1,4 +1,4 @@
-# Build BT3 Sparking Controls 1.1 — Windows
+# Build BT3 Sparking Controls 1.1.1 — Windows
 
 Python 3 and .NET Framework 4 C# compiler are required. Install Pillow to rebuild the icon. From the source root run `python desenvolvimento/tools/build-single-exe-windows.py`. The reviewed payload, profiles and compatibility metadata are included, so rebuilding the launcher does not require the game or Zig. An optional output EXE path can be passed as the first argument.
 
@@ -8,6 +8,6 @@ Compatibility accepts verified address changes; structural differences can requi
 
 ## Variant profiles
 
-The `variants/` directory is embedded by the Windows single-EXE builder and must be included with source distributions. Rebuilding the launcher requires no game executable or native compiler. The original native payload remains unchanged.
+The `variants/` directory is embedded by the Windows single-EXE builder and must be included with source distributions. Rebuilding the launcher requires no game executable or native compiler. The original Windows native payload includes the launched-recovery shortcuts; variant payloads are unchanged.
 
 To regenerate variant metadata after reviewing the game interfaces, install pefile/capstone/keystone-engine, set ZIG to Zig 0.13.0, and run `python desenvolvimento/tools/build-variants-windows.py --reviewed --characters PATH_TO_CHAR_PACKAGE_EXE --tagteam PATH_TO_TAG_TEAM_EXE`. Tag Team's native source is in variants/tagteam/src. The generator builds in analysis/variant-native without replacing the original native payload/profile. PDB/debug timestamps can change the payload hash between builds even when executable code is identical. Run compatibility, packet and HUD tests before distributing a regenerated build.

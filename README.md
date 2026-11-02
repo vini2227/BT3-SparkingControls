@@ -12,7 +12,13 @@
 
 # BT3 Sparking Controls
 
-**1.1 — Windows Controls and Setup Guide**
+**1.1.1 — Windows Controls and Setup Guide**
+
+## Latest update: 1.1.1 (Windows)
+
+Revised compatibility checks and added left-stick Down/Up native launched recovery shortcuts for the original Windows Decomp. Grounded recovery stays native. Linux remains at 1.1. Actual online recovery and the reported ×8/texture-pack slowdown remain unverified; Lua migration is not included. [1.1.1 changes and limitations](docs/Release-1.1.1.md).
+
+
 
 ## 1.1 — Changes
 
@@ -60,9 +66,9 @@ Special thanks to **Aero** for the extensive testing, detailed reproduction step
 
 ## Downloads and demonstration
 
-[**Windows x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1/BT3-SparkingControls-1.1-Windows.zip) · [**Linux x64 ZIP (1.1)**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1/BT3-SparkingControls-1.1-Linux-x64.zip) · [**1.1**](https://github.com/vini2227/BT3-SparkingControls/releases/tag/v1.1)
+[**Windows x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1.1/BT3-SparkingControls-1.1.1-Windows.zip) · [**Linux x64 ZIP (1.1)**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1/BT3-SparkingControls-1.1-Linux-x64.zip) · [**1.1.1**](https://github.com/vini2227/BT3-SparkingControls/releases/tag/v1.1.1)
 
-[▶ Gameplay demo (recorded for 1.0 Beta) — MP4, 167 MiB](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-1.0-Beta-Gameplay-Demo.mp4) · [TXT](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1/BT3-SparkingControls-Controls-and-Setup-Guide.txt) · [SHA256](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1/SHA256SUMS.txt)
+[▶ Gameplay demo (recorded for 1.0 Beta) — MP4, 167 MiB](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-1.0-Beta-Gameplay-Demo.mp4) · [TXT](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1.1/BT3-SparkingControls-Controls-and-Setup-Guide.txt) · [SHA256](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1.1/SHA256SUMS.txt)
 
 ## About
 
@@ -76,7 +82,7 @@ The original input payload and preferences are preserved. Reviewed address/times
 
 ## Windows installation
 
-1. Extract BT3-SparkingControls-1.1-Windows.zip.
+1. Extract BT3-SparkingControls-1.1.1-Windows.zip.
 2. Run BT3-SparkingControls.exe.
 3. Click Browse and select Tenkaichi3Decomp.exe in your game installation.
 4. Choose your language, panel placement and HUD preferences.

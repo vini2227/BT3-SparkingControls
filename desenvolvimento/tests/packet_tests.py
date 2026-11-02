@@ -114,6 +114,28 @@ def run_suite(allocated):
   assert held(invoke(4,cue=cue,emergency=0))==0;checks+=1
   invoke(0)
  invoke(0,net=1,side=0,active=1,story=0,cue=-1,emergency=0)
+ # SZ-style gestures generate native 47/48 chords in action CE only.
+ for net,side,port in [(0,0,0),(0,1,1),(1,0,0),(1,1,0)]:
+  for ly,direction in [(0,0x10),(255,0x40)]:
+   invoke(0,net=net,side=side,socket=port,action=0,ly=128)
+   for tick in range(12):
+    got=invoke(0,action=0xce,ly=ly,socket=port)
+    assert held(got)==direction|(0x2000 if tick%4<2 else 0),(net,side,port,ly,tick,hex(held(got)),bytes(u.mem_read(allocated+0xf920+side*32,12)).hex());checks+=1
+    assert got[2:6]==bytes([128]*4);checks+=1
+   assert held(invoke(0,action=0,ly=ly,socket=port))==0;checks+=1
+   for raw in [0x200,0x800,0x2000,0x8000,0x1000,0x4000,0x10,0x40]:
+    # Any explicit controller chord takes priority over the automatic gesture.
+    invoke(raw,action=0xce,ly=ly,socket=port)
+    assert struct.unpack('<I',u.mem_read(allocated+0xf920+side*32+4,4))[0]==0;checks+=1
+ invoke(0,net=1,side=0,active=1,action=0,ly=128)
+ # Ground recovery preserves normal physical remaps; no Circle-only filter.
+ for fallen in [0xd8,0xda,0xdb,0xdc,0xdd,0xde]:
+  for net,side,port in [(0,0,0),(0,1,1),(1,0,0),(1,1,0)]:
+   for physical,expected in [(0,0),(0x800,0x2000),(0x2000,0x3000),(0x8000,0x8000),(0x1000,0x1000),(0x4000,0x4000)]:
+    output=invoke(physical,net=net,side=side,socket=port,action=fallen,lx=0,ly=255)
+    assert held(output)==expected,(fallen,physical,held(output));checks+=1
+    assert output[4:6]==bytes([0,255]);checks+=1
+ invoke(0,net=1,side=0,active=1,action=0)
  for opt in [{'net':0,'active':0},{'net':1,'active':0},{'active':1,'flags':0x400},{'flags':0x4100,'owner':0}]:
   got=invoke(0xa300,lx=201,ly=40,**opt);assert got==packet;checks+=1
  invoke(net=1,active=1,flags=0,owner=0)
@@ -655,6 +677,23 @@ def run_suite(allocated):
   allow_native[0]=True
   try:return native('BtlInput_TestAction',[chr,inputId,1])
   finally:allow_native[0]=False
+ # Actual native input 47/48 with pulse streams, sampled every blank or alternate blanks.
+ for ly,target,other in [(255,47,48),(0,48,47)]:
+  invoke(0,net=1,side=0,socket=0,action=0,ly=128)
+  stream=[invoke(0,action=0xce,ly=ly) for tick in range(16)]
+  for stride,phase in [(1,0),(2,0),(2,1)]:
+   previous=0;hits=0
+   for pkt in stream[phase::stride]:
+    raw=held(pkt);bits=native('BtlInput_RemapButtons',[raw,mask]);prevBits=native('BtlInput_RemapButtons',[previous,mask])
+    set32(chr+0x73c,bits);set32(chr+0x744,bits&~prevBits)
+    allow_native[0]=True
+    try:
+     hits+=int(native('BtlInput_TestAction',[chr,target,1])!=0)
+     assert native('BtlInput_TestAction',[chr,other,1])==0;checks+=1
+    finally:allow_native[0]=False
+    previous=raw
+   assert hits>=2;checks+=1
+ invoke(0,action=0,ly=128)
  for net,side,port in [(1,0,0),(1,1,0),(0,0,0),(0,1,1)]:
   for act in [0x44,0x66,0x70,0xad]:
    invoke(0,net=net,side=side,socket=port,action=act,flags=0,stage=0)

@@ -1,2 +1,2 @@
-Windows: 1.1
-Linux: 1.1
+BT3 Sparking Controls 1.1.1 — Windows
+Original Windows Decomp recovery and reviewed compatibility update. Linux remains 1.1.

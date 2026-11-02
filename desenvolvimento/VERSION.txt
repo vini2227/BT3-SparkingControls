@@ -1,4 +1,2 @@
-BT3 Sparking Controls
-1.0.6 Beta - Windows
-Automatic Decomp variant detection
-Build date: 2026-10-24
+BT3 Sparking Controls 1.1.1 — Windows
+Original Windows Decomp recovery and reviewed compatibility update. Linux remains 1.1.

@@ -369,6 +369,19 @@ __declspec(dllexport) int PadFilter(int socket,u8 *data){
     }
     if(storyCue&&(raw&4)&&!open&&!switching&&!U32(tab,8)&&!U32(sw,0))mapped|=4u;
     U32(selection,0)=mapped;
+    /* SZ-style stick gestures for the native launched recovery window only.
+       Native input 47=Down+face, 48=Up+face. No action/physics writes.
+       Two input samples per edge tolerate native sampling on alternate blanks. */
+    u8 *recovery=(u8 *)MAIL+0x920+side*32;
+    unsigned recoverDir=action==0xce&&!(raw&0xfff6u)?(stickDown?0x40u:stickUp?0x10u:0):0;
+    if(!recoverDir){U32(recovery,0)=0;U32(recovery,4)=0;}
+    else {
+        if(U32(recovery,4)!=recoverDir||U32(recovery,8)!=U32(chr,12)){U32(recovery,0)=0;U32(recovery,4)=recoverDir;U32(recovery,8)=U32(chr,12);}
+        unsigned phase=U32(recovery,0)&3u;
+        mapped=(mapped&9u)|recoverDir|(phase<2?0x2000u:0);
+        neutral_stick(data);data[2]=data[3]=128;
+        U32(recovery,0)=(phase+1)&3u;
+    }
     data[0]=(u8)~mapped;data[1]=(u8)~(mapped>>8);
     /* Diagnostic only: original and transmitted local packet words, no tags in the game input word. */
     U32((void *)MAIL,0x400)++;U32((void *)MAIL,0x404)=raw;U32((void *)MAIL,0x408)=mapped;U32((void *)MAIL,0x40c)=(u32)side;U32((void *)MAIL,0x410)=(u32)action;U32((void *)MAIL,0x400)++;

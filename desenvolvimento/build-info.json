@@ -1,6 +1,6 @@
 {
-  "version": "1.1.1",
-  "sha256": "a9162111c55e92f25d9312f812f4c45452841516ff67d91b1d299febc0c7a0cc",
-  "scope": "Original Windows Decomp; Linux remains 1.1",
+  "version": "1.1.2",
+  "sha256": "07fa079de5b4c14dba80f0843a4ff9af2436581c3fbb266026b3a7d89d152b35",
+  "scope": "Windows: original Decomp and Z Warriors; Linux remains 1.1",
   "live_online_validation": false
 }

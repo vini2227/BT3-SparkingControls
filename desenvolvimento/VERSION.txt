@@ -1,2 +1,2 @@
-BT3 Sparking Controls 1.1.1 — Windows
-Original Windows Decomp recovery and reviewed compatibility update. Linux remains 1.1.
+BT3 Sparking Controls 1.1.2 — Windows
+Z Warriors and original Decomp compatibility; lighter HUD reads. Linux remains 1.1.

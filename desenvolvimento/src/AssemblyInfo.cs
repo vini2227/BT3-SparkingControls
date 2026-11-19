@@ -3,6 +3,6 @@
 [assembly: AssemblyProduct("BT3 Sparking Controls")]
 [assembly: AssemblyVersion("1.1.0.0")]
 [assembly: AssemblyFileVersion("1.1.0.0")]
-[assembly: AssemblyInformationalVersion("1.1.1-sz-recovery-test")]
+[assembly: AssemblyInformationalVersion("1.1.2-zwarriors-review")]
 
 

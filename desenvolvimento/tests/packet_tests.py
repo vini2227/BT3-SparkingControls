@@ -854,3 +854,6 @@ def run_suite(allocated):
 lines=[run_suite(a) for a in [0x60000000,0x60100000,0x7e000000]]
 lines+=['PASS: '+str(checks)+' packet/ABI/native-command checks; new controls offline on both ports; menus preserved; online local side only, relocation, held techniques/skills, transform packets, switch panel and native teammate navigation/acknowledgment, cancellation and timeout, native swap acknowledgment/release and bounded retries online and on both offline ports, fusion tabs and native long-hold packets on host/guest and both offline ports, native R1+Square priority without attack/guard/counter leaks, R3 emergency shortcut in native eligibility window and no original R3 leakage, native boost chord, vertical Z Dash and disabled legacy double taps, guard return after Circle release with actual native counter animation/exit tests and varied hold durations/delayed input acknowledgment, no writes to fighter or game globals.','NOT TESTED: a live online match, actual ping/rollback behavior, physical-controller timing or opponent compatibility end-to-end.']
 print('\n'.join(lines));(R/'analysis/packet-test-results.txt').write_text('\n'.join(lines)+'\n',encoding='utf-8')
+
+
+

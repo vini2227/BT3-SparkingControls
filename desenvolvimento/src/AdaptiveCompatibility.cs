@@ -82,12 +82,57 @@ sealed class PeImage {
     public bool MatchesSymbol(string name,long rva,string owner,string scope=null) {
         List<PeSymbol> matches;
         if(!candidates.TryGetValue(name,out matches))return false;
-        if(scope!=null)return matches.Any(s=>s.Rva==rva&&s.Scope==scope);
+        if(scope!=null){
+            if(matches.Any(s=>s.Rva==rva&&s.Scope==scope))return true;
+            // COFF emission groups are not C lexical scopes: adding a function or an import
+            // can move a unique symbol's group without changing its identity. Only an
+            // unambiguous name may use this fallback; the exact symbolic target is still required.
+            if(matches.Select(s=>s.Rva).Distinct().Count()!=1||matches.Any(s=>s.Type==32)||!matches.Any(s=>s.Rva==rva))return false;
+            if(matches.All(s=>(Sections[s.Section-1].Flags&0x20000000)==0))return true; // non-executable data
+            return IsImportThunk(name,(int)rva); // executable: only the thunk of the import of that very name
+        }
         if(name.StartsWith(".",StringComparison.Ordinal))return Symbol(name)==rva;
         // Local COFF names may repeat across translation units. Resolve them in
         // the referencing function's COFF emission group, never against an unrelated duplicate.
         if(matches.Select(s=>s.Rva).Distinct().Count()>1){PeSymbol function;if(!symbols.TryGetValue(owner,out function)||string.IsNullOrEmpty(function.Scope))return false;return matches.Any(s=>s.Rva==rva&&s.Scope==owner);}
         return matches.Any(s=>s.Rva==rva);
+    }
+    Dictionary<long,string> importSlots;
+    // Import address table slot -> imported name, read from the image's own import directory.
+    Dictionary<long,string> ImportSlots() {
+        if(importSlots!=null)return importSlots;
+        var slots=new Dictionary<long,string>();
+        try {
+            int optional=PeOffset+24;
+            if(U32(optional+108)>=2&&I32(optional+112+8)>0) {
+                int directory=I32(optional+112+8);
+                for(int d=0;d<4096;d++) {
+                    int at=RawOffset(directory+d*20,20);int lookup=I32(at),first=I32(at+16);
+                    if(lookup==0&&first==0)break;
+                    if(first<=0)throw new IOException("import directory");
+                    if(lookup==0)lookup=first;
+                    for(int i=0;i<65536;i++) {
+                        long entry=BitConverter.ToInt64(Bytes,RawOffset(lookup+i*8,8));
+                        if(entry==0)break;
+                        if(entry<0)continue; // imported by ordinal: no name to compare
+                        if(entry>int.MaxValue-2)throw new IOException("import name");
+                        int begin=RawOffset((int)entry+2,1),end=begin;
+                        while(end<Bytes.Length&&Bytes[end]!=0&&end-begin<=256)end++;
+                        if(end>=Bytes.Length||end-begin>256)throw new IOException("import name");
+                        slots[(long)first+i*8]=Encoding.ASCII.GetString(Bytes,begin,end-begin);
+                    }
+                }
+            }
+        } catch(IOException) { slots.Clear(); } // unreadable import data: no thunk is accepted
+        return importSlots=slots;
+    }
+    bool IsImportThunk(string name,int rva) {
+        try {
+            byte[] code=Read(rva,6);
+            if(code[0]!=0xff||code[1]!=0x25)return false; // jmp qword ptr [rip+disp32]
+            string imported;
+            return ImportSlots().TryGetValue((long)rva+6+BitConverter.ToInt32(code,2),out imported)&&imported==name;
+        } catch(IOException) { return false; }
     }
     public int RawOffset(int rva,int count) {
         foreach(var section in Sections)if(rva>=section.Rva && (long)rva+count<=section.Rva+(long)section.RawSize) {
@@ -107,7 +152,8 @@ sealed class PeImage {
 }
 public sealed class OnlineReference { public int offset,width,addend,bias; public string symbol,kind,data_expected,symbol_scope; public int[] dispatch_offsets; }
 public sealed class OnlineSignature { public string name,expected,mask; public int length; public OnlineReference[] references; public OnlineSignature[] alternatives; }
-public sealed class PacketContract { public string entry,entry_call_symbol,packet;public int entry_call_offset,return_offset;public OnlineSignature caller; }
+public sealed class PacketVariant { public string entry,packet; }
+public sealed class PacketContract { public string entry,entry_call_symbol,packet;public int entry_call_offset,return_offset;public OnlineSignature caller;public PacketVariant[] alternatives; }
 public sealed class OnlineMetadata {
     public PacketContract packet_contract;
     public int format,entry_offset,trampoline_length,online_addend;
@@ -190,7 +236,8 @@ static class OnlineCompatibility {
         else if(code[at]==0x0f&&code[at+1]==0x88){at+=2;initializer=(long)at+4+BitConverter.ToInt32(code,at);at+=4;}
         else throw Changed("online state signed branch");
         byte[] result={0x0f,0x9f,0xc0,0x0f,0xb6,0xc0,0x48,0x83,0xc4,(byte)stack};
-        foreach(byte value in result)if(code[at++]!=value)throw Changed("online state boolean return");
+        // The signed branch above already left for a negative cache, so on this path "!= 0" (setne) and "> 0" (setg) are the same boolean.
+        for(int i=0;i<result.Length;i++){byte value=code[at++];if(value!=result[i]&&!(i==1&&value==0x95))throw Changed("online state boolean return");}
         for(int i=pushes.Count-1;i>=0;i--){int reg=pushes[i];if(reg>=8&&code[at++]!=0x41)throw Changed("online state restore prefix");if(code[at++]!=0x58+(reg&7))throw Changed("online state restore register");}
         if(code[at++]!=0xc3||initializer<at||initializer>=length)throw Changed("online state return boundary");
     }
@@ -201,8 +248,23 @@ static class OnlineCompatibility {
     static void CheckPacketContract(PeImage image,PacketContract c) {
         int rva=image.Symbol("Port_PadRead"),length=image.FunctionLength("Port_PadRead");
         if(length<256||length>32768||c.entry_call_offset!=0x5b||c.return_offset!=0x6a||c.caller==null||c.caller.name!="sample_local")throw Changed("input contract metadata");
-        byte[] actual=image.Read(rva,length),entry=Program.Unhex(c.entry),packet=Program.Unhex(c.packet);
-        if(entry.Length!=160||packet.Length!=91)throw Changed("input contract bounds");
+        if(c.alternatives!=null&&c.alternatives.Length>8)throw Changed("input contract metadata");
+        byte[] actual=image.Read(rva,length);
+        // The reviewed baseline first, then reviewed recompilations of the same interface: same frame,
+        // same early exit, same 18-byte packet and return path, other register/instruction selection.
+        // An unknown build is still refused, with the baseline's reason.
+        IOException reason=null;bool matched=false;
+        for(int v=-1;!matched&&v<(c.alternatives==null?0:c.alternatives.Length);v++) {
+            try { CheckPacketVariant(image,c,actual,rva,v<0?new PacketVariant{entry=c.entry,packet=c.packet}:c.alternatives[v],v<0);matched=true; }
+            catch(IOException ex) { if(reason==null)reason=ex; }
+        }
+        if(!matched)throw reason;
+        CheckSignature(image,c.caller);
+    }
+    static void CheckPacketVariant(PeImage image,PacketContract c,byte[] actual,int rva,PacketVariant variant,bool baseline) {
+        if(variant==null||string.IsNullOrEmpty(variant.entry)||string.IsNullOrEmpty(variant.packet))throw Changed("input contract metadata");
+        byte[] entry=Program.Unhex(variant.entry),packet=Program.Unhex(variant.packet);
+        if(entry.Length!=160||(baseline?packet.Length!=91:packet.Length<48||packet.Length>160))throw Changed("input contract bounds");
         for(int i=0;i<entry.Length;i++)if((i<c.entry_call_offset||i>=c.entry_call_offset+4)&&actual[i]!=entry[i])throw Changed("Port_PadRead entry/ABI");
         if(rva+c.entry_call_offset+4+BitConverter.ToInt32(actual,c.entry_call_offset)!=image.Symbol(c.entry_call_symbol))throw Changed("Port_PadRead entry target");
         int found=-1;
@@ -212,7 +274,13 @@ static class OnlineCompatibility {
             if(found>=0)throw Changed("ambiguous packet writer");found=i;
         }
         if(found<0||actual[found+packet.Length]!=0xe9||found+packet.Length+5+BitConverter.ToInt32(actual,found+packet.Length+1)!=c.return_offset)throw Changed("Port_PadRead packet/return");
-        CheckSignature(image,c.caller);
+    }
+    // The packet writer bytes of whichever reviewed variant this image carries (for the self-test fixtures).
+    internal static string EffectivePacket(PeImage image,PacketContract c) {
+        byte[] actual=image.Read(image.Symbol("Port_PadRead"),image.FunctionLength("Port_PadRead"));
+        var all=new List<string>{c.packet};if(c.alternatives!=null)all.AddRange(c.alternatives.Where(a=>a!=null&&!string.IsNullOrEmpty(a.packet)).Select(a=>a.packet));
+        foreach(string hex in all){byte[] packet=Program.Unhex(hex);for(int i=0;i+packet.Length<=actual.Length;i++){int j=0;while(j<packet.Length&&actual[i+j]==packet[j])j++;if(j==packet.Length)return hex;}}
+        return c.packet;
     }
     public static string ResolveImage(PeImage image,Profile profile,OnlineMetadata metadata,string resourceRoot=null){
         byte[] template=File.ReadAllBytes(Path.Combine(resourceRoot??Program.Root,"SparkingControls.payload"));
@@ -255,6 +323,16 @@ static class OnlineCompatibility {
 }
 static class OnlineCompatibilityTests {
     static void Assert(bool value,string text){if(!value)throw new Exception("FAILED: "+text);}
+    // Signatures as this image carries them. Port_PadRead and, when its body differs, Port_NetActive are
+    // validated through their bounded contracts and have no per-reference fixture.
+    static List<OnlineSignature> Matching(PeImage image,OnlineMetadata metadata){
+        var list=new List<OnlineSignature>();
+        foreach(var f in metadata.functions){
+            if(f.name=="Port_PadRead")continue;
+            try{list.Add(OnlineCompatibility.EffectiveSignature(image,f));}catch(IOException){if(f.name!="Port_NetActive")throw;}
+        }
+        return list;
+    }
     public static int Run(string exe){
         var log=new StringBuilder();try{
             var bytes=File.ReadAllBytes(exe);var image=new PeImage(bytes);var metadata=OnlineCompatibility.Metadata();var baseline=Program.LoadProfile();
@@ -264,14 +342,30 @@ static class OnlineCompatibilityTests {
             var moved=(byte[])bytes.Clone();const int delta=0x10000;
             foreach(var section in image.Sections)Buffer.BlockCopy(BitConverter.GetBytes(section.Rva+delta),0,moved,section.Header+12,4);
             Buffer.BlockCopy(BitConverter.GetBytes(image.SizeOfImage+delta),0,moved,image.PeOffset+24+56,4);
+            // A relinked image keeps its import tables consistent with the moved sections.
+            int importField=image.PeOffset+24+112+8,importRva=BitConverter.ToInt32(bytes,importField);
+            if(importRva>0){
+                Buffer.BlockCopy(BitConverter.GetBytes(importRva+delta),0,moved,importField,4);
+                var importTables=new System.Collections.Generic.HashSet<int>();
+                for(int d=0;d<4096;d++){
+                    int at=image.RawOffset(importRva+d*20,20),lookup=BitConverter.ToInt32(bytes,at),first=BitConverter.ToInt32(bytes,at+16);
+                    if(lookup==0&&first==0)break;
+                    foreach(int importOffset in new[]{0,12,16}){int v=BitConverter.ToInt32(bytes,at+importOffset);if(v!=0)Buffer.BlockCopy(BitConverter.GetBytes(v+delta),0,moved,at+importOffset,4);}
+                    foreach(int table in new[]{lookup,first})if(table!=0&&importTables.Add(table))for(int i=0;i<65536;i++){
+                        int slot=image.RawOffset(table+i*8,8);long entry=BitConverter.ToInt64(bytes,slot);
+                        if(entry==0)break;
+                        if(entry>0)Buffer.BlockCopy(BitConverter.GetBytes(entry+delta),0,moved,slot,8);
+                    }
+                }
+            }
             // Relative references move with their containing section. Absolute references need the same delta.
-            foreach(var f in metadata.functions.Select(f=>OnlineCompatibility.EffectiveSignature(image,f)).Where(f=>f.name!="Port_PadRead").Concat(metadata.packet_contract==null?new OnlineSignature[0]:new[]{metadata.packet_contract.caller}))foreach(var reference in f.references)if(reference.kind=="absolute"){
+            foreach(var f in Matching(image,metadata).Concat(metadata.packet_contract==null?new OnlineSignature[0]:new[]{OnlineCompatibility.EffectiveSignature(image,metadata.packet_contract.caller)}))foreach(var reference in f.references)if(reference.kind=="absolute"){
                 int off=image.RawOffset(image.Symbol(f.name)+reference.offset,reference.width);
                 if(reference.width==4)Buffer.BlockCopy(BitConverter.GetBytes(checked(BitConverter.ToInt32(moved,off)+delta)),0,moved,off,4);
                 else Buffer.BlockCopy(BitConverter.GetBytes(BitConverter.ToInt64(moved,off)+delta),0,moved,off,8);
             }
             var tableWrites=new System.Collections.Generic.HashSet<int>();
-            foreach(var signature in metadata.functions)foreach(var reference in signature.references)if(reference.dispatch_offsets!=null){
+            foreach(var signature in Matching(image,metadata))foreach(var reference in signature.references)if(reference.dispatch_offsets!=null){
                 int site=image.Symbol(signature.name);byte[] function=image.Read(site,signature.length);
                 long value=reference.width==8?BitConverter.ToInt64(function,reference.offset):BitConverter.ToInt32(function,reference.offset);
                 long target=reference.kind=="relative"?image.ImageBase+site+reference.offset+reference.bias+value:value;
@@ -294,22 +388,27 @@ static class OnlineCompatibilityTests {
                 var padded=(byte[])bytes.Clone();int padEnd=image.RawOffset(image.Symbol("Port_PadRead")+image.FunctionLength("Port_PadRead")-1,1);
                 Assert(padded[padEnd]==0x90,"fixture trailing alignment NOP");padded[padEnd]=0xcc;
                 OnlineCompatibility.ResolveImage(new PeImage(padded),Program.LoadProfile(),metadata);
-                foreach(string hex in new[]{metadata.packet_contract.packet,"b812000000"}) {
+                foreach(string hex in new[]{OnlineCompatibility.EffectivePacket(image,metadata.packet_contract),"b812000000"}) {
                     byte[] pattern=Program.Unhex(hex);var bad=(byte[])bytes.Clone();int loc=-1,begin=image.RawOffset(image.Symbol("Port_PadRead"),image.FunctionLength("Port_PadRead"));
                     for(int i=begin;i<begin+image.FunctionLength("Port_PadRead")-pattern.Length;i++)if(bad.Skip(i).Take(pattern.Length).SequenceEqual(pattern)){loc=i;break;}
                     Assert(loc>=0,"packet fixture located");bad[loc]^=1;bool refused=false;try{OnlineCompatibility.ResolveImage(new PeImage(bad),Program.LoadProfile(),metadata);}catch(IOException){refused=true;}Assert(refused,"packet ABI mutation rejected");
                 }
                 var netBad=(byte[])bytes.Clone();netBad[image.RawOffset(image.Symbol("sample_local"),1)]^=1;bool netRefused=false;try{OnlineCompatibility.ResolveImage(new PeImage(netBad),Program.LoadProfile(),metadata);}catch(IOException){netRefused=true;}Assert(netRefused,"online sampling mutation rejected");
-                var duplicate=metadata.functions.First(f=>f.name=="Port_NetActive").references.First(r=>r.symbol=="k_.128");
-                var wrong=(byte[])bytes.Clone();int fieldAt=image.RawOffset(image.Symbol("Port_NetActive")+duplicate.offset,4);
-                long wrongRva=image.Symbol(duplicate.symbol)+duplicate.addend;
-                long wrongDisp=wrongRva-(image.Symbol("Port_NetActive")+duplicate.offset+duplicate.bias);
-                Buffer.BlockCopy(BitConverter.GetBytes(checked((int)wrongDisp)),0,wrong,fieldAt,4);
-                bool duplicateRefused=false;try{OnlineCompatibility.CheckSignature(new PeImage(wrong),metadata.functions.First(f=>f.name=="Port_NetActive"));}catch(IOException){duplicateRefused=true;}Assert(duplicateRefused,"same-named local from another function rejected");
-                log.AppendLine("PASS: strict signature reference checks resolve duplicate COFF names in their owner group. Native initializer-only changes may use the bounded online-state contract instead.");
+                // This fixture redirects one of the baseline body's function-local statics; it only exists when
+                // the image carries that body (the compiler numbers those statics per build).
+                var netSignature=metadata.functions.First(f=>f.name=="Port_NetActive");bool netBaseline=true;try{OnlineCompatibility.CheckSignature(image,netSignature);}catch(IOException){netBaseline=false;}
+                var duplicate=netBaseline?netSignature.references.FirstOrDefault(r=>r.symbol.StartsWith("k_.",StringComparison.Ordinal)):null;
+                if(duplicate!=null){
+                    var wrong=(byte[])bytes.Clone();int fieldAt=image.RawOffset(image.Symbol("Port_NetActive")+duplicate.offset,4);
+                    long wrongRva=image.Symbol(duplicate.symbol)+duplicate.addend;
+                    long wrongDisp=wrongRva-(image.Symbol("Port_NetActive")+duplicate.offset+duplicate.bias);
+                    Buffer.BlockCopy(BitConverter.GetBytes(checked((int)wrongDisp)),0,wrong,fieldAt,4);
+                    bool duplicateRefused=false;try{OnlineCompatibility.CheckSignature(new PeImage(wrong),netSignature);}catch(IOException){duplicateRefused=true;}Assert(duplicateRefused,"same-named local from another function rejected");
+                    log.AppendLine("PASS: strict signature reference checks resolve duplicate COFF names in their owner group. Native initializer-only changes may use the bounded online-state contract instead.");
+                }else log.AppendLine("SKIP: the duplicate-name scope fixture needs the baseline Port_NetActive body; this build is validated by the bounded online-state contract.");
                 log.AppendLine("PASS: input-reader alignment changes accepted; packet format, return and online sampling changes rejected.");
             }
-            var redirect=(byte[])bytes.Clone();var owner=metadata.functions.First(f=>f.references.Length>0);var field=owner.references[0];redirect[image.RawOffset(image.Symbol(owner.name)+field.offset,1)]^=1;bool rejected=false;try{OnlineCompatibility.ResolveImage(new PeImage(redirect),Program.LoadProfile(),metadata);}catch(IOException){rejected=true;}Assert(rejected,"changed masked target rejected");
+            var redirect=(byte[])bytes.Clone();var owner=Matching(image,metadata).First(f=>f.references.Length>0);var field=owner.references[0];redirect[image.RawOffset(image.Symbol(owner.name)+field.offset,1)]^=1;bool rejected=false;try{OnlineCompatibility.ResolveImage(new PeImage(redirect),Program.LoadProfile(),metadata);}catch(IOException){rejected=true;}Assert(rejected,"changed masked target rejected");
             var stripped=(byte[])bytes.Clone();Buffer.BlockCopy(new byte[4],0,stripped,image.PeOffset+16,4);rejected=false;try{OnlineCompatibility.ResolveImage(new PeImage(stripped),Program.LoadProfile(),metadata);}catch(IOException){rejected=true;}Assert(rejected,"stripped symbols rejected");
             log.AppendLine("PASS: changed native instructions, redirected references and stripped symbols rejected before launching.");
             File.WriteAllText(Path.Combine(Program.Root,"compatibility-test-results.txt"),log.ToString());

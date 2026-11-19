@@ -7,7 +7,11 @@
 [繁體中文](README.zh-Hant.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [ไทย](README.th.md)
 
 
-## Atualização: 1.1.1 (Windows)
+## Atualização: 1.1.2 (Windows)
+
+Agora funciona com o Decomp **com o Z Warriors instalado e com o Decomp original**, detectados automaticamente. Os dados de ataques não são mais lidos com o painel de ataques oculto, e a leitura dos nomes dos golpes ficou limitada e em cache. Linux permanece na 1.1. Sem teste de partida online nem comparação de FPS. [Mudanças e limitações (inglês)](../Release-1.1.2.md).
+
+## Atualização anterior: 1.1.1 (Windows)
 
 Compatibilidade revisada e recuperação nativa por analógico para cima/baixo no BT3 original Windows. Linux permanece na 1.1. Validação online em partida e a queda de desempenho com ×8/texturas continuam pendentes. Migração para Lua não incluída. [Mudanças e limitações (inglês)](../Release-1.1.1.md).
 

@@ -1,0 +1,9 @@
+{
+  "packet_checks": 1372977,
+  "compatibility_suite": "passed against Z Warriors (4aa8923c) and original Decomp (de4f626a), 65 checks each",
+  "dispatch_checks": 279,
+  "windows_exe_sha256": "07fa079de5b4c14dba80f0843a4ff9af2436581c3fbb266026b3a7d89d152b35",
+  "live_gameplay_test": "user played Z Warriors offline, controls worked",
+  "live_online_test": false,
+  "slowdown_fixed": false
+}

@@ -117,13 +117,62 @@ sealed class TechniquePrompt {
     }
 }
 
+// Only active local-player names are requested. Failed custom text is retried at
+// most once per second; successful entries are bounded and reset outside a fight.
+sealed class MoveNameCache {
+    sealed class Entry { public List<string> Names;public int Attempt; }
+    readonly Dictionary<long,Entry> entries=new Dictionary<long,Entry>();
+    readonly Queue<long> order=new Queue<long>();
+    readonly Func<long,int,byte[]> read;readonly Func<int> now;
+    public MoveNameCache(Func<long,int,byte[]> reader,Func<int> clock=null){read=reader;now=clock??(()=>Environment.TickCount);}
+    public int Count {get{return entries.Count;}}
+    public void Clear(){entries.Clear();order.Clear();}
+    public List<string> Get(long key,long script){
+        int tick=now();Entry entry;
+        if(entries.TryGetValue(key,out entry)){
+            if(entry.Names.Count==5||unchecked((uint)(tick-entry.Attempt))<1000)return entry.Names;
+        }else{
+            if(entries.Count>=64)entries.Remove(order.Dequeue());
+            entry=new Entry {Names=new List<string>()};entries.Add(key,entry);order.Enqueue(key);
+        }
+        entry.Attempt=tick;
+        try {entry.Names=ReadNames(script);}catch(IOException){entry.Names=new List<string>();}
+        return entry.Names;
+    }
+    List<string> ReadNames(long script){
+        var text=new List<byte>();int lineStart=0,records=0;
+        for(int off=0;off<65536;){
+            int chunk=(int)Math.Min(256,4096-((script+off)&4095));
+            byte[] part=read(script+off,chunk);
+            if(part.Length!=chunk)throw new IOException("Short move-name read");
+            for(int j=0;j+1<part.Length;j+=2){
+                byte lo=part[j],hi=part[j+1];text.Add(lo);text.Add(hi);
+                if(text.Count==2&&lo==0xff&&hi==0xfe)lineStart=2;
+                if(lo==0&&hi==0)return GameData.ParseMoveNames(text.ToArray());
+                if(hi==0&&(lo==10||lo==13)){
+                    int end=text.Count-2,tag=lineStart+4;
+                    if(tag+2<=end&&text[tag]==0x26&&text[tag+1]==0)tag+=8;
+                    if(tag+2<=end&&text[tag+1]==0){
+                        if(text[tag]==0x40)return GameData.ParseMoveNames(text.ToArray());
+                        if(text[tag]==0x2a&&end>=tag+8&&++records>=5)return GameData.ParseMoveNames(text.ToArray());
+                    }
+                    lineStart=text.Count;
+                }
+            }
+            off+=chunk;
+        }
+        return GameData.ParseMoveNames(text.ToArray());
+    }
+}
+
 sealed class Reader {
+    static readonly MoveRow[][] HiddenAttacks=new MoveRow[2][];
     readonly Memory m; readonly Profile p;
     readonly int[] switchReport={-1,-1};
     readonly int[] fusionReport={0,0};
     readonly uint[] oldSeq=new uint[2]; readonly long[] freshAt=new long[2];
-    readonly Dictionary<long,List<string>> nameCache=new Dictionary<long,List<string>>();
-    public Reader(Memory memory,Profile profile) { m=memory;p=profile;m.Reopened+=()=>{nameCache.Clear();Array.Clear(oldSeq,0,oldSeq.Length);Array.Clear(freshAt,0,freshAt.Length);}; }
+    readonly MoveNameCache nameCache;
+    public Reader(Memory memory,Profile profile) { m=memory;p=profile;nameCache=new MoveNameCache(m.Read);m.Reopened+=()=>{nameCache.Clear();Array.Clear(oldSeq,0,oldSeq.Length);Array.Clear(freshAt,0,freshAt.Length);}; }
     long Sym(string n) { return p.image_base+p.symbols[n]; }
     bool BattleActive {get{
         if(m.I32(Sym("gBattleWork")+0x19f8)!=0)return true;
@@ -211,7 +260,10 @@ sealed class Reader {
         }
         return result.ToArray();
     }
-    public MoveRow[][] Sample() {
+    public MoveRow[][] Sample(bool showAttacks=true) {
+        // No battle, player, move or text reads while this panel is disabled.
+        // Prompts and card menus have their own independent sampling paths.
+        if(!showAttacks){nameCache.Clear();MenuStatus="attack panel hidden";return HiddenAttacks;}
         MoveRow[][] result=new MoveRow[2][];MenuStatus="waiting for fresh charge input";
         if(!BattleActive) { MenuStatus="battle inactive";nameCache.Clear(); return result; }
         uint flags=m.U32(Sym("gBattleWork")+0x19f0);
@@ -245,22 +297,7 @@ sealed class Reader {
             if(script==0) continue;
             long nameKey=script|((long)m.U32(obj+0xc)<<32);
             List<string> names;
-            if(!nameCache.TryGetValue(nameKey,out names)) {
-                // Read line by line; do not cross an unmapped allocation boundary.
-                List<byte> text=new List<byte>();
-                bool ended=false;
-                for(int off=0;off<65536 && !ended;) {
-                    int chunk=(int)Math.Min(256,4096-((script+off)&4095));
-                    byte[] part=m.Read(script+off,chunk);
-                    for(int j=0;j+1<part.Length;j+=2) {
-                        text.Add(part[j]);text.Add(part[j+1]);
-                        if(part[j]==0 && part[j+1]==0) { ended=true; break; }
-                    }
-                    off+=chunk;
-                }
-                names=GameData.ParseMoveNames(text.ToArray());
-                if(names.Count==5) nameCache[nameKey]=names;
-            }
+            names=nameCache.Get(nameKey,script);
             if(names.Count!=5){MenuStatus="charge input; move names unavailable";continue;} // never label unknown data as a real move
             int gauge=0x9a4+slot*0xa4+0x40;
             int ki=I(fighter,gauge+12),stocks=I(fighter,gauge+20);
@@ -505,7 +542,7 @@ sealed class Overlay : Form {
 
             // A transient prompt/card read must not blank the other independent components.
             try{aspectMilli=reader.AspectMilli;localSplit=reader.LocalSplit;}catch(IOException ex){HudReadError("aspect",ex);}
-            try{rows=reader.Sample();}catch(IOException ex){rows=new MoveRow[2][];HudReadError("attacks",ex);}
+            try{rows=reader.Sample(HudPreferences.ShowAttacks);}catch(IOException ex){rows=new MoveRow[2][];HudReadError("attacks",ex);}
             try{prompts=reader.SamplePrompts();}catch(IOException ex){prompts=new TechniquePrompt[0];HudReadError("prompts",ex);}
             try{transformations=reader.SampleTransformations();}catch(IOException ex){transformations=new TransformationPanel[0];HudReadError("cards",ex);}
             PresentAlphaHud();HudNotice("mode="+PanelPlacement.Mode+"; attacks="+HudPreferences.ShowAttacks+"; aspect="+aspectMilli+"; client="+ClientSize+"; moves="+(rows[0]!=null||rows[1]!=null)+"; cards="+transformations.Length+"; "+reader.MenuStatus);

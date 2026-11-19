@@ -1,0 +1,1 @@
+PASS: 180 fade checks: 100 ms in / 80 ms out, continuous reversal, rapid taps, cropped snapshot reuse, true alpha rendering, full fade-out after source disappears, all four menu types at 4:3/16:9/ultrawide, immediate focus/session reset. Pure managed offscreen tests; not live gameplay.

@@ -1,5 +1,5 @@
 {
-  "version": "1.1",
+  "version": "1.1.2",
   "platform": "Linux x64",
   "packet_checks_each_reviewed_game": 446473,
   "loader_checks_each_reviewed_game": 9,
@@ -14,9 +14,11 @@
     "cards": 1408,
     "split_attacks": 565,
     "shortcuts": 93,
-    "launcher": 2282
+    "launcher": 2282,
+    "move_name_cache": 2217
   },
   "live_linux_x11_tested": false,
   "live_online_tested": false,
-  "slowdown_fix_confirmed": false
+  "slowdown_fix_confirmed": false,
+  "release_1_1_2_rerun": "cropped 192, fade 180, launcher 2282, move-name cache 2217 under Windows .NET"
 }

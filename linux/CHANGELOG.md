@@ -1,3 +1,10 @@
+## Linux 1.1.2 — Changes
+
+- Ported the 1.1.2 HUD read improvements from Windows: attack data is no longer read while the attack panel is hidden (prompts, transformations, fusions and switching still work), and move names are read from the active character's real text with a bounded, cached reader (stops after five move records, retries unavailable text at most once per second, 64-entry cache).
+- Z Warriors is a Windows-only package (it replaces the Windows Tenkaichi3Decomp.exe); there is no Linux Z Warriors build to support. The ELF resolver, native library and reviewed game versions (v0.1.37 / v0.1.38.1) are unchanged.
+- Managed frontend rebuilt with the same .NET Framework csc command and icon as 1.1; the native ELF library is the unchanged 1.1 file.
+- Checks run under Windows .NET: 2,217 move-name cache checks, 192 cropped composition, 180 fade and 2,282 launcher checks. Real Linux Mono/X11 execution was not available, as for 1.1.
+
 ## Linux 1.1 — Changes
 
 - Ported Story / Mission 100 fight detection for the reviewed original Linux Decomp, including native R3 story confirmation handling.

@@ -1,7 +1,7 @@
 {
-  "version": "1.1",
-  "frontend_sha256": "1c7aee70841b4c8f9d2ba77df6280b579b253156a7dd1c797ca5fc3842810625",
+  "version": "1.1.2",
+  "frontend_sha256": "e39e96d269e603054a490d3482564783d6ad6c4b01f7e54b36d639b1de50688f",
   "native_sha256": "d5bcaaa03af2405b6686e4a8a2f19f4e4205f562ce76f4e3368bef622f539271",
-  "build": "ELF cross-compiled with Zig 0.13.0 clang target x86_64-linux-gnu.2.35. Managed frontend built with .NET Framework csc; build.sh supports native Linux mcs.",
-  "scope": "Cropped HUD/X11 resource reuse, Story fight detection, Screen edges, quiet logging. ELF compatibility resolver unchanged; no Windows variant support."
+  "build": "Managed frontend built with .NET Framework csc (/win32icon assets/dragon-ball-three-stars.ico), same command as 1.1; build.sh supports native Linux mcs. Native ELF library unchanged from 1.1 (Zig 0.13.0 clang, x86_64-linux-gnu.2.35).",
+  "scope": "HUD read improvements ported from Windows 1.1.2. ELF resolver unchanged; no Windows variant or Z Warriors support (Z Warriors is Windows-only)."
 }

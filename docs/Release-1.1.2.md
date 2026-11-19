@@ -15,5 +15,6 @@
 - Structural compatibility suite: **passed on the Z Warriors executable and on the original Decomp** (65 checks each, 0 failures). 279 dispatch-table checks, including rejected mutations.
 - 1,372,977 emulated packet/ABI/native-command checks against the Z Warriors executable; 2,217 name-cache/parser checks; 1,013 local HUD / hidden-panel / custom-name checks; 180 fade checks.
 - The user played Z Warriors through this helper and the controls worked. No live online match or same-PC FPS comparison was performed; these changes remove confirmed redundant reads but do not prove that any slowdown is fixed.
-- Future Z Warriors or Decomp updates may need a new review. Char Package and Tag Team payloads are unchanged. **Linux remains at 1.1** without these changes.
+- Future Z Warriors or Decomp updates may need a new review. Char Package and Tag Team payloads are unchanged.
+- **Linux 1.1.2** ports the HUD read improvements above (hidden attack panel, bounded move-name cache). Z Warriors is a Windows-only package, so there is nothing to support on Linux; the ELF resolver, native library and reviewed versions (v0.1.37 / v0.1.38.1) are unchanged. Checked under Windows .NET (2,217 cache, 192 composition, 180 fade, 2,282 launcher checks); real Linux Mono/X11 execution was not available.
 - The packaged EXE is the exact locally tested build; its informational label is `1.1.2-zwarriors-review`.

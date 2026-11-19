@@ -16,7 +16,7 @@
 
 ## Latest update: 1.1.2 (Windows)
 
-Now works with the Decomp **with Z Warriors installed and with the original Decomp**, detected automatically. Attack data is no longer read while the attack panel is hidden, and move-name reads are bounded and cached. Linux remains at 1.1. No live online match or FPS comparison was performed. [1.1.2 changes and limitations](docs/Release-1.1.2.md).
+Now works with the Decomp **with Z Warriors installed and with the original Decomp**, detected automatically. Attack data is no longer read while the attack panel is hidden, and move-name reads are bounded and cached. Linux 1.1.2 gets the same HUD read improvements; Z Warriors itself is Windows-only. No live online match or FPS comparison was performed. [1.1.2 changes and limitations](docs/Release-1.1.2.md).
 
 ## Previous update: 1.1.1 (Windows)
 
@@ -70,7 +70,7 @@ Special thanks to **Aero** for the extensive testing, detailed reproduction step
 
 ## Downloads and demonstration
 
-[**Windows x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1.2/BT3-SparkingControls-1.1.2-Windows.zip) · [**Linux x64 ZIP (1.1)**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1/BT3-SparkingControls-1.1-Linux-x64.zip) · [**1.1.2**](https://github.com/vini2227/BT3-SparkingControls/releases/tag/v1.1.2)
+[**Windows x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1.2/BT3-SparkingControls-1.1.2-Windows.zip) · [**Linux x64 ZIP (1.1.2)**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1.2/BT3-SparkingControls-1.1.2-Linux-x64.zip) · [**1.1.2**](https://github.com/vini2227/BT3-SparkingControls/releases/tag/v1.1.2)
 
 [▶ Gameplay demo (recorded for 1.0 Beta) — MP4, 167 MiB](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-1.0-Beta-Gameplay-Demo.mp4) · [TXT](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1.2/BT3-SparkingControls-Controls-and-Setup-Guide.txt) · [SHA256](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1.2/SHA256SUMS.txt)
 

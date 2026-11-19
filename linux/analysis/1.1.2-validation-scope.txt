@@ -1,0 +1,1 @@
+1.1.2: managed frontend only. Move-name cache, cropped composition, fade and launcher fixtures run under Windows .NET. Native library, ELF resolver and packet tests unchanged from 1.1. X11/Mono/LD_PRELOAD real execution not available.

@@ -9,7 +9,7 @@
 
 ## Atualização: 1.1.2 (Windows)
 
-Agora funciona com o Decomp **com o Z Warriors instalado e com o Decomp original**, detectados automaticamente. Os dados de ataques não são mais lidos com o painel de ataques oculto, e a leitura dos nomes dos golpes ficou limitada e em cache. Linux permanece na 1.1. Sem teste de partida online nem comparação de FPS. [Mudanças e limitações (inglês)](../Release-1.1.2.md).
+Agora funciona com o Decomp **com o Z Warriors instalado e com o Decomp original**, detectados automaticamente. Os dados de ataques não são mais lidos com o painel de ataques oculto, e a leitura dos nomes dos golpes ficou limitada e em cache. O Linux 1.1.2 recebe as mesmas melhorias do HUD; o Z Warriors é só para Windows. Sem teste de partida online nem comparação de FPS. [Mudanças e limitações (inglês)](../Release-1.1.2.md).
 
 ## Atualização anterior: 1.1.1 (Windows)
 
@@ -39,9 +39,9 @@ Um layout de controles e HUD inspirado em Sparking! ZERO para Tenkaichi3Decomp. 
 
 ## Downloads e demonstração
 
-[**Windows x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1/BT3-SparkingControls-1.1-Windows.zip) · [**Linux x64 ZIP (1.1)**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1/BT3-SparkingControls-1.1-Linux-x64.zip) · [**1.1**](https://github.com/vini2227/BT3-SparkingControls/releases/tag/v1.1)
+[**Windows x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1.2/BT3-SparkingControls-1.1.2-Windows.zip) · [**Linux x64 ZIP (1.1.2)**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1.2/BT3-SparkingControls-1.1.2-Linux-x64.zip) · [**1.1.2**](https://github.com/vini2227/BT3-SparkingControls/releases/tag/v1.1.2)
 
-[▶ Gameplay demo (recorded for 1.0 Beta) — MP4, 167 MiB](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-1.0-Beta-Gameplay-Demo.mp4) · [TXT](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1/BT3-SparkingControls-Controls-and-Setup-Guide.txt) · [SHA256](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1/SHA256SUMS.txt)
+[▶ Gameplay demo (recorded for 1.0 Beta) — MP4, 167 MiB](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-1.0-Beta-Gameplay-Demo.mp4) · [TXT](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1.2/BT3-SparkingControls-Controls-and-Setup-Guide.txt) · [SHA256](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1.2/SHA256SUMS.txt)
 
 ## Instalação
 

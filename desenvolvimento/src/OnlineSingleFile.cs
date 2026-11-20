@@ -4,7 +4,7 @@ using System.Reflection;
 using System.Security.Cryptography;
 static class OnlineSingleFile {
     public static string Prepare(){
-        string root=Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"BT3-SparkingControls","online-test-79df5885938e-1.1.2-zwarriors-review");Directory.CreateDirectory(root);
+        string root=Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"BT3-SparkingControls","online-test-79df5885938e-1.1.3");Directory.CreateDirectory(root);
         var assembly=Assembly.GetExecutingAssembly();
         foreach(string name in assembly.GetManifestResourceNames()){
             if(!name.StartsWith("OnlineBundle/",StringComparison.Ordinal))continue;

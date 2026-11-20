@@ -7,6 +7,8 @@
 [繁體中文](README.zh-Hant.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [ไทย](README.th.md)
 
 
+**1.1.3 (Windows):** Z Warriors v1.05 と今後のゲームの再コンパイルを、補助ツールを更新せずに自動で受け入れます。操作、HUD、オンラインのコードは変わりません。 [Release-1.1.3](../Release-1.1.3.md)
+
 ## 最新アップデート: 1.1.2（Windows）
 
 **Z Warriors を導入した Decomp と、オリジナルの Decomp の両方**で動作するようになりました。どちらも自動で判別されます。攻撃パネルを非表示にしているときは攻撃データを読み込まず、技名の読み込みは回数を制限してキャッシュします。Linux 1.1.2 にも同じ HUD の改善を反映しました。Z Warriors は Windows 専用です。オンライン対戦と FPS 比較は行っていません。 [1.1.2 の変更点と制限（英語）](../Release-1.1.2.md).
@@ -39,9 +41,9 @@ Tenkaichi3Decomp 向けの、Sparking! ZERO に着想を得た操作配置と戦
 
 ## ダウンロードと実演
 
-[**Windows x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1.2/BT3-SparkingControls-1.1.2-Windows.zip) · [**Linux x64 ZIP (1.1.2)**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1.2/BT3-SparkingControls-1.1.2-Linux-x64.zip) · [**1.1.2**](https://github.com/vini2227/BT3-SparkingControls/releases/tag/v1.1.2)
+[**Windows x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1.3/BT3-SparkingControls-1.1.3-Windows.zip) · [**Linux x64 ZIP (1.1.2)**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1.2/BT3-SparkingControls-1.1.2-Linux-x64.zip) · [**1.1.3**](https://github.com/vini2227/BT3-SparkingControls/releases/tag/v1.1.3)
 
-[▶ Gameplay demo (recorded for 1.0 Beta) — MP4, 167 MiB](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-1.0-Beta-Gameplay-Demo.mp4) · [TXT](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1.2/BT3-SparkingControls-Controls-and-Setup-Guide.txt) · [SHA256](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1.2/SHA256SUMS.txt)
+[▶ Gameplay demo (recorded for 1.0 Beta) — MP4, 167 MiB](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-1.0-Beta-Gameplay-Demo.mp4) · [TXT](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1.3/BT3-SparkingControls-Controls-and-Setup-Guide.txt) · [SHA256](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1.3/SHA256SUMS.txt)
 
 ## インストール
 

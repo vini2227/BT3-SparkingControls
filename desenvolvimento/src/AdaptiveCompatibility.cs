@@ -75,6 +75,13 @@ sealed class PeImage {
         }
     }
     public bool HasSymbol(string name){return symbols.ContainsKey(name);}
+    public bool IsFunctionSymbol(string name){PeSymbol s;return symbols.TryGetValue(name,out s)&&s.Type==32;}
+    Dictionary<long,string> functionStarts;
+    // Name of the function that starts exactly at this RVA, or null.
+    public string FunctionAt(long rva){
+        if(functionStarts==null){functionStarts=new Dictionary<long,string>();foreach(var pair in candidates)foreach(var s in pair.Value)if(s.Type==32&&(Sections[s.Section-1].Flags&0x20000000)!=0&&!functionStarts.ContainsKey(s.Rva))functionStarts[s.Rva]=pair.Key;}
+        string name;return functionStarts.TryGetValue(rva,out name)?name:null;
+    }
     public int Symbol(string name) {
         if(name=="$image")return 0;PeSymbol s;if(!symbols.TryGetValue(name,out s))throw new IOException(UiLanguage.Text("Atualizacao ainda nao reconhecida: falta o simbolo ")+name+UiLanguage.Text(". Nenhum patch foi aplicado."));
         return s.Rva;
@@ -205,6 +212,67 @@ static class OnlineCompatibility {
             }else if(!image.MatchesSymbol(reference.symbol,target-image.ImageBase-reference.addend,signature.name,reference.symbol_scope))throw Changed(signature.name+" target "+reference.symbol);
         }
     }
+    // Claude 19/11/2026: a rebuilt game (Z Warriors updates, another compiler or
+    // options, same source) picks other registers and block order but keeps what a
+    // function calls and touches. Only for functions the add-on never calls: they are
+    // checked to confirm the game logic it relies on is the same. Required, in order:
+    // the same sequence of direct calls, every other reviewed reference still present,
+    // no jump table/literal dependency, and a length within -25%/+33%.
+    internal static bool RecompiledEquivalent(PeImage image,OnlineSignature s,out string detail){
+        detail="";
+        if(s.references==null){detail="references";return false;}
+        int rva,length;
+        try{rva=image.Symbol(s.name);length=image.FunctionLength(s.name);}catch(IOException){detail="symbol";return false;}
+        if(length<16||length>65536||(long)length*4<(long)s.length*3||(long)length*3>(long)s.length*4){detail="length "+s.length+" -> "+length;return false;}
+        byte[] code=image.Read(rva,length);
+        Func<OnlineReference,bool> isCall=r=>r.kind=="relative"&&r.width==4&&image.IsFunctionSymbol(r.symbol);
+        var expected=s.references.Where(isCall).OrderBy(r=>r.offset).Select(r=>r.symbol).ToList();
+        var actual=new List<string>();
+        for(int i=0;i+5<=code.Length;i++)if(code[i]==0xe8){string name=image.FunctionAt((long)rva+i+5+BitConverter.ToInt32(code,i+1));if(name!=null)actual.Add(name);}
+        if(!expected.SequenceEqual(actual,StringComparer.Ordinal)){detail="direct calls";return false;}
+        // A switch may move its table: the same number of cases, each one inside this function.
+        foreach(var r in s.references.Where(r=>r.dispatch_offsets!=null)){
+            int count=r.dispatch_offsets.Length;bool found=false;
+            if(count<1||count>256){detail="jump table bounds";return false;}
+            for(int i=0;!found&&i+4<=code.Length;i++){
+                long location=(r.kind=="relative"?(long)rva+i+4+BitConverter.ToInt32(code,i):(long)BitConverter.ToInt32(code,i)-image.ImageBase);
+                if(location<0||location>int.MaxValue||!image.Sections.Any(x=>location>=x.Rva&&location+(long)count*8<=x.Rva+(long)x.RawSize&&(x.Flags&0xa0000000)==0))continue;
+                byte[] table=image.Read((int)location,count*8);found=true;
+                for(int k=0;k<count&&found;k++){long entry=BitConverter.ToInt64(table,k*8)-image.ImageBase-rva;found=entry>=0&&entry<length;}
+            }
+            if(!found){detail="jump table";return false;}
+        }
+        // Reviewed constants (strings/tables) must still be read, with identical content, wherever they are now.
+        foreach(var r in s.references.Where(r=>r.dispatch_offsets==null&&!string.IsNullOrEmpty(r.data_expected)).GroupBy(r=>r.data_expected).Select(g=>g.First())){
+            byte[] content=Program.Unhex(r.data_expected);bool found=false;
+            for(int i=0;!found&&i+4<=code.Length;i++){
+                var targets=new List<long>{(long)BitConverter.ToInt32(code,i)-image.ImageBase};
+                for(int bias=4;bias<=8;bias++)targets.Add((long)rva+i+bias+BitConverter.ToInt32(code,i));
+                foreach(long location in targets){
+                    if(location<0||location>int.MaxValue||!image.Sections.Any(x=>location>=x.Rva&&location+content.Length<=x.Rva+(long)x.RawSize&&(x.Flags&0xa0000000)==0))continue;
+                    if(image.Read((int)location,content.Length).SequenceEqual(content)){found=true;break;}
+                }
+            }
+            if(!found){detail="constant data";return false;}
+        }
+        foreach(var r in s.references.Where(r=>!isCall(r)&&r.dispatch_offsets==null&&string.IsNullOrEmpty(r.data_expected)).GroupBy(r=>r.kind+"|"+r.symbol+"|"+r.addend+"|"+r.width).Select(g=>g.First())){
+            bool found=false;
+            for(int i=0;!found&&i+r.width<=code.Length;i++){
+                try{
+                    if(r.kind=="relative"){
+                        if(r.width!=4)break;
+                        long value=BitConverter.ToInt32(code,i);
+                        for(int bias=4;bias<=8&&!found;bias++)found=image.MatchesSymbol(r.symbol,(long)rva+i+bias+value-r.addend,s.name,r.symbol_scope);
+                    }else if(r.width==4||r.width==8){
+                        long value=r.width==8?BitConverter.ToInt64(code,i):BitConverter.ToInt32(code,i);
+                        found=image.MatchesSymbol(r.symbol,value-image.ImageBase-r.addend,s.name,r.symbol_scope);
+                    }else break;
+                }catch(IOException){}
+            }
+            if(!found){detail="reference "+r.symbol;return false;}
+        }
+        return true;
+    }
     // Only the public cached-state ABI is an add-on dependency. The native
     // initializer remains native and may add connection types/options. Decode a
     // bounded, explicit x64 fast path; never execute or scan arbitrary game code.
@@ -290,17 +358,26 @@ static class OnlineCompatibility {
         // A full-file cryptographic match is required here. Unknown hashes still
         // pass every instruction, address-target and literal-content check below.
         bool approvedHistory=metadata.approved_history_sha256!=null&&metadata.approved_history_sha256.Contains(image.Sha256);
+        // Functions the payload calls (and the hooked reader) always need their reviewed interface.
+        var called=new HashSet<string>(metadata.game_references.Select(r=>r.symbol),StringComparer.Ordinal);int recompiled=0;
         foreach(var signature in metadata.functions){
             if(approvedHistory){report.AppendLine("PASS exact historical executable: "+signature.name);continue;}
             try { CheckSignature(image,signature); }
-            catch(IOException) {
+            catch(IOException strict) {
                 if(signature.name=="Port_NetActive"){
                     CheckNetActiveContract(image,metadata);
                     report.AppendLine("PASS online-state boundary contract: signed sMode cache, boolean return, Windows x64 stack/register preservation; native initializer may differ.");
-                }else{
-                    if(signature.name!="Port_PadRead" || metadata.packet_contract==null)throw;
+                }else if(signature.name=="Port_PadRead"){
+                    if(metadata.packet_contract==null)throw;
                     CheckPacketContract(image,metadata.packet_contract);
                     report.AppendLine("PASS input boundary contract: packet ABI, buffer layout, return path and online sampling caller; input collection implementation may differ.");
+                }else{
+                    string detail;
+                    if(called.Contains(signature.name))throw;
+                    if(!RecompiledEquivalent(image,signature,out detail))throw new IOException(strict.Message+" (rebuilt check: "+detail+")",strict);
+                    // Many rebuilt functions at once means a larger rework: keep refusing that.
+                    if(++recompiled>metadata.functions.Length/4)throw Changed("too many changed native functions");
+                    report.AppendLine("PASS recompiled equivalent (same direct calls and references, different instruction selection): "+signature.name);
                 }
             }
             report.AppendLine("PASS "+signature.name+" @ 0x"+image.Symbol(signature.name).ToString("X"));
@@ -329,9 +406,14 @@ static class OnlineCompatibilityTests {
         var list=new List<OnlineSignature>();
         foreach(var f in metadata.functions){
             if(f.name=="Port_PadRead")continue;
-            try{list.Add(OnlineCompatibility.EffectiveSignature(image,f));}catch(IOException){if(f.name!="Port_NetActive")throw;}
+            try{list.Add(OnlineCompatibility.EffectiveSignature(image,f));}catch(IOException){string detail;if(f.name!="Port_NetActive"&&!OnlineCompatibility.RecompiledEquivalent(image,f,out detail))throw;}
         }
         return list;
+    }
+    // Checked-only functions this image carries as a rebuilt (recompiled) body.
+    static List<OnlineSignature> Rebuilt(PeImage image,OnlineMetadata metadata){
+        var strict=new HashSet<string>(Matching(image,metadata).Select(f=>f.name));
+        return metadata.functions.Where(f=>f.name!="Port_PadRead"&&f.name!="Port_NetActive"&&!strict.Contains(f.name)).ToList();
     }
     public static int Run(string exe){
         var log=new StringBuilder();try{
@@ -364,6 +446,27 @@ static class OnlineCompatibilityTests {
                 if(reference.width==4)Buffer.BlockCopy(BitConverter.GetBytes(checked(BitConverter.ToInt32(moved,off)+delta)),0,moved,off,4);
                 else Buffer.BlockCopy(BitConverter.GetBytes(BitConverter.ToInt64(moved,off)+delta),0,moved,off,8);
             }
+            // Rebuilt bodies have no reviewed offsets: move their absolute references where they are found.
+            foreach(var f in Rebuilt(image,metadata)){
+                int site=image.Symbol(f.name),length=image.FunctionLength(f.name);byte[] body=image.Read(site,length);
+                foreach(var reference in f.references.Where(r=>r.kind=="absolute"&&r.dispatch_offsets!=null))for(int i=0;i+4<=length;i++){
+                    long location=(long)BitConverter.ToInt32(body,i)-image.ImageBase;int count=reference.dispatch_offsets.Length;
+                    if(location<0||location>int.MaxValue||!image.Sections.Any(x=>location>=x.Rva&&location+(long)count*8<=x.Rva+(long)x.RawSize&&(x.Flags&0xa0000000)==0))continue;
+                    byte[] table=image.Read((int)location,count*8);bool inside=true;
+                    for(int k=0;k<count&&inside;k++){long entry=BitConverter.ToInt64(table,k*8)-image.ImageBase-site;inside=entry>=0&&entry<length;}
+                    if(!inside)continue;
+                    int off=image.RawOffset(site+i,4);Buffer.BlockCopy(BitConverter.GetBytes(checked(BitConverter.ToInt32(moved,off)+delta)),0,moved,off,4);
+                    for(int k=0;k<count;k++){int entryOff=image.RawOffset((int)location+k*8,8);Buffer.BlockCopy(BitConverter.GetBytes(BitConverter.ToInt64(moved,entryOff)+delta),0,moved,entryOff,8);}
+                    break;
+                }
+                foreach(var reference in f.references.Where(r=>r.kind=="absolute"&&r.dispatch_offsets==null&&string.IsNullOrEmpty(r.data_expected)))for(int i=0;i+reference.width<=length;i++){
+                    long value=reference.width==8?BitConverter.ToInt64(body,i):BitConverter.ToInt32(body,i);bool hit=false;
+                    try{hit=image.MatchesSymbol(reference.symbol,value-image.ImageBase-reference.addend,f.name,reference.symbol_scope);}catch(IOException){}
+                    if(!hit)continue;int off=image.RawOffset(site+i,reference.width);
+                    if(reference.width==4)Buffer.BlockCopy(BitConverter.GetBytes(checked(BitConverter.ToInt32(moved,off)+delta)),0,moved,off,4);
+                    else Buffer.BlockCopy(BitConverter.GetBytes(BitConverter.ToInt64(moved,off)+delta),0,moved,off,8);
+                }
+            }
             var tableWrites=new System.Collections.Generic.HashSet<int>();
             foreach(var signature in Matching(image,metadata))foreach(var reference in signature.references)if(reference.dispatch_offsets!=null){
                 int site=image.Symbol(signature.name);byte[] function=image.Read(site,signature.length);
@@ -382,7 +485,10 @@ static class OnlineCompatibilityTests {
             }
             log.AppendLine("PASS: moved executable sections rebuild hook, trampoline, 24 payload targets and HUD at three allocation addresses.");
             foreach(string name in new[]{"Port_PadRead","BtlInput_BuildCommands","BtlAct_CanFuse","Port_NetActive"}){
-                var bad=(byte[])bytes.Clone();bad[image.RawOffset(image.Symbol(name),1)]^=1;bool refused=false;try{OnlineCompatibility.ResolveImage(new PeImage(bad),Program.LoadProfile(),metadata);}catch(IOException){refused=true;}Assert(refused,"changed instructions "+name);
+                // A function the add-on only checks may be rebuilt; changing what it calls must still be refused.
+                var bad=(byte[])bytes.Clone();var calledBy=new HashSet<string>(metadata.game_references.Select(r=>r.symbol));var sig=metadata.functions.First(f=>f.name==name);
+                int at=name=="Port_PadRead"||name=="Port_NetActive"||calledBy.Contains(name)||sig.references.Length==0?1:sig.references.OrderBy(r=>r.offset).First().offset;
+                bad[image.RawOffset(image.Symbol(name)+at,1)]^=1;bool refused=false;try{OnlineCompatibility.ResolveImage(new PeImage(bad),Program.LoadProfile(),metadata);}catch(IOException){refused=true;}Assert(refused,"changed instructions "+name);
             }
             if(metadata.packet_contract!=null && image.FunctionLength("Port_PadRead")!=metadata.functions.First(f=>f.name=="Port_PadRead").length){
                 var padded=(byte[])bytes.Clone();int padEnd=image.RawOffset(image.Symbol("Port_PadRead")+image.FunctionLength("Port_PadRead")-1,1);

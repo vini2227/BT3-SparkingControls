@@ -7,6 +7,8 @@
 [繁體中文](README.zh-Hant.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [ไทย](README.th.md)
 
 
+**1.1.3 (Windows):** Z Warriors v1.05와 앞으로의 게임 재컴파일을 보조 도구 업데이트 없이 자동으로 허용합니다. 조작, HUD, 온라인 코드는 바뀌지 않았습니다. [Release-1.1.3](../Release-1.1.3.md)
+
 ## 최신 업데이트: 1.1.2 (Windows)
 
 이제 **Z Warriors가 설치된 Decomp와 원본 Decomp 모두**에서 작동하며, 자동으로 인식됩니다. 공격 패널을 숨기면 공격 데이터를 더 이상 읽지 않으며, 기술 이름 읽기는 횟수를 제한하고 캐시합니다. Linux 1.1.2에도 같은 HUD 개선을 적용했습니다. Z Warriors는 Windows 전용입니다. 온라인 대전과 FPS 비교는 하지 않았습니다. [1.1.2 변경 사항 및 제한 (영어)](../Release-1.1.2.md).
@@ -39,9 +41,9 @@ Tenkaichi3Decomp용 Sparking! ZERO 스타일 조작 배치와 전투 HUD입니�
 
 ## 다운로드 및 시연
 
-[**Windows x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1.2/BT3-SparkingControls-1.1.2-Windows.zip) · [**Linux x64 ZIP (1.1.2)**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1.2/BT3-SparkingControls-1.1.2-Linux-x64.zip) · [**1.1.2**](https://github.com/vini2227/BT3-SparkingControls/releases/tag/v1.1.2)
+[**Windows x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1.3/BT3-SparkingControls-1.1.3-Windows.zip) · [**Linux x64 ZIP (1.1.2)**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1.2/BT3-SparkingControls-1.1.2-Linux-x64.zip) · [**1.1.3**](https://github.com/vini2227/BT3-SparkingControls/releases/tag/v1.1.3)
 
-[▶ Gameplay demo (recorded for 1.0 Beta) — MP4, 167 MiB](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-1.0-Beta-Gameplay-Demo.mp4) · [TXT](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1.2/BT3-SparkingControls-Controls-and-Setup-Guide.txt) · [SHA256](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1.2/SHA256SUMS.txt)
+[▶ Gameplay demo (recorded for 1.0 Beta) — MP4, 167 MiB](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-1.0-Beta-Gameplay-Demo.mp4) · [TXT](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1.3/BT3-SparkingControls-Controls-and-Setup-Guide.txt) · [SHA256](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1.3/SHA256SUMS.txt)
 
 ## 설치
 

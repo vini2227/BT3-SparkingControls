@@ -12,9 +12,13 @@
 
 # BT3 Sparking Controls
 
-**1.1.2 — Windows Controls and Setup Guide**
+**1.1.3 — Windows Controls and Setup Guide**
 
-## Latest update: 1.1.2 (Windows)
+## Latest update: 1.1.3 (Windows)
+
+Accepts **Z Warriors v1.05** and future rebuilds of the game automatically, without a new helper update. A changed game function that the helper only checks (never calls) is accepted when it makes the same calls in the same order, keeps every reviewed reference, switch table and constant, and stays close in size; functions the helper calls and the input/online contracts stay strict. Controls, HUD and online code are unchanged. Not yet played with Z Warriors v1.05. [1.1.3 changes and limitations](docs/Release-1.1.3.md).
+
+## Previous update: 1.1.2 (Windows)
 
 Now works with the Decomp **with Z Warriors installed and with the original Decomp**, detected automatically. Attack data is no longer read while the attack panel is hidden, and move-name reads are bounded and cached. Linux 1.1.2 gets the same HUD read improvements; Z Warriors itself is Windows-only. No live online match or FPS comparison was performed. [1.1.2 changes and limitations](docs/Release-1.1.2.md).
 
@@ -70,9 +74,9 @@ Special thanks to **Aero** for the extensive testing, detailed reproduction step
 
 ## Downloads and demonstration
 
-[**Windows x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1.2/BT3-SparkingControls-1.1.2-Windows.zip) · [**Linux x64 ZIP (1.1.2)**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1.2/BT3-SparkingControls-1.1.2-Linux-x64.zip) · [**1.1.2**](https://github.com/vini2227/BT3-SparkingControls/releases/tag/v1.1.2)
+[**Windows x64 ZIP**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1.3/BT3-SparkingControls-1.1.3-Windows.zip) · [**Linux x64 ZIP (1.1.2)**](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1.2/BT3-SparkingControls-1.1.2-Linux-x64.zip) · [**1.1.3**](https://github.com/vini2227/BT3-SparkingControls/releases/tag/v1.1.3)
 
-[▶ Gameplay demo (recorded for 1.0 Beta) — MP4, 167 MiB](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-1.0-Beta-Gameplay-Demo.mp4) · [TXT](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1.2/BT3-SparkingControls-Controls-and-Setup-Guide.txt) · [SHA256](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1.2/SHA256SUMS.txt)
+[▶ Gameplay demo (recorded for 1.0 Beta) — MP4, 167 MiB](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.0-beta/BT3-SparkingControls-1.0-Beta-Gameplay-Demo.mp4) · [TXT](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1.3/BT3-SparkingControls-Controls-and-Setup-Guide.txt) · [SHA256](https://github.com/vini2227/BT3-SparkingControls/releases/download/v1.1.3/SHA256SUMS.txt)
 
 ## About
 
@@ -86,7 +90,7 @@ The original input payload and preferences are preserved. Reviewed address/times
 
 ## Windows installation
 
-1. Extract BT3-SparkingControls-1.1.2-Windows.zip.
+1. Extract BT3-SparkingControls-1.1.3-Windows.zip.
 2. Run BT3-SparkingControls.exe.
 3. Click Browse and select Tenkaichi3Decomp.exe in your game installation.
 4. Choose your language, panel placement and HUD preferences.

@@ -1,0 +1,10 @@
+{
+  "compatibility_suite": {
+    "zwarriors_1.05_6430a1a2": "71 PASS, rebuilt: BtlInput_BuildRecord, HudPrompt_UpdateCommand, BtlInput_MergeStick",
+    "zwarriors_previous_4aa8923c": "68 PASS",
+    "original_decomp_de4f626a": "65 PASS"
+  },
+  "windows_exe_sha256": "a8772f5886a9925a7488262ee55741f819c92e8451ba712ae2a9d3917dd97f13",
+  "live_gameplay_test": false,
+  "live_online_test": false
+}
